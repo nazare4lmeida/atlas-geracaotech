@@ -1,0 +1,86 @@
+/* Rodapé: a mesma faixa da barra superior (global.css > .navbar): altura --nav-h e margens laterais iguais. */
+
+.site-footer {
+  margin-top: 2rem;
+  background: color-mix(in srgb, var(--bg-soft) 88%, transparent);
+  border-top: 1px solid var(--border);
+  color: var(--text-soft);
+  font-size: 0.88rem;
+}
+
+.site-footer-bar {
+  min-height: var(--nav-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  padding: 0.5rem max(4vw, calc((100vw - var(--container)) / 2));
+}
+
+.site-footer-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.site-footer-copy {
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.site-footer-links {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  flex-wrap: wrap;
+}
+
+.site-footer-links a,
+.site-footer-right a {
+  color: var(--text-soft);
+  text-decoration: none;
+}
+
+.site-footer-links a:hover,
+.site-footer-right a:hover {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.site-footer-right {
+  display: grid;
+  justify-items: end;
+  gap: 0.1rem;
+  font-size: 0.8rem;
+  text-align: right;
+}
+
+@media (max-width: 860px) {
+  .site-footer-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    padding-block: 1rem;
+  }
+  .site-footer-right {
+    justify-items: start;
+    text-align: left;
+  }
+}
+
+/* Rodapé sempre no fim da janela quando a página é curta, e sem subir/descer conforme o conteúdo muda. */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+    min-height: calc(100vh / 0.9);
+}
+
+.app-shell > .main-content {
+  flex: 1 0 auto;
+}
+
+.app-shell > .site-footer {
+  flex-shrink: 0;
+}

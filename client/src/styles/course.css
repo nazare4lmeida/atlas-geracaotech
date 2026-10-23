@@ -1,0 +1,1866 @@
+/* =====================================================================
+   course.css — Página do curso (aluno) e menu lateral recolhível.
+   Cores e fontes vêm das variáveis do layout (layouts.css / registry.js)
+   e do tema global (global.css), então funcionam em modo claro e escuro.
+   ===================================================================== */
+
+/* ---------- Menu lateral recolhível ---------- */
+
+.dashboard-layout:has(> .sidebar.is-collapsed) {
+  grid-template-columns: 68px 1fr;
+}
+
+.sidebar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.sidebar-toggle {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--text-soft);
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.sidebar-toggle:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.sidebar.is-collapsed {
+  padding: 0.85rem 0.5rem;
+}
+
+.sidebar.is-collapsed .sidebar-head {
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.sidebar.is-collapsed .sidebar-title {
+  display: none;
+}
+
+.sidebar.is-collapsed .sidebar-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.sidebar.is-collapsed .sidebar-link {
+  justify-content: center;
+  padding: 0.6rem 0;
+}
+
+.sidebar-link .sidebar-icon {
+  flex: 0 0 auto;
+  opacity: 0.8;
+}
+
+.sidebar.is-collapsed .sidebar-link .sidebar-icon {
+  opacity: 1;
+}
+
+@media (max-width: 900px) {
+  .sidebar-toggle {
+    display: none;
+  }
+  .dashboard-layout:has(> .sidebar.is-collapsed) {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Cabeçalho do curso ---------- */
+
+.course-page {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.course-hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.course-hero-text {
+  min-width: 0;
+  flex: 1 1 320px;
+}
+
+.course-hero-text h1 {
+  margin: 0.25rem 0 0.35rem;
+}
+
+.course-hero-text p {
+  margin: 0;
+  color: var(--text-soft);
+}
+
+.course-hero-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* ---------- Progresso do curso: barra estática, logo abaixo do título ---------- */
+.course-sticky {
+  display: grid;
+  gap: 0.3rem;
+}
+
+/* Sem animação de entrada: a barra fica parada no lugar. */
+.dashboard-content > .course-sticky {
+  animation: none;
+}
+
+.course-progress {
+  padding: 0.7rem 1rem 0.8rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+.course-progress-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.6rem;
+  font-size: 0.9rem;
+  color: var(--text-soft);
+}
+
+.course-progress-pct {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  color: var(--primary);
+}
+
+.course-progress-stats {
+  margin-left: auto;
+  font-size: 0.82rem;
+}
+
+.course-progress-track {
+  margin-top: 0.5rem;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.course-progress-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    var(--primary),
+    var(--accent, var(--primary))
+  );
+  transition: width 0.5s ease;
+}
+
+/* ---------- Trilha + conteúdo ---------- */
+
+.course-shell {
+  display: grid;
+  grid-template-columns: 290px minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.course-shell.outline-collapsed {
+  grid-template-columns: 52px minmax(0, 1fr);
+}
+
+.course-main {
+  display: grid;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.course-outline {
+  position: sticky;
+  top: calc(var(--nav-h) + 8.5rem);
+  max-height: calc(100vh - var(--nav-h) - 9rem);
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.course-outline.is-collapsed {
+  align-items: center;
+  padding: 0.6rem 0;
+  gap: 0.6rem;
+}
+
+.course-outline.is-collapsed .outline-rail-label {
+  writing-mode: vertical-rl;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+}
+
+.outline-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 0.9rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.outline-title {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+}
+
+.outline-toggle {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--text-soft);
+  font: inherit;
+  cursor: pointer;
+}
+
+.outline-toggle:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.outline-tree {
+  overflow-y: auto;
+  padding: 0.5rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.outline-module-head,
+.outline-unit-head {
+  width: min(100%, 1200px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.55rem 0.6rem;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.outline-module-head {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.outline-module-head:hover,
+.outline-unit-head:hover {
+  background: var(--surface-2);
+}
+
+.outline-module-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.outline-module,
+.outline-unit {
+  min-width: 0;
+}
+
+.outline-module-body {
+  display: grid;
+  min-width: 0;
+  gap: 0.15rem;
+  padding: 0.1rem 0 0.4rem 0.4rem;
+  border-left: 2px solid var(--primary-soft);
+  margin-left: 0.6rem;
+}
+
+.outline-unit {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.outline-unit-head {
+  font-size: 0.82rem;
+  color: var(--text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
+.outline-lesson {
+  width: min(100%, 1200px);
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.55rem 0.4rem 0.7rem;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.84rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.outline-lesson:hover {
+  background: var(--surface-2);
+}
+
+.outline-lesson.is-active {
+  background: var(--primary-soft);
+  color: var(--primary-ink, var(--primary));
+  font-weight: 600;
+}
+
+.outline-lesson.is-done .outline-lesson-title {
+  color: var(--text-soft);
+}
+
+.outline-lesson-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- Módulos, unidades e aulas ---------- */
+
+.module-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.module-head {
+  width: min(100%, 1200px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.15rem;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.module-block.is-open > .module-head {
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.module-head:hover {
+  background: var(--surface-2);
+}
+
+.module-head-text {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.module-head-title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.module-head-desc {
+  font-size: 0.85rem;
+  color: var(--text-soft);
+}
+
+.module-head-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex: 0 0 auto;
+}
+
+.module-count {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-soft);
+  white-space: nowrap;
+}
+
+.lesson-chevron {
+  display: inline-grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--primary);
+  font-weight: 600;
+  line-height: 1;
+}
+
+.module-body {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.85rem 1rem 1rem;
+}
+
+.unit-block {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.unit-head {
+  width: min(100%, 1200px);
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.75rem 0.95rem;
+  border: 0;
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.unit-head-title {
+  flex: 1 1 auto;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.unit-block.is-open > .unit-head {
+  border-bottom: 1px solid var(--border);
+}
+
+.unit-body {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.65rem;
+}
+
+.lesson-item {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  scroll-margin-top: 9rem;
+}
+
+.lesson-item.is-open {
+  border-color: var(--primary-soft);
+  box-shadow: 0 0 0 1px var(--primary-soft);
+}
+
+.lesson-item-head {
+  width: min(100%, 1200px);
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.7rem 0.9rem;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 12px;
+}
+
+.lesson-item-head:hover {
+  background: var(--surface-2);
+}
+
+.lesson-item-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-weight: 500;
+}
+
+.lesson-item.is-done .lesson-item-title {
+  color: var(--text-soft);
+}
+
+.lesson-item-kind {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+}
+
+.lesson-check {
+  flex: 0 0 auto;
+  display: inline-grid;
+  place-items: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  border: 2px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.lesson-check--sm {
+  width: 1.1rem;
+  height: 1.1rem;
+  font-size: 0.66rem;
+  padding: 0;
+  border-width: 1.5px;
+}
+
+.lesson-check.on {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.lesson-item-body {
+  display: grid;
+  gap: 0.85rem;
+  padding: 0 0.95rem 0.95rem;
+  border-top: 1px dashed var(--border);
+  padding-top: 0.85rem;
+}
+
+.lesson-item-foot {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.lesson-item-foot .done {
+  opacity: 0.85;
+}
+
+.video-embed,
+.video-wrapper {
+  position: relative;
+  width: min(100%, 1200px);
+  aspect-ratio: 16 / 9;
+}
+
+.video-embed iframe,
+.video-wrapper iframe {
+  position: absolute;
+  inset: 0;
+  width: min(100%, 1200px);
+  height: 100%;
+  border: 0;
+  border-radius: 12px;
+}
+
+/* ---------- Conteúdo HTML das aulas (material do Moodle) ---------- */
+
+.lesson-html svg {
+  display: inline-block;
+  width: 1.2em;
+  height: 1.2em;
+  color: var(--primary);
+  vertical-align: -0.2em;
+  flex: 0 0 auto;
+}
+
+.lesson-html svg path {
+  fill: currentColor;
+}
+
+/* Bloco de destaque do Moodle (ícone + título + texto) vira um aviso alinhado. */
+.lesson-html div:has(> svg) {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.lesson-html p {
+  margin: 0.6rem 0;
+}
+
+.media-missing {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  background: var(--surface-2);
+  color: var(--text-soft);
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+/* ---------- Janela de boas-vindas ---------- */
+
+.welcome-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(15, 20, 26, 0.55);
+  backdrop-filter: blur(2px);
+}
+
+.welcome-modal {
+  width: min(560px, 100%);
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  padding: 1.6rem 1.7rem 1.4rem;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: var(--shadow-pop, 0 20px 50px rgba(0, 0, 0, 0.25));
+}
+
+.welcome-modal h2 {
+  margin: 0.2rem 0 0.4rem;
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+}
+
+.welcome-lead {
+  margin: 0 0 1rem;
+  color: var(--text-soft);
+}
+
+.welcome-steps {
+  margin: 0 0 1.2rem;
+  padding-left: 1.25rem;
+  display: grid;
+  gap: 0.65rem;
+  line-height: 1.5;
+}
+
+.welcome-steps li::marker {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.welcome-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ---------- Telas estreitas ---------- */
+
+@media (max-width: 900px) {
+  .course-shell,
+  .course-shell.outline-collapsed {
+    grid-template-columns: 1fr;
+  }
+
+  .course-outline {
+    position: static;
+    max-height: 22rem;
+  }
+
+  .course-outline.is-collapsed {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    max-height: none;
+  }
+
+  .course-outline.is-collapsed .outline-rail-label {
+    writing-mode: horizontal-tb;
+  }
+
+  .course-progress-stats {
+    margin-left: 0;
+    width: min(100%, 1200px);
+  }
+
+  .module-head-desc {
+    display: none;
+  }
+}
+
+/* ---------- Modo leitura (tela cheia) ---------- */
+
+.reading-mode {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.reading-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.reading-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.6rem;
+  min-width: 0;
+  font-size: 0.82rem;
+  color: var(--text-soft);
+}
+
+.reading-crumbs span + span::before {
+  content: "›";
+  margin-right: 0.6rem;
+}
+
+.reading-count {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-soft);
+  white-space: nowrap;
+}
+
+.reading-exit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.reading-exit:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.reading-scroll {
+  overflow-y: auto;
+  padding: 2.5rem clamp(1rem, 3vw, 2.5rem) 3rem;
+}
+
+/* Largura da leitura: acompanha a tela (ocupa mais espaço em monitores grandes),
+   com limite máximo para não ficar com linhas longas demais e com margem no celular. */
+.reading-article {
+  box-sizing: border-box;
+  width: min(100%, 1200px);
+  max-width: min(1480px, 100%);
+  margin-left: auto;
+  margin-right: auto;
+  justify-self: center;
+  display: grid;
+  gap: 1.25rem;
+  line-height: 1.7;
+}
+
+.reading-article h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 2.6vw, 2.1rem);
+  line-height: 1.2;
+}
+
+.reading-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1.5rem;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.reading-bottom button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .reading-top {
+    padding: 0.6rem 0.9rem;
+    flex-wrap: wrap;
+  }
+  .reading-count {
+    order: 3;
+    width: min(100%, 1200px);
+  }
+  .reading-bottom {
+    padding: 0.7rem 0.9rem;
+  }
+  .reading-bottom .ghost-button,
+  .reading-bottom .primary-button {
+    font-size: 0.85rem;
+    padding: 0.5rem 0.6rem;
+  }
+}
+
+/* =====================================================================
+   Texto das aulas: ritmo de leitura, destaques e blocos.
+   Vale para a página do curso e para o modo leitura.
+   ===================================================================== */
+
+.lesson-html,
+.lesson-text {
+  font-size: 1.0625rem;
+  line-height: 1.8;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.lesson-html > * + * {
+  margin-top: 0.9rem;
+}
+
+.lesson-html p {
+  margin: 0;
+}
+
+.lesson-html strong {
+  color: inherit;
+  font-weight: 700;
+}
+
+/* Títulos com barra de acento, para separar partes da aula */
+.lesson-html h1,
+.lesson-html h2,
+.lesson-html h3,
+.lesson-html h4 {
+  margin: 1.8rem 0 0.4rem;
+  padding-left: 0.85rem;
+  border-left: 4px solid var(--primary);
+  font-family: var(--font-display);
+  line-height: 1.25;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.lesson-html h1 {
+  font-size: 1.6rem;
+}
+.lesson-html h2 {
+  font-size: 1.35rem;
+}
+.lesson-html h3 {
+  font-size: 1.15rem;
+}
+.lesson-html h4 {
+  font-size: 1.02rem;
+  border-left-width: 2px;
+}
+
+/* Listas com marcador colorido e respiro entre itens */
+.lesson-html ul,
+.lesson-html ol {
+  padding-left: 1.3rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.lesson-html ul > li::marker {
+  color: var(--primary);
+}
+
+.lesson-html ol > li::marker {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+/* Destaques de texto do Moodle */
+.lesson-html p.callout {
+  position: relative;
+  padding: 0.9rem 1.1rem 0.9rem 3.4rem;
+  border-radius: 12px;
+  background: var(--primary-soft);
+  border: 1px solid transparent;
+}
+
+.lesson-html p.callout::before {
+  content: "i";
+  position: absolute;
+  left: 1rem;
+  top: 0.95rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.lesson-html p.feedback {
+  padding: 0.7rem 1rem;
+  border-radius: 10px;
+  border-left: 4px solid var(--border);
+  background: var(--surface-2);
+}
+
+.lesson-html p.feedback.is-correct {
+  border-left-color: #16a34a;
+  background: color-mix(in srgb, #16a34a 12%, var(--surface));
+}
+
+.lesson-html p.feedback.is-wrong {
+  border-left-color: #dc2626;
+  background: color-mix(in srgb, #dc2626 10%, var(--surface));
+}
+
+.lesson-html .quiz-title {
+  margin-top: 2rem;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.lesson-html blockquote {
+  margin: 1rem 0;
+  padding: 0.8rem 1.1rem;
+  border-left: 4px solid var(--primary);
+  background: var(--surface-2);
+  border-radius: 0 12px 12px 0;
+  font-style: normal;
+}
+
+/* Código: bloco escuro, com rolagem horizontal em telas pequenas */
+.lesson-html pre {
+  margin: 1rem 0;
+  padding: 1rem 1.15rem;
+  border-radius: 12px;
+  background: #0f1720;
+  color: #e6edf3;
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  line-height: 1.6;
+  overflow-x: auto;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.lesson-html code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  padding: 0.1rem 0.35rem;
+  border-radius: 6px;
+  background: var(--primary-soft);
+  color: var(--primary-ink, var(--primary));
+}
+
+.lesson-html pre code {
+  padding: 0;
+  background: none;
+  color: inherit;
+  font-size: inherit;
+}
+
+/* Imagens e vídeos ocupam a largura da coluna */
+.lesson-html img {
+  display: block;
+  max-width: min(100%, 1200px);
+  height: auto;
+  margin: 1rem auto;
+  border-radius: 12px;
+}
+
+.lesson-html .video-embed,
+.lesson-html .video-wrapper {
+  display: block;
+  width: min(100%, 1200px);
+  max-width: min(100%, 1200px);
+  height: auto;
+  aspect-ratio: 16 / 9;
+  position: relative;
+  margin: 1.2rem 0;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #000;
+}
+
+.lesson-html .video-embed iframe,
+.lesson-html .video-wrapper iframe,
+.lesson-html iframe {
+  position: absolute;
+  inset: 0;
+  width: min(100%, 1200px);
+  height: 100%;
+  max-width: min(100%, 1200px);
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: 14px;
+}
+
+/* Opções de múltipla escolha vindas do Moodle viram cartões */
+.lesson-html button,
+.lesson-html input[type="button"] {
+  display: inline-block;
+  margin: 0.25rem 0.3rem 0.25rem 0;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.95rem;
+  text-align: left;
+  cursor: default;
+}
+
+/* Quiz embutido: alternativa clicável, correta em verde, errada em vermelho, feedback só depois da resposta */
+.lesson-html button[data-quiz-target] {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.lesson-html button[data-quiz-target]:not(:disabled):hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.lesson-html button[data-quiz-target]:disabled {
+  cursor: default;
+  color: var(--text);
+  opacity: 0.72;
+}
+
+.lesson-html button[data-quiz-target].is-correct {
+  background: color-mix(in srgb, #16a34a 16%, var(--surface));
+  border-color: #16a34a;
+  color: var(--text);
+}
+
+.lesson-html button[data-quiz-target].is-wrong {
+  background: color-mix(in srgb, #dc2626 14%, var(--surface));
+  border-color: #dc2626;
+  color: var(--text);
+}
+
+.lesson-html .quiz-answer-feedback {
+  display: none;
+  margin: 0.9rem 0 0;
+  padding: 0.8rem 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.97rem;
+  line-height: 1.6;
+}
+
+.lesson-html .quiz-answer-feedback.is-open {
+  display: block;
+}
+
+.lesson-html .quiz-answer-feedback.is-open[data-correct="true"] {
+  border-left: 4px solid #16a34a;
+  background: color-mix(in srgb, #16a34a 12%, var(--surface));
+}
+
+.lesson-html .quiz-answer-feedback.is-open[data-correct="false"] {
+  border-left: 4px solid #dc2626;
+  background: color-mix(in srgb, #dc2626 10%, var(--surface));
+}
+
+/* Blocos de estrutura do Moodle, mantidos como classes para não se misturarem */
+.lesson-html .atlas-row {
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.lesson-html .atlas-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.lesson-html .atlas-box--ok {
+  background: color-mix(in srgb, #16a34a 10%, var(--surface));
+  border-color: color-mix(in srgb, #16a34a 35%, transparent);
+}
+.lesson-html .atlas-box--danger {
+  background: color-mix(in srgb, #dc2626 9%, var(--surface));
+  border-color: color-mix(in srgb, #dc2626 35%, transparent);
+}
+.lesson-html .atlas-box--warn {
+  background: color-mix(in srgb, #ca8a04 11%, var(--surface));
+  border-color: color-mix(in srgb, #ca8a04 40%, transparent);
+}
+.lesson-html .atlas-box--info {
+  background: color-mix(in srgb, #2563eb 9%, var(--surface));
+  border-color: color-mix(in srgb, #2563eb 35%, transparent);
+}
+
+.lesson-html .atlas-box > * + * {
+  margin-top: 0.6rem;
+}
+
+/* Caixas dentro de uma seção: o espaçamento vem da seção, sem margem extra */
+.lesson-html .atlas-section .atlas-box {
+  margin: 0;
+}
+
+.lesson-html .atlas-box > .atlas-row > svg {
+  width: 1.1em;
+  height: 1.1em;
+}
+
+/* Modo leitura: texto um pouco maior e barra de progresso */
+.reading-article .lesson-html,
+.reading-article .lesson-text {
+  font-size: 1.12rem;
+  line-height: 1.85;
+}
+
+.reading-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 3px;
+  background: transparent;
+  z-index: 2;
+}
+
+.reading-progress span {
+  display: block;
+  height: 100%;
+  width: var(--read, 0%);
+  background: linear-gradient(
+    90deg,
+    var(--primary),
+    var(--accent, var(--primary))
+  );
+  transition: width 0.15s linear;
+}
+
+.reading-mode {
+  position: fixed;
+}
+
+.reading-kicker {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.reading-meta {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-soft);
+}
+
+.reading-fade {
+  animation: readingIn 0.35s ease both;
+}
+
+@keyframes readingIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.reading-next {
+  margin-top: 2.5rem;
+  padding: 1.2rem 1.3rem;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.reading-next p {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.85rem;
+}
+
+.reading-next strong {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reading-fade {
+    animation: none;
+  }
+  .reading-progress span {
+    transition: none;
+  }
+}
+
+/* =====================================================================
+   Modelo de conteúdo (atlas-*). Todas as aulas usam este desenho;
+   o curso muda só as cores (variáveis do tema). Veja utils/contentTemplate.js.
+   ===================================================================== */
+
+.lesson-html .atlas-topic {
+  margin: 0 0 1.2rem;
+  padding: 1.4rem 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 5px solid var(--primary);
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+}
+
+.lesson-html .atlas-topic-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.8rem;
+}
+
+.lesson-html .atlas-kicker {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: var(--primary, #134771);
+  color: var(--primary-ink, #ffffff);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.lesson-html .atlas-topic-meta > span:last-child {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-soft);
+}
+
+.lesson-html .atlas-topic-title {
+  margin: 0 0 0.75rem;
+  padding: 0;
+  border: 0;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.lesson-html .atlas-topic > p {
+  margin: 0;
+}
+
+.lesson-html .atlas-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 0.9rem 0;
+}
+
+.lesson-html .atlas-chip {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-size: 0.86rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.lesson-html .atlas-chip--neutral {
+  background: var(--surface-2);
+  color: var(--text);
+  border-color: var(--border);
+}
+.lesson-html .atlas-chip--danger {
+  background: color-mix(in srgb, #dc2626 10%, var(--surface));
+  color: #dc2626;
+  border-color: color-mix(in srgb, #dc2626 30%, transparent);
+}
+.lesson-html .atlas-chip--info {
+  background: color-mix(in srgb, #2563eb 10%, var(--surface));
+  color: #2563eb;
+  border-color: color-mix(in srgb, #2563eb 30%, transparent);
+}
+.lesson-html .atlas-chip--warn {
+  background: color-mix(in srgb, #ca8a04 12%, var(--surface));
+  color: #a16207;
+  border-color: color-mix(in srgb, #ca8a04 35%, transparent);
+}
+.lesson-html .atlas-chip--ok {
+  background: color-mix(in srgb, #16a34a 10%, var(--surface));
+  color: #15803d;
+  border-color: color-mix(in srgb, #16a34a 30%, transparent);
+}
+
+.lesson-html .atlas-section,
+.lesson-html .atlas-box {
+  margin: 1rem 0;
+  padding: 1.25rem 1.3rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.lesson-html .atlas-section-title {
+  margin: 0 0 0.6rem;
+  padding: 0;
+  border: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.lesson-html .atlas-section p {
+  margin: 0 0 0.75rem;
+}
+
+.lesson-html .atlas-doc {
+  display: grid;
+  gap: 1rem;
+}
+
+.lesson-html .atlas-doc > * {
+  margin-top: 0;
+}
+
+.lesson-html .atlas-note--info {
+  border-left-color: var(--primary);
+}
+
+.lesson-html .atlas-note p {
+  margin: 0;
+}
+
+.lesson-html .atlas-section > * + * {
+  margin-top: 0.75rem;
+}
+
+.lesson-html .atlas-section > .atlas-section-title + * {
+  margin-top: 0.4rem;
+}
+
+.lesson-html .atlas-section p:last-child {
+  margin-bottom: 0;
+}
+
+.lesson-html .atlas-note {
+  margin: 0.9rem 0 0;
+  padding: 0.8rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--primary);
+  border-radius: 8px;
+  font-size: 0.93rem;
+  color: var(--text);
+}
+
+.lesson-html .atlas-note--danger {
+  border-left-color: #dc2626;
+}
+.lesson-html .atlas-note--warn {
+  border-left-color: #ca8a04;
+}
+.lesson-html .atlas-note--ok {
+  border-left-color: #16a34a;
+}
+
+.lesson-html a.atlas-link {
+  color: var(--primary);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ---------- Quiz em pop-up ---------- */
+
+.quiz-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 320;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(10, 14, 20, 0.6);
+  backdrop-filter: blur(2px);
+}
+
+.quiz-dialog {
+  width: min(680px, 100%);
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  padding: 1.5rem 1.6rem 1.4rem;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+  display: grid;
+  gap: 1.1rem;
+}
+
+.quiz-dialog-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.quiz-dialog-head h2 {
+  margin: 0.15rem 0 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+}
+
+.quiz-kicker {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.quiz-close {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.quiz-progress {
+  display: grid;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--text-soft);
+}
+
+.quiz-progress-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.quiz-progress-track span {
+  display: block;
+  height: 100%;
+  background: var(--primary);
+  transition: width 0.3s ease;
+}
+
+.quiz-question {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  line-height: 1.4;
+}
+
+.quiz-choices {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.quiz-choice {
+  width: min(100%, 1200px);
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.85rem 1rem;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.quiz-choice:not(:disabled):hover {
+  border-color: var(--primary);
+}
+
+.quiz-choice:disabled {
+  cursor: default;
+  opacity: 1;
+  color: var(--text);
+}
+
+.quiz-choice.is-correct .quiz-choice-text,
+.quiz-choice.is-wrong .quiz-choice-text {
+  font-weight: 600;
+}
+
+.quiz-letter {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--surface-2);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.quiz-choice-text {
+  flex: 1 1 auto;
+}
+
+.quiz-mark {
+  flex: 0 0 auto;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.quiz-choice.is-correct {
+  border-color: #16a34a;
+  background: color-mix(in srgb, #16a34a 14%, var(--surface));
+}
+
+.quiz-choice.is-correct .quiz-mark {
+  color: #15803d;
+}
+
+.quiz-choice.is-wrong {
+  border-color: #dc2626;
+  background: color-mix(in srgb, #dc2626 12%, var(--surface));
+}
+
+.quiz-choice.is-wrong .quiz-mark {
+  color: #b91c1c;
+}
+
+.quiz-feedback-box {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.95rem 1.05rem;
+  border-radius: 12px;
+  border-left: 4px solid var(--border);
+  background: var(--surface-2);
+  line-height: 1.6;
+}
+
+.quiz-feedback-box.is-correct {
+  border-left-color: #16a34a;
+  background: color-mix(in srgb, #16a34a 10%, var(--surface));
+}
+
+.quiz-feedback-box.is-wrong {
+  border-left-color: #dc2626;
+  background: color-mix(in srgb, #dc2626 9%, var(--surface));
+}
+
+.quiz-feedback-box p {
+  margin: 0;
+}
+
+.quiz-explanation {
+  color: var(--text-soft);
+  font-size: 0.93rem;
+}
+
+.quiz-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+
+.quiz-note {
+  margin-right: auto;
+  font-size: 0.85rem;
+  color: var(--text-soft);
+}
+
+.quiz-result {
+  display: grid;
+  gap: 0.6rem;
+  justify-items: start;
+  padding: 0.5rem 0 0.2rem;
+}
+
+.quiz-score {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 3rem;
+  line-height: 1;
+  color: var(--primary);
+}
+
+.quiz-result h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+}
+
+.quiz-lead {
+  margin: 0;
+  color: var(--text-soft);
+}
+
+.quiz-result .quiz-dialog-actions {
+  width: min(100%, 1200px);
+  justify-content: flex-start;
+  margin-top: 0.6rem;
+}
+
+.module-quiz {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 1rem 1.1rem;
+  border-radius: 14px;
+  border: 1px dashed var(--primary);
+  background: var(--surface-2);
+}
+
+.module-quiz-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.module-quiz-desc {
+  margin: 0.2rem 0 0;
+  font-size: 0.88rem;
+  color: var(--text-soft);
+}
+
+/* ---------- Cores do material (tons do tema, sem cor fixa) ---------- */
+.lesson-html .lc-primary {
+  color: var(--primary);
+}
+.lesson-html .lc-danger {
+  color: #b91c1c;
+}
+.lesson-html .lc-ok {
+  color: #15803d;
+}
+.lesson-html .lc-warn {
+  color: #a16207;
+}
+[data-theme="dark"] .lesson-html .lc-danger,
+:root:not([data-theme="light"]) .lesson-html .lc-danger {
+  color: #f87171;
+}
+[data-theme="dark"] .lesson-html .lc-ok,
+:root:not([data-theme="light"]) .lesson-html .lc-ok {
+  color: #4ade80;
+}
+[data-theme="dark"] .lesson-html .lc-warn,
+:root:not([data-theme="light"]) .lesson-html .lc-warn {
+  color: #fbbf24;
+}
+
+/* =====================================================================
+   Ajuste do modo leitura: o conteúdo ocupa toda a área disponível
+   e fica centralizado na tela. Cole no FIM do course.css
+   (ou carregue depois dele).
+   ===================================================================== */
+
+.reading-scroll {
+  display: grid;
+  justify-items: stretch;
+  align-content: start;
+  padding-left: clamp(1rem, 3vw, 2.5rem);
+  padding-right: clamp(1rem, 3vw, 2.5rem);
+}
+
+.reading-article {
+  width: min(100%, 1200px);
+  max-width: none;
+  margin-left: auto;
+  margin-right: auto;
+  justify-self: stretch;
+}
+
+.reading-article > * {
+  width: min(100%, 1200px);
+  max-width: min(100%, 1200px);
+  box-sizing: border-box;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.reading-article .lesson-html,
+.reading-article .lesson-text {
+  width: min(100%, 1200px);
+  max-width: min(100%, 1200px);
+}
+
+.reading-article .lesson-html .atlas-topic,
+.reading-article .lesson-html .atlas-section,
+.reading-article .lesson-html .atlas-box,
+.reading-article .lesson-html .atlas-note {
+  max-width: min(100%, 1200px);
+  box-sizing: border-box;
+}
+
+.reading-next {
+  width: min(100%, 1200px);
+  box-sizing: border-box;
+}
+
+.lesson-html .atlas-topic-meta > .atlas-kicker:first-child {
+  color: #ffffff;
+}
+
+/* ---------- Módulos do curso em cards (mesmo formato da biblioteca) ---------- */
+
+.module-grid {
+  margin-bottom: 1.25rem;
+}
+
+.module-card.is-locked {
+  opacity: 0.6;
+}
+
+.module-card-action {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  color: var(--primary);
+}
+
+.module-card-action:disabled {
+  cursor: not-allowed;
+  color: var(--text-soft);
+}
+
+.module-card.is-open {
+  border-color: color-mix(
+    in srgb,
+    var(--accent, var(--primary)) 45%,
+    var(--border)
+  );
+}
+
+.outline-module.is-locked .outline-module-head {
+  color: var(--text-soft);
+}
+
+/* ---------- Seletor de formato da página do curso ---------- */
+
+.layout-switch {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-soft);
+}
+
+.layout-switch button {
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.layout-switch button.is-active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--surface);
+}
+
+.module-grid {
+  margin-bottom: 1.25rem;
+}
+
+.course-shell.is-full {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.module-nav {
+  margin-bottom: 0.75rem;
+}
+
+.module-title-row h2 {
+  margin: 0.15rem 0 1rem;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+}
+
+.locked-module-note {
+  margin-bottom: 0.75rem;
+  color: var(--text-soft);
+}
+
+.locked-module-note p {
+  margin: 0.25rem 0 0;
+}

@@ -1,0 +1,76 @@
+/* Cronogramas e presença por turma: calendário mensal, lista de aulas e resumo. */
+
+.cron-gestao, .cron-aluno { display: grid; gap: 1.1rem; align-content: start; min-width: 0; }
+
+.cron-barra {
+  display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;
+  padding: 0.9rem 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+}
+.cron-barra label { display: grid; gap: 0.3rem; font-size: 0.85rem; min-width: min(420px, 100%); }
+.cron-barra select { padding: 0.5rem 0.6rem; border-radius: 9px; }
+.cron-barra p { margin: 0; }
+
+.cron-numeros {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); background: var(--surface); overflow: hidden;
+}
+.cron-numeros > div { padding: 0.85rem 1rem; display: grid; gap: 0.15rem; border-right: 1px solid var(--border); }
+.cron-numeros > div:last-child { border-right: 0; }
+.cron-numeros strong { font-family: var(--font-display); font-size: 1.5rem; color: var(--primary); }
+.cron-numeros span { font-size: 0.8rem; color: var(--text-soft); }
+
+.cron-abas { display: flex; gap: 0.4rem; }
+.cron-abas button {
+  padding: 0.5rem 0.95rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font: inherit; cursor: pointer;
+}
+.cron-abas button.is-active { border-color: var(--primary); background: var(--primary-soft); }
+
+.cron-vazio { display: grid; gap: 0.3rem; padding: 1.5rem; }
+.cron-tabela-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 0.75rem; min-width: 0; }
+.cron-nota { margin: 0.6rem 0.25rem 0.25rem; font-size: 0.85rem; }
+
+.cron-status { display: inline-block; padding: 0.15rem 0.55rem; border-radius: 999px; font-size: 0.78rem; border: 1px solid var(--border); }
+.cron-status.is-realizada { border-color: var(--success); }
+.cron-status.is-prevista { border-style: dashed; }
+
+/* Calendário */
+.cal { display: grid; gap: 0.8rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1rem; min-width: 0; }
+.cal-head { display: flex; align-items: center; gap: 0.6rem; }
+.cal-head strong { min-width: 12rem; text-align: center; }
+.cal-vazio { color: var(--text-soft); margin: 0.5rem 0; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-top: 1px solid var(--border); border-left: 1px solid var(--border); }
+.cal-dow { padding: 0.45rem; font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; color: var(--text-soft); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); text-align: center; }
+.cal-dia { min-height: 84px; padding: 0.35rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); display: grid; align-content: start; gap: 0.25rem; min-width: 0; }
+.cal-dia.is-vazio { background: var(--surface-2); }
+.cal-dia.is-hoje .cal-num { background: var(--primary); color: #fff; border-radius: 999px; }
+.cal-num { font-size: 0.8rem; color: var(--text-soft); width: 1.6rem; height: 1.6rem; display: grid; place-items: center; }
+.cal-chip {
+  text-align: left; font: inherit; font-size: 0.74rem; padding: 0.25rem 0.4rem; border-radius: 7px; cursor: pointer; color: var(--text);
+  border: 1px solid var(--border); background: var(--surface-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.cal-chip small { display: block; font-size: 0.66rem; color: var(--text-soft); }
+.cal-chip em { font-style: normal; color: var(--primary); }
+.cal-chip.is-realizada { border-left: 3px solid var(--success); }
+.cal-chip.is-prevista { border-left: 3px dashed var(--primary); }
+.cal-legenda { display: flex; gap: 1rem; font-size: 0.8rem; color: var(--text-soft); }
+.cal-sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 0.3rem; vertical-align: middle; }
+.cal-sw.is-realizada { background: var(--success); }
+.cal-sw.is-prevista { border: 1px dashed var(--primary); }
+.cal-lista h3 { margin: 0.6rem 0 0.4rem; font-size: 1rem; text-transform: capitalize; }
+.cal-lista ul { list-style: none; margin: 0; padding: 0; display: grid; }
+.cal-lista li { display: grid; grid-template-columns: 56px 80px minmax(0, 1fr) 160px 110px auto; gap: 0.75rem; align-items: center; padding: 0.6rem 0; border-top: 1px solid var(--border); font-size: 0.9rem; }
+.cal-lista-titulo { display: grid; min-width: 0; }
+.cal-lista-titulo small { color: var(--text-soft); font-size: 0.8rem; }
+.cal-lista-prof { color: var(--text-soft); font-size: 0.85rem; }
+.cal-status { font-size: 0.78rem; }
+.cal-status.is-realizada { color: var(--success); }
+.cal-status.is-prevista { color: var(--text-soft); }
+
+@media (max-width: 900px) {
+  .cron-numeros { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cron-numeros > div:nth-child(2) { border-right: 0; }
+  .cal-dia { min-height: 60px; }
+  .cal-chip small { display: none; }
+  .cal-lista li { grid-template-columns: 50px minmax(0, 1fr); }
+  .cal-lista-hora, .cal-lista-prof, .cal-status, .cal-lista-extra { display: none; }
+}

@@ -1,0 +1,227 @@
+/* Acompanhamento da gestão: resumo, filtros e tabela com ordenação. */
+.report-stamp {
+  font-size: 0.85rem;
+}
+.report-summary {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(110px, 1fr));
+  gap: 10px;
+  margin: 12px 0 16px;
+}
+.report-summary > div {
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: grid;
+  gap: 2px;
+}
+.report-summary strong {
+  font-size: 1.35rem;
+}
+.report-summary span {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+.report-panel {
+  display: grid;
+  gap: 14px;
+}
+.report-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+  align-items: end;
+}
+.report-field {
+  display: grid;
+  gap: 4px;
+  font-size: 0.82rem;
+}
+.report-field-wide {
+  grid-column: span 2;
+}
+.report-field input,
+.report-field select {
+  padding: 8px;
+  border-radius: 8px;
+  width: min(100%, 1200px);
+  box-sizing: border-box;
+}
+.report-filter-actions {
+  display: flex;
+  align-items: end;
+}
+.report-sort {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+}
+.report-table {
+  min-width: 1100px;
+}
+.report-progress {
+  display: inline-block;
+  width: 70px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--border, #e5e7eb);
+  overflow: hidden;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+.report-progress span {
+  display: block;
+  height: 100%;
+  background: #6366f1;
+}
+.report-status {
+  font-size: 0.78rem;
+  border-radius: 999px;
+  padding: 2px 8px;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+}
+.report-status-concluido {
+  color: #15803d;
+}
+.report-status-em_andamento {
+  color: #b45309;
+}
+.report-status-nao_iniciado {
+  color: #64748b;
+}
+.report-account {
+  font-size: 0.78rem;
+  border-radius: 999px;
+  padding: 2px 8px;
+  border: 1px solid currentColor;
+}
+.report-account-ativa {
+  color: #15803d;
+}
+.report-account-bloqueada {
+  color: #b91c1c;
+}
+.report-account-desativada {
+  color: #64748b;
+}
+.report-actions {
+  display: flex;
+  gap: 6px;
+}
+@media (max-width: 1000px) {
+  .report-summary {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .report-field-wide {
+    grid-column: span 1;
+  }
+}
+
+/* Presença */
+.report-presence-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(0, 2fr);
+  gap: 16px;
+  align-items: start;
+}
+.report-session-form {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.report-session-form input {
+  padding: 8px;
+  border-radius: 8px;
+}
+.report-session-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+.report-session-list li {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 10px;
+  padding: 6px;
+}
+.report-session-list li.is-active {
+  border-color: #6366f1;
+}
+.report-session-open {
+  flex: 1;
+  display: grid;
+  gap: 2px;
+  text-align: left;
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  padding: 4px;
+}
+.report-session-open span,
+.report-session-open small {
+  opacity: 0.75;
+}
+.report-note-input {
+  width: min(100%, 1200px);
+  min-width: 160px;
+  padding: 6px;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+.report-import-result {
+  margin: 12px 0;
+}
+.file-button {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}
+@media (max-width: 900px) {
+  .report-presence-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Declarações e acessos */
+.report-decision {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.report-decision input {
+  flex: 1 1 200px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  min-width: 160px;
+}
+
+/* Paginação de tabelas da gestão (ex.: Acessos). */
+.pager {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.8rem 1rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.88rem;
+}
+.pager-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}

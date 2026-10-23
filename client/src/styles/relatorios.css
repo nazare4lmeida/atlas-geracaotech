@@ -1,0 +1,178 @@
+/* Relatórios da gestão: três blocos separados por faixa, cada um com cabeçalho, filtros e ações próprios. */
+
+.rel {
+  display: grid;
+  gap: 1.5rem;
+  align-content: start;
+  min-width: 0;
+}
+.rel-head h1 {
+  margin: 0.2rem 0 0.35rem;
+}
+.rel-head p {
+  margin: 0;
+  color: var(--text-soft);
+  max-width: 66ch;
+}
+
+.rel-bloco {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+  min-width: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+.rel-bloco-head h2 {
+  margin: 0 0 0.25rem;
+}
+.rel-bloco-head p {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.9rem;
+}
+
+.rel-periodo {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+.rel-periodo label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.82rem;
+  color: var(--text-soft);
+}
+.rel-periodo input {
+  padding: 0.5rem 0.6rem;
+  border-radius: 9px;
+  min-width: 12rem;
+}
+
+.rel-numeros {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.rel-numeros > div {
+  padding: 0.85rem 1rem;
+  display: grid;
+  gap: 0.15rem;
+  border-right: 1px solid var(--border);
+}
+.rel-numeros > div:last-child {
+  border-right: 0;
+}
+.rel-numeros strong {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--primary);
+}
+.rel-numeros span {
+  font-size: 0.8rem;
+  color: var(--text-soft);
+}
+
+.rel-acoes {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+.rel-acoes > .muted {
+  margin-right: auto;
+  font-size: 0.85rem;
+}
+.rel-acoes-inline {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.rel-filtros {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.rel-filtros-titulo {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+}
+.rel-filtros-grid {
+  display: grid;
+  grid-template-columns: 2fr repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+.rel-campo {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.82rem;
+  min-width: 0;
+}
+.rel-campo span {
+  color: var(--text);
+}
+.rel-campo input,
+.rel-campo select {
+  padding: 0.5rem 0.6rem;
+  border-radius: 9px;
+  width: min(100%, 1200px);
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.rel-resultado {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+  color: var(--text-soft);
+}
+.rel-resultado strong {
+  color: var(--text);
+}
+
+@media (max-width: 1100px) {
+  .rel-filtros-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .rel-campo-busca {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 720px) {
+  .rel-numeros {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .rel-numeros > div:nth-child(2) {
+    border-right: 0;
+  }
+  .rel-numeros > div:nth-child(-n + 2) {
+    border-bottom: 1px solid var(--border);
+  }
+  .rel-filtros-grid {
+    grid-template-columns: 1fr;
+  }
+  .rel-periodo input {
+    min-width: 0;
+    width: min(100%, 1200px);
+  }
+}

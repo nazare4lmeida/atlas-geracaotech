@@ -1,0 +1,130 @@
+{
+  "nome": "Certificado - Geração Tech (Full Stack)",
+  "proporcao": {
+    "largura_pt": 893.0,
+    "altura_pt": 631.9
+  },
+  "fundo": "background.png",
+  "logo": {
+    "arquivo": "logo.png",
+    "x": 0.088,
+    "y": 0.0797,
+    "w": 0.1952,
+    "h": 0.1015,
+    "observacao": "Marca original com \"4.0\": só no certificado. No restante do sistema a marca não tem o 4.0."
+  },
+  "campos": [
+    {
+      "id": "campo-1",
+      "valor": "CERTIFICADO",
+      "modelo": "CERTIFICADO",
+      "automatico": false,
+      "x": 0.0882,
+      "y": 0.2209,
+      "w": 0.7059,
+      "h": 0.101,
+      "tamanhoPt": 47.25,
+      "negrito": true,
+      "cor": "#091A38"
+    },
+    {
+      "id": "campo-2",
+      "valor": "O IEL - Instituto Euvaldo Lodi em parceria com o Governo do Estado por\nmeio da ADECE - Agência de Desenvolvimento do Estado do Ceará,\ncertifica que",
+      "modelo": "O IEL - Instituto Euvaldo Lodi em parceria com o Governo do Estado por\nmeio da ADECE - Agência de Desenvolvimento do Estado do Ceará,\ncertifica que",
+      "automatico": false,
+      "x": 0.0882,
+      "y": 0.3563,
+      "w": 0.8571,
+      "h": 0.1235,
+      "tamanhoPt": 17.25,
+      "negrito": false,
+      "cor": "#091A38"
+    },
+    {
+      "id": "campo-3",
+      "valor": "[NOME DO PARTICIPANTE]",
+      "modelo": "{NOME_DO_ALUNO}",
+      "automatico": true,
+      "x": 0.0882,
+      "y": 0.5,
+      "w": 0.8151,
+      "h": 0.0534,
+      "tamanhoPt": 21.75,
+      "negrito": true,
+      "cor": "#087F91"
+    },
+    {
+      "id": "campo-4",
+      "valor": "participou da Formação em Desenvolvimento Full Stack, realizado entre\nNov/2025 a Março/2026 com duração de 192h/aula.",
+      "modelo": "participou da {CURSO}, realizado entre {PERIODO} com duração de {CARGA_HORARIA}.",
+      "automatico": true,
+      "x": 0.0882,
+      "y": 0.6021,
+      "w": 0.8403,
+      "h": 0.0926,
+      "tamanhoPt": 17.25,
+      "negrito": false,
+      "cor": "#091A38"
+    },
+    {
+      "id": "campo-5",
+      "valor": "Fortaleza, 07 de Maio de 2026",
+      "modelo": "{LOCAL}, {DATA_EMISSAO}",
+      "automatico": true,
+      "x": 0.6975,
+      "y": 0.7019,
+      "w": 0.2773,
+      "h": 0.038,
+      "tamanhoPt": 12.0,
+      "negrito": false,
+      "cor": "#091A38"
+    },
+    {
+      "id": "campo-6",
+      "valor": "Danadette Nunes Costa Souza",
+      "modelo": "Danadette Nunes Costa Souza",
+      "automatico": false,
+      "x": 0.7017,
+      "y": 0.7945,
+      "w": 0.2857,
+      "h": 0.0309,
+      "tamanhoPt": 12.0,
+      "negrito": true,
+      "cor": "#091A38"
+    },
+    {
+      "id": "campo-7",
+      "valor": "Superintendente do IEL Ceará",
+      "modelo": "Superintendente do IEL Ceará",
+      "automatico": false,
+      "x": 0.7017,
+      "y": 0.8278,
+      "w": 0.2857,
+      "h": 0.0273,
+      "tamanhoPt": 10.5,
+      "negrito": false,
+      "cor": "#091A38"
+    },
+    {
+      "id": "campo-8",
+      "valor": "Realização",
+      "modelo": "Realização",
+      "automatico": false,
+      "x": 0.5504,
+      "y": 0.8872,
+      "w": 0.1345,
+      "h": 0.0261,
+      "tamanhoPt": 9.0,
+      "negrito": false,
+      "cor": "#124F8C"
+    }
+  ],
+  "tokens": [
+    "{NOME_DO_ALUNO}",
+    "{CURSO}",
+    "{PERIODO}",
+    "{CARGA_HORARIA}",
+    "{LOCAL}",
+    "{DATA_EMISSAO}"
+  ]
+}

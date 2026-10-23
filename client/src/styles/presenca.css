@@ -1,0 +1,199 @@
+/* Presença: pop-up do aluno, histórico e justificativas da gestão. */
+
+.presenca-popup {
+  width: min(520px, 100%);
+}
+.presenca-popup-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.presenca-popup-head h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+.presenca-popup-text {
+  margin: 0;
+  line-height: 1.5;
+}
+.presenca-popup-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.presenca-popup-list li,
+.presenca-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 10px;
+}
+.presenca-popup-list li div,
+.presenca-list li div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.presenca-popup-list span,
+.presenca-list span {
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+.presenca-popup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.presenca-page {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+.presenca-page h2 {
+  margin: 0 0 12px;
+  font-size: 1.1rem;
+}
+.presenca-stats strong {
+  font-size: 1.6rem;
+}
+.presenca-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.presenca-badge {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.presenca-badge.is-present,
+.presenca-badge.is-justified {
+  background: rgba(31, 122, 77, 0.12);
+  color: #1f7a4d;
+}
+.presenca-badge.is-absent {
+  background: rgba(190, 40, 40, 0.12);
+  color: #a8262a;
+}
+.presenca-badge.is-pending {
+  background: rgba(120, 120, 120, 0.14);
+  color: inherit;
+}
+.presenca-resposta {
+  opacity: 0.7;
+}
+.presenca-motivo {
+  max-width: 320px;
+  white-space: normal;
+}
+.presenca-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.presenca-filtros .is-active {
+  font-weight: 700;
+  text-decoration: underline;
+}
+.presenca-justify textarea {
+  width: min(100%, 1200px);
+  box-sizing: border-box;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+@media (max-width: 640px) {
+  .presenca-popup-list li,
+  .presenca-list li {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* Relatórios da gestão */
+.presenca-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.presenca-periodo {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+.presenca-periodo label,
+.presenca-filtros-lista label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.85rem;
+}
+.presenca-periodo input,
+.presenca-filtros-lista input,
+.presenca-filtros-lista select {
+  padding: 7px 8px;
+  border-radius: 8px;
+  min-width: 140px;
+}
+.presenca-filtros-lista {
+  display: grid;
+  grid-template-columns: 2fr repeat(4, minmax(120px, 1fr)) auto;
+  gap: 10px;
+  align-items: end;
+  margin: 12px 0;
+}
+.presenca-filtros-acoes {
+  display: flex;
+  gap: 6px;
+}
+.presenca-export {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  margin: 10px 0;
+  font-size: 0.9rem;
+}
+.presenca-export span {
+  margin-right: auto;
+  opacity: 0.75;
+}
+@media (max-width: 1000px) {
+  .presenca-filtros-lista {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Boas-vindas do primeiro acesso */
+.boas-vindas-passos {
+  margin: 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 10px;
+  line-height: 1.45;
+}
+.boas-vindas-passos li {
+  display: grid;
+  gap: 2px;
+}
+.boas-vindas-passos span {
+  opacity: 0.85;
+}

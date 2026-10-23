@@ -1,0 +1,289 @@
+/* Estúdio de código: editor, prévia e console lado a lado. Paletas e modo claro/escuro por variáveis. */
+
+.editor-page {
+  gap: 1rem;
+}
+
+.code-studio {
+  --cs-bg: #fdfcfa;
+  --cs-panel: #f6f4ef;
+  --cs-border: #e2ded5;
+  --cs-text: #2c3440;
+  --cs-muted: #646d78;
+  --cs-accent: var(--primary);
+  --cs-accent-2: var(--highlight);
+  display: grid;
+  gap: 0.75rem;
+  color: var(--cs-text);
+}
+
+.code-studio[data-mode='dark'] {
+  --cs-bg: #1c2127;
+  --cs-panel: #232a32;
+  --cs-border: #323a44;
+  --cs-text: #dfe3e6;
+  --cs-muted: #a9b2bc;
+}
+
+.code-studio[data-palette='rose'] {
+  --cs-accent: #a45a6e;
+  --cs-accent-2: #d2ac94;
+}
+
+.code-studio[data-palette='ocean'] {
+  --cs-accent: #4a6178;
+  --cs-accent-2: #9db2bf;
+}
+
+.code-studio[data-palette='forest'] {
+  --cs-accent: #14352f;
+  --cs-accent-2: #5e8a75;
+}
+
+.cs-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 14px;
+  background: var(--cs-panel);
+  border: 1px solid var(--cs-border);
+}
+
+.cs-tabs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.cs-tab {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 10px;
+  border: 1px solid var(--cs-border);
+  background: var(--cs-bg);
+}
+
+.cs-tab.is-active {
+  border-color: var(--cs-accent);
+  box-shadow: inset 0 -2px 0 var(--cs-accent);
+}
+
+.cs-tab > button:first-child {
+  padding: 0.4rem 0.7rem;
+  border: 0;
+  background: transparent;
+  color: var(--cs-text);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.cs-tab-close {
+  padding: 0.2rem 0.5rem 0.2rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--cs-muted);
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.cs-add {
+  padding: 0.4rem 0.7rem;
+  border: 1px dashed var(--cs-border);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--cs-muted);
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.cs-acoes {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.cs-botao {
+  padding: 0.42rem 0.8rem;
+  border-radius: 10px;
+  border: 1px solid var(--cs-border);
+  background: var(--cs-bg);
+  color: var(--cs-text);
+  font-size: 0.84rem;
+  cursor: pointer;
+}
+
+.cs-botao.primary {
+  border-color: var(--cs-accent);
+  background: var(--cs-accent);
+  color: #fff;
+}
+
+.cs-botao.small {
+  padding: 0.25rem 0.6rem;
+  font-size: 0.78rem;
+}
+
+.cs-paleta {
+  position: relative;
+}
+
+.cs-menu {
+  position: absolute;
+  right: 0;
+  z-index: 20;
+  top: calc(100% + 0.4rem);
+  display: grid;
+  gap: 0.2rem;
+  min-width: 220px;
+  padding: 0.4rem;
+  border-radius: 12px;
+  border: 1px solid var(--cs-border);
+  background: var(--cs-bg);
+  box-shadow: 0 16px 30px -18px rgba(0, 0, 0, 0.5);
+}
+
+.cs-menu button {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.55rem;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--cs-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.cs-menu button:hover,
+.cs-menu button.is-active {
+  background: var(--cs-panel);
+}
+
+.cs-swatches {
+  display: inline-flex;
+  width: 3.5rem;
+  height: 1.1rem;
+  overflow: hidden;
+  border-radius: 6px;
+  border: 1px solid var(--cs-border);
+}
+
+.cs-swatches i {
+  flex: 1;
+}
+
+.cs-aviso {
+  margin: 0;
+  color: var(--cs-muted);
+  font-size: 0.88rem;
+}
+
+.cs-corpo {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 0.75rem;
+  height: min(74vh, 720px);
+  min-height: 480px;
+}
+
+.cs-editor,
+.cs-saida {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  border-radius: 14px;
+  border: 1px solid var(--cs-border);
+  background: var(--cs-bg);
+  overflow: hidden;
+}
+
+.cs-editor .cm-editor {
+  height: 100%;
+}
+
+.cs-editor .cm-scroller {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+}
+
+.cs-saida {
+  grid-template-rows: auto minmax(0, 1.4fr) minmax(0, 1fr);
+}
+
+.cs-previa-cabecalho,
+.cs-console-cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.45rem 0.7rem;
+  border-bottom: 1px solid var(--cs-border);
+  background: var(--cs-panel);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--cs-muted);
+}
+
+.cs-previa {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #fff;
+}
+
+.cs-console {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 0;
+  border-top: 1px solid var(--cs-border);
+}
+
+.cs-console ul {
+  margin: 0;
+  padding: 0.5rem 0.7rem;
+  list-style: none;
+  overflow: auto;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+.cs-console li {
+  padding: 0.15rem 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--cs-text);
+}
+
+.cs-console li.is-warn {
+  color: #b7791f;
+}
+
+.cs-console li.is-error {
+  color: #c0392b;
+}
+
+.cs-console-vazio {
+  color: var(--cs-muted);
+}
+
+@media (max-width: 900px) {
+  .cs-corpo {
+    grid-template-columns: 1fr;
+    height: auto;
+    min-height: 0;
+  }
+
+  .cs-editor {
+    height: 360px;
+  }
+
+  .cs-saida {
+    height: 460px;
+  }
+}

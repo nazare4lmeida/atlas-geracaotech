@@ -1,0 +1,29 @@
+{
+  "name": "atlas-server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "node --watch index.js",
+    "start": "node index.js",
+    "db:migrate": "node db/migrate.js",
+    "seed": "node data/seed.js",
+    "set-role": "node scripts/setRole.js",
+    "test": "node --test",
+    "catalog:sync": "node scripts/syncCatalog.js",
+    "integracao:chave": "node scripts/criar-chave-integracao.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "pdfkit": "^0.20.2",
+    "pg": "^8.23.1",
+    "qrcode": "^1.5.4"
+  }
+}

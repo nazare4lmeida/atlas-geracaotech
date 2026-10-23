@@ -1,0 +1,309 @@
+/* =====================================================================
+   myarea.css — Minha área do aluno (perfil, progresso, lembretes, declarações e segurança).
+   ===================================================================== */
+
+.myarea {
+  display: grid;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+.myarea-head {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  flex-wrap: wrap;
+}
+
+.myarea-avatar {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  border: 3px solid var(--surface);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.14);
+  background: var(--surface-2);
+}
+
+.myarea-head h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+}
+
+.myarea-head p {
+  margin: 0.2rem 0 0;
+  color: var(--text-soft);
+}
+
+.myarea-tabs {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.4rem;
+}
+
+.myarea-tabs button {
+  border: 0;
+  background: transparent;
+  color: var(--text-soft);
+  font: inherit;
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.myarea-tabs button.is-active {
+  background: var(--primary);
+  color: #fff;
+}
+
+.myarea-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.9rem;
+}
+
+.myarea-stat {
+  padding: 1rem 1.1rem;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.myarea-stat strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  color: var(--primary);
+}
+
+.myarea-stat span {
+  color: var(--text-soft);
+  font-size: 0.9rem;
+}
+
+.myarea-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.myarea-box {
+  padding: 1.2rem 1.25rem;
+  border-radius: 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  display: grid;
+  gap: 0.8rem;
+  min-width: 0;
+}
+
+.myarea-box h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+}
+
+.myarea-box h3 {
+  margin: 0.4rem 0 0;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-soft);
+  font-family: var(--font-mono);
+}
+
+.myarea-form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.myarea-form label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+.myarea-form input,
+.myarea-form select,
+.myarea-form textarea {
+  width: min(100%, 1200px);
+  box-sizing: border-box;
+  padding: 0.65rem 0.8rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+}
+
+.myarea-form input[readonly] {
+  opacity: 0.7;
+}
+
+.myarea-avatars {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.myarea-avatars button {
+  padding: 3px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: transparent;
+  cursor: pointer;
+}
+
+.myarea-avatars button.is-active {
+  border-color: var(--primary);
+}
+
+.myarea-avatars img {
+  width: min(100%, 1200px);
+  aspect-ratio: 1;
+  display: block;
+  border-radius: 50%;
+}
+
+.myarea-course {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.8rem 0.9rem;
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+
+.myarea-course-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.myarea-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--bg-muted);
+  overflow: hidden;
+}
+
+.myarea-bar span {
+  display: block;
+  height: 100%;
+  background: var(--primary);
+  border-radius: 999px;
+}
+
+.myarea-pill {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  background: var(--surface-2);
+  color: var(--text-soft);
+  font-family: var(--font-mono);
+}
+
+.myarea-pill.is-ok {
+  background: #e4f3ea;
+  color: #2b6e46;
+}
+
+.myarea-pill.is-warn {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.myarea-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.myarea-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  align-items: center;
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+
+.myarea-list li.is-done span {
+  text-decoration: line-through;
+  color: var(--text-soft);
+}
+
+.myarea-muted {
+  color: var(--text-soft);
+  font-size: 0.92rem;
+  margin: 0;
+}
+
+.myarea-msg {
+  margin: 0;
+  padding: 0.6rem 0.8rem;
+  border-radius: 10px;
+  background: #e4f3ea;
+  color: #2b6e46;
+  font-size: 0.92rem;
+}
+
+.myarea-msg.is-error {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+@media (max-width: 720px) {
+  .myarea-avatars {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Itens do cartão não esticam na vertical (mensagens e botões ficam do tamanho do próprio conteúdo). */
+.myarea-box > * {
+  align-self: start;
+  justify-self: stretch;
+}
+
+.myarea-box > .primary-button,
+.myarea-box > .ghost-button {
+  justify-self: start;
+}
+
+/* Botão de voltar no topo da área pessoal */
+.myarea-back {
+  margin-bottom: 0.75rem;
+}
+
+/* Seletor de avatar paginado (todos os modelos do DiceBear). */
+.avatar-picker {
+  display: grid;
+  gap: 0.8rem;
+}
+.avatar-picker .myarea-avatars {
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+}
+.avatar-picker .myarea-avatars button {
+  display: grid;
+  justify-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem;
+}
+.avatar-picker .myarea-avatars button span {
+  font-size: 0.72rem;
+  color: var(--text-soft);
+  text-transform: capitalize;
+}
+.avatar-pager {
+  justify-content: space-between;
+  border-top: 0;
+  padding: 0;
+}

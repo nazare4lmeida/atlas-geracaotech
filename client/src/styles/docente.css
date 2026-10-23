@@ -1,0 +1,557 @@
+/* Área do professor: cronograma, chamada, ponto e arquivos. Usa os tokens do tema (claro e escuro). */
+
+.docente-ponto {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.docente-bloco {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 1.25rem;
+}
+
+.docente-bloco-cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
+}
+
+.docente-bloco-cabecalho h2,
+.docente-form-cabecalho h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.docente-form-cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.docente-form-cabecalho p {
+  margin: 0.2rem 0 0;
+}
+
+.docente-form,
+.docente-extra-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1.1rem;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg, 12px);
+  background: var(--surface-2, var(--surface));
+}
+
+.docente-extra-form h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.docente-grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.75rem;
+}
+
+.docente-form label,
+.docente-extra-form label,
+.docente-periodo label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+}
+
+.docente-form input,
+.docente-form select,
+.docente-extra-form input,
+.docente-extra-form select,
+.docente-extra-form textarea,
+.docente-periodo input,
+.docente-periodo select,
+.docente-barra-select {
+  font: inherit;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: inherit;
+  min-width: 0;
+}
+
+.docente-dias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.docente-dias legend,
+.docente-rotulo {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+  color: var(--text-soft);
+}
+
+.docente-dias label,
+.docente-check {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.88rem;
+}
+
+.docente-dias label.is-on {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
+}
+
+.docente-nota,
+.docente-total {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.docente-erro {
+  margin: 0;
+  color: var(--danger);
+  font-size: 0.9rem;
+}
+
+.docente-sucesso {
+  margin: 0;
+  color: var(--success);
+  font-size: 0.9rem;
+}
+
+.docente-aviso {
+  margin: 0;
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--highlight, #f5b400) 18%, transparent);
+  font-size: 0.9rem;
+}
+
+.docente-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.docente-acoes-linha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.docente-linha-cancelada td {
+  opacity: 0.6;
+}
+
+.docente-origem {
+  color: var(--text-soft);
+  font-weight: 500;
+}
+
+.docente-aberto {
+  color: var(--highlight, #b45309);
+  font-weight: 600;
+}
+
+/* Professores da turma */
+.docente-professores {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg, 12px);
+}
+
+.docente-professores-lista,
+.docente-professores-editar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.docente-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
+  font-size: 0.86rem;
+}
+
+/* Chamada da aula */
+.docente-chamada {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 1.1rem;
+}
+
+.docente-resumo-chamada {
+  margin: 0;
+}
+
+.docente-chamada-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.docente-chamada-lista li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.docente-chamada-nome small {
+  color: var(--text-soft);
+}
+
+.docente-chamada-botoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.docente-marca {
+  font: inherit;
+  font-size: 0.84rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: inherit;
+  cursor: pointer;
+}
+
+.docente-marca:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.docente-marca.is-presente.is-on {
+  background: var(--success);
+  border-color: var(--success);
+  color: #fff;
+}
+
+.docente-marca.is-ausente.is-on {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+}
+
+.docente-marca.is-justificado.is-on {
+  background: var(--highlight, #b45309);
+  border-color: var(--highlight, #b45309);
+  color: #fff;
+}
+
+/* Ponto */
+.docente-aulas-hoje {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.docente-aulas-hoje li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg, 12px);
+}
+
+.docente-ponto-acao {
+  display: flex;
+  align-items: center;
+}
+
+.docente-concluido {
+  font-weight: 600;
+  color: var(--success);
+}
+
+.docente-extras-hoje {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.docente-extra-linha {
+  font-size: 0.9rem;
+}
+
+.docente-periodo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+/* Perfil do professor: turmas, aulas e arquivos */
+.docente-turmas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.docente-turma {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1rem;
+}
+
+.docente-turma h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.docente-turma p {
+  margin: 0.2rem 0 0;
+  font-size: 0.88rem;
+}
+
+.docente-visao-aluno {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.docente-visao-aluno p {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.docente-lista-aulas {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.88rem;
+}
+
+.docente-lista-aulas li {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.docente-lista-aulas li.is-cancelada {
+  opacity: 0.6;
+  text-decoration: line-through;
+}
+
+.docente-arquivos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.docente-upload {
+  cursor: pointer;
+}
+
+.docente-lista-arquivos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.docente-lista-arquivos li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  padding: 0.75rem 1rem;
+}
+
+/* Situações extras nos chips de status do cronograma */
+.cron-status.is-cancelada {
+  background: color-mix(in srgb, var(--danger) 14%, transparent);
+  color: var(--danger);
+}
+
+.cron-status.is-ativa {
+  background: color-mix(in srgb, var(--success) 14%, transparent);
+  color: var(--success);
+}
+
+@media (max-width: 640px) {
+  .docente-bloco {
+    padding: 1rem;
+  }
+
+  .docente-periodo label {
+    flex: 1 1 140px;
+  }
+
+  .docente-lista-aulas li {
+    grid-template-columns: 1fr;
+  }
+}
+
+.docente-acoes-celula {
+  white-space: normal;
+}
+
+.docente-acoes-celula .docente-acoes-linha {
+  max-width: 200px;
+}
+
+/* Grade de geração: uma regra por combinação de dias e horário */
+.docente-regras {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.docente-regra {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.docente-regra legend {
+  padding: 0 0.35rem;
+  font-weight: 600;
+}
+
+.docente-predefinidos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+/* Ações em lote sobre as aulas selecionadas */
+.docente-lote {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 0.9rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-lg, 12px);
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+}
+
+.docente-lote-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.docente-lote-campo {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.docente-lote-campo input {
+  font: inherit;
+  width: 12rem;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: inherit;
+}
+
+/* Janela de entrada do ponto */
+.docente-entrada {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+}
+
+.docente-janela {
+  font-size: 0.85rem;
+  color: var(--text-soft);
+  text-align: right;
+}
+
+.docente-janela.is-aberta {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.docente-janela.is-depois {
+  color: var(--danger);
+}
+
+/* Link da aula ao vivo da turma (administração) */
+.docente-link-turma {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.docente-link-turma label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex: 1 1 320px;
+  font-size: 0.85rem;
+}
+
+.docente-link-turma input {
+  font: inherit;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: inherit;
+}

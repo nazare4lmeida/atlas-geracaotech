@@ -1,0 +1,87 @@
+/* Gestão de cursos dentro da aba Cursos */
+.courses-manager { display: grid; gap: 1.25rem; min-width: 0; }
+.courses-manager .manage-two-col { align-items: start; }
+.courses-manager .manage-stack { display: grid; gap: 0.9rem; }
+.courses-manager .course-manage-card { display: grid; gap: 0.6rem; }
+
+/* Barra superior: alternador Gestão | Visualizar e o botão de novo curso */
+.cursos-barra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.cursos-modos {
+  display: inline-flex;
+  padding: 0.22rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-2);
+}
+
+.cursos-modos button {
+  padding: 0.4rem 0.9rem;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cursos-modos button.is-active {
+  background: var(--surface);
+  color: var(--primary);
+  box-shadow: 0 1px 0 var(--border-strong);
+}
+
+/* Pop-up de novo curso */
+.cm-modal {
+  width: min(680px, 100%);
+  max-height: calc(100vh - 80px);
+  overflow: auto;
+}
+
+.cm-modal-cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cm-modal-cabecalho h2 {
+  margin: 0;
+}
+
+.cm-form {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.cm-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 1rem;
+}
+
+.cm-acoes {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+}
+
+.cm-acoes .editor-actions {
+  margin-left: auto;
+}
+
+@media (max-width: 600px) {
+  .cm-grid {
+    grid-template-columns: 1fr;
+  }
+}

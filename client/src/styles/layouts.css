@@ -1,0 +1,376 @@
+/* =====================================================================
+   layouts.css — Layouts de curso.
+   O professor escolhe um layout ao criar o curso. Cores, fonte e forma
+   vêm de variáveis definidas em registry.js (inline no .course-layout),
+   então estas regras só cuidam da estrutura e da decoração de cada layout.
+   ===================================================================== */
+
+.course-layout {
+  --primary-hover: color-mix(in srgb, var(--primary) 85%, #000);
+  border-radius: var(--radius-lg);
+}
+
+.course-layout .lesson-html img {
+  max-width: min(100%, 1200px);
+  height: auto;
+  border-radius: var(--radius-sm);
+}
+
+.course-layout .lesson-html iframe {
+  width: min(100%, 1200px);
+  max-width: min(100%, 1200px);
+  aspect-ratio: 16 / 9;
+  height: auto;
+  border: 0;
+  border-radius: var(--radius);
+}
+
+.course-layout .lesson-html table {
+  width: min(100%, 1200px);
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+.course-layout .lesson-html th,
+.course-layout .lesson-html td {
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--border-strong);
+  text-align: left;
+}
+
+.course-layout .lesson-html pre,
+.course-layout .lesson-html code {
+  font-family: var(--font-mono);
+}
+
+.course-layout .lesson-html a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.course-logo {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  padding: 0.35rem;
+}
+
+/* Banner de capa (quando o professor define uma imagem) */
+.course-hero.has-banner {
+  background-image:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--primary) 88%, #000) 0%,
+      color-mix(in srgb, var(--primary) 55%, transparent) 100%
+    ),
+    var(--banner-url);
+  background-size: cover;
+  background-position: center;
+  color: #fff;
+  border-color: transparent;
+}
+
+.course-hero.has-banner h1,
+.course-hero.has-banner p,
+.course-hero.has-banner .eyebrow {
+  color: #fff;
+}
+
+/* Densidade */
+.density-compacto .lesson-card,
+.density-compacto .surface-card {
+  padding: 0.95rem 1.05rem;
+}
+
+.density-compacto .lesson-content {
+  font-size: 0.96rem;
+  line-height: 1.55;
+}
+
+/* ---------------------------------------------------------------------
+   1. CADERNO — visual original (sem sobrescritas além das variáveis)
+   --------------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------------
+   2. CLÁSSICO — cabeçalho colorido, abas arredondadas, cartões com faixa
+   --------------------------------------------------------------------- */
+.layout-classico {
+  background: var(--surface);
+  color: var(--text);
+  padding: clamp(1rem, 2.5vw, 1.75rem);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  /* Tons do próprio curso, calculados sobre a superfície do tema: funcionam no claro e no escuro. */
+  --surface-2: color-mix(in srgb, var(--primary) 5%, var(--surface));
+  --bg-muted: color-mix(in srgb, var(--primary) 9%, var(--surface));
+  --border: color-mix(in srgb, var(--primary) 18%, var(--surface));
+  --border-strong: color-mix(in srgb, var(--primary) 30%, var(--surface));
+}
+
+.layout-classico .course-hero {
+  background: var(--primary);
+  color: var(--primary-ink);
+  border: 0;
+  border-radius: var(--radius-lg);
+  box-shadow: none;
+}
+
+.layout-classico .course-hero h1,
+.layout-classico .course-hero p,
+.layout-classico .course-hero .eyebrow,
+.layout-classico .course-hero .progress-meta {
+  color: var(--primary-ink);
+}
+
+.layout-classico .course-hero .eyebrow::before {
+  color: var(--primary-ink);
+}
+
+.layout-classico .course-hero .progress-bar {
+  background: color-mix(in srgb, var(--primary-ink) 25%, transparent);
+}
+
+.layout-classico .course-hero .progress-bar span {
+  background: var(--highlight);
+}
+
+.layout-classico .module-tabs {
+  border-bottom: 0;
+  gap: 0.4rem;
+}
+
+.layout-classico .tab {
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--primary);
+}
+
+.layout-classico .tab.active {
+  background: var(--primary);
+  color: var(--primary-ink);
+  border-color: var(--primary);
+  box-shadow: none;
+}
+
+.layout-classico .surface-card,
+.layout-classico .lesson-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+
+.layout-classico .lesson-card {
+  border-left: 5px solid var(--primary);
+  border-radius: var(--radius);
+}
+
+.layout-classico .section-heading {
+  border-bottom: 2px solid var(--primary-soft);
+}
+
+.layout-classico .section-heading h2,
+.layout-classico .lesson-header h3 {
+  color: var(--primary);
+}
+
+.layout-classico .lesson-content h2,
+.layout-classico .lesson-content h3 {
+  color: var(--primary);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.3rem;
+}
+
+/* ---------------------------------------------------------------------
+   3. TERMINAL — fundo escuro, mono nos títulos, prefixos de comando
+   --------------------------------------------------------------------- */
+.layout-terminal {
+  background: #0e1116;
+  color: #d6dde6;
+  padding: clamp(1rem, 2.5vw, 1.75rem);
+  --bg: #0e1116;
+  --surface: #151a21;
+  --surface-2: #1b212a;
+  --bg-muted: #222a35;
+  --text: #d6dde6;
+  --text-muted: #94a1b2;
+  --text-soft: #6c7a8c;
+  --border: #29313d;
+  --border-strong: #38424f;
+  --font-display: var(--font-mono);
+  --font-body: var(--font-mono);
+  font-size: 0.97rem;
+}
+
+.layout-terminal h1,
+.layout-terminal h2,
+.layout-terminal h3,
+.layout-terminal h4 {
+  font-family: var(--font-mono);
+  letter-spacing: -0.02em;
+}
+
+.layout-terminal .course-hero {
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--primary) 12%, transparent),
+      transparent 70%
+    ),
+    var(--surface);
+  border: 1px solid color-mix(in srgb, var(--primary) 45%, var(--border));
+  box-shadow: none;
+}
+
+.layout-terminal .course-hero::before {
+  content: "● ● ●";
+  display: block;
+  margin-bottom: 0.75rem;
+  color: var(--primary);
+  letter-spacing: 0.3em;
+  font-size: 0.8rem;
+}
+
+.layout-terminal .lesson-header h3::before {
+  content: "$ ";
+  color: var(--primary);
+}
+
+.layout-terminal .lesson-card,
+.layout-terminal .surface-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+
+.layout-terminal .module-tabs {
+  border-bottom: 1px solid var(--border-strong);
+}
+
+.layout-terminal .tab {
+  color: var(--text-muted);
+  border-radius: 0;
+}
+
+.layout-terminal .tab.active {
+  color: var(--primary);
+  background: transparent;
+  border-color: transparent;
+  box-shadow: inset 0 -2px 0 var(--primary);
+}
+
+.layout-terminal .lesson-content pre,
+.layout-terminal .lesson-content code {
+  background: #0a0d12;
+  color: #cfe3d4;
+  border: 1px solid var(--border);
+}
+
+.layout-terminal .lesson-content a {
+  color: var(--primary);
+}
+
+/* ---------------------------------------------------------------------
+   4. EDITORIAL — títulos grandes, aulas em linhas finas, sem caixas
+   --------------------------------------------------------------------- */
+.layout-editorial {
+  background: #f7f3ec;
+  color: #1c1a17;
+  padding: clamp(1rem, 3vw, 2.25rem);
+  --bg: #f7f3ec;
+  --surface: #fbf9f5;
+  --surface-2: #f1ece3;
+  --bg-muted: #ebe4d7;
+  --text: #1c1a17;
+  --text-muted: #5f5a51;
+  --text-soft: #8a8377;
+  --border: #e2dace;
+  --border-strong: #cdc3b0;
+}
+
+.layout-editorial .course-hero {
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid var(--primary);
+  border-radius: 0;
+  box-shadow: none;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.layout-editorial .course-hero h1 {
+  font-size: clamp(2.6rem, 6.5vw, 4.8rem);
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  line-height: 0.98;
+}
+
+.layout-editorial .eyebrow {
+  color: var(--primary);
+}
+
+.layout-editorial .module-tabs {
+  border-bottom: 1px solid var(--border-strong);
+  gap: 1.1rem;
+}
+
+.layout-editorial .tab {
+  padding-left: 0;
+  padding-right: 0;
+  color: var(--text-soft);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  border-radius: 0;
+}
+
+.layout-editorial .tab.active {
+  color: var(--text);
+  background: transparent;
+  border-color: transparent;
+  box-shadow: inset 0 -3px 0 var(--primary);
+}
+
+.layout-editorial .surface-card,
+.layout-editorial .lesson-card {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.layout-editorial .lesson-card {
+  border-top: 1px solid var(--border-strong);
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+.layout-editorial .lesson-header h3 {
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+
+.layout-editorial .section-heading {
+  border-bottom: 0;
+}
+
+.layout-editorial .section-heading h2 {
+  font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+  letter-spacing: -0.035em;
+}
+
+.layout-editorial .lesson-content {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  line-height: 1.75;
+  max-width: 68ch;
+}
+
+.layout-editorial .lesson-content h2,
+.layout-editorial .lesson-content h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+}

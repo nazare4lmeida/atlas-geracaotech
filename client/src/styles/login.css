@@ -1,0 +1,301 @@
+/* =====================================================================
+   login.css — Tela de entrada do Atlas.
+   Esquerda: foto do Geração Tech (client/public/brand/login-collage.jpg), sem texto por cima.
+   Direita: cartão de acesso com as fontes do sistema (Space Grotesk nos títulos, DM Sans no texto).
+   ===================================================================== */
+
+.login-screen {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  min-height: 100vh;
+  /* Mesmo fundo do restante do Atlas (grade e cores do tema), sem cor própria da tela de entrada. */
+  background: transparent;
+  color: var(--text);
+}
+
+.login-screen-single {
+  grid-template-columns: 1fr;
+}
+
+/* ---------- Painel visual (foto) ---------- */
+
+.login-visual {
+  position: relative;
+  overflow: hidden;
+  background: #0b1220;
+}
+
+.login-visual-img {
+  display: block;
+  width: min(100%, 1200px);
+  height: 100%;
+  min-height: 100vh;
+  object-fit: cover;
+  object-position: left center;
+}
+
+/* ---------- Painel do formulário ---------- */
+
+.login-form-side {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 3rem 1.25rem;
+}
+
+.login-theme-toggle {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.login-card {
+  position: relative;
+  width: min(430px, 100%);
+  padding: 2.2rem 2.1rem 1.8rem;
+  border-radius: 22px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 22px 50px rgba(20, 24, 30, 0.12);
+  display: grid;
+  gap: 0.75rem;
+}
+
+/* Topo do cartão: marca Atlas (mesmo estilo da barra superior) e símbolo do Geração Tech à direita. */
+.login-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+}
+
+.login-card-symbol {
+  width: 46px;
+  height: 46px;
+  background: var(--primary);
+  -webkit-mask: url("/brand/geracao-tech-simbolo.png") center / contain
+    no-repeat;
+  mask: url("/brand/geracao-tech-simbolo.png") center / contain no-repeat;
+}
+
+.login-card-wide {
+  width: min(520px, 100%);
+}
+
+.login-card h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.login-subtitle {
+  margin: 0.35rem 0 0.9rem;
+  color: var(--text-soft);
+  font-size: 0.98rem;
+  line-height: 1.5;
+}
+
+.login-field {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.login-field + .login-field {
+  margin-top: -0.35rem;
+}
+
+.login-field input {
+  width: min(100%, 1200px);
+  padding: 0.8rem 0.95rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.login-field input:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+.login-password {
+  position: relative;
+  display: block;
+}
+
+.login-password input {
+  padding-right: 5.2rem;
+}
+
+.login-eye {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0.3rem 0.5rem;
+}
+
+.login-error {
+  margin: 0;
+  padding: 0.7rem 0.9rem;
+  border-radius: 12px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.login-submit {
+  width: min(100%, 1200px);
+  padding: 0.95rem 1rem;
+  border: 0;
+  border-radius: 12px;
+  background: var(--primary);
+  color: #fff;
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 10px 22px rgba(19, 71, 113, 0.28);
+}
+
+.login-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.login-hint {
+  margin: 0.2rem 0 0;
+  padding: 0.8rem 0.95rem;
+  border-radius: 12px;
+  background: var(--surface-2);
+  color: var(--text-soft);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.login-help {
+  margin: -0.2rem 0 0;
+  padding: 0 0.2rem;
+  text-align: left;
+  color: var(--text-soft);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.login-link {
+  justify-self: center;
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.password-checklist {
+  margin: 0;
+  padding: 0.7rem 0.95rem;
+  list-style: none;
+  display: grid;
+  gap: 0.35rem;
+  border-radius: 12px;
+  background: var(--surface-2);
+  font-size: 0.9rem;
+  color: var(--text-soft);
+}
+
+.password-checklist li.is-ok {
+  color: var(--primary);
+  font-weight: 500;
+}
+
+/* ---------- Celular ---------- */
+
+@media (max-width: 860px) {
+  .login-screen {
+    grid-template-columns: 1fr;
+  }
+
+  .login-visual {
+    height: 240px;
+  }
+
+  .login-visual-img {
+    min-height: 0;
+    height: 240px;
+  }
+
+  .login-form-side {
+    padding: 4rem 1rem 3rem;
+  }
+
+  .login-card {
+    padding: 1.6rem 1.25rem 1.4rem;
+  }
+
+  .login-card-symbol {
+    width: 38px;
+    height: 38px;
+  }
+}
+
+/* ---------- Ajuste de altura: a tela de entrada cabe na janela sem rolagem ---------- */
+
+/* A regra global de label dá margem de 1rem embaixo de cada campo; o campo não precisa dela */
+.login-field {
+  margin-bottom: 0;
+}
+
+@media (min-width: 861px) {
+  .login-form-side {
+    padding: 1rem 1.25rem;
+  }
+
+  .login-card {
+    padding: 1rem 1.8rem 1.3rem;
+    gap: 0.55rem;
+  }
+
+  .login-card-top {
+    margin-bottom: 0.4rem;
+  }
+
+  .login-card h2 {
+    font-size: 1.7rem;
+  }
+
+  .login-subtitle {
+    margin: 0.2rem 0 0.5rem;
+    font-size: 0.92rem;
+  }
+
+  .login-submit {
+    padding: 0.8rem 1rem;
+  }
+
+  .login-hint {
+    padding: 0.6rem 0.8rem;
+  }
+}

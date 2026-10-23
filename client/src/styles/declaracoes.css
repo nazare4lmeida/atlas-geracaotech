@@ -1,0 +1,86 @@
+/* Declarações da gestão: modelo de exemplo recolhível e barra de ações por pedido. */
+
+.decl-modelo {
+  margin: 1rem 0 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  overflow: hidden;
+}
+.decl-modelo > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 0.9rem 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.decl-modelo > summary::-webkit-details-marker {
+  display: none;
+}
+.decl-modelo > summary::after {
+  content: "▾";
+  color: var(--text-soft);
+  transition: transform 0.15s;
+}
+.decl-modelo:not([open]) > summary::after {
+  transform: rotate(-90deg);
+}
+.decl-modelo > summary span {
+  display: grid;
+  gap: 0.15rem;
+}
+.decl-modelo > summary small {
+  color: var(--text-soft);
+  font-size: 0.85rem;
+}
+
+.decl-modelo-barra {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.6rem 1.1rem;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+  font-size: 0.85rem;
+}
+.decl-modelo-aviso {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  border: 1px dashed var(--text-soft);
+  color: var(--text);
+}
+.decl-modelo-folha {
+  margin: 1.1rem auto;
+  max-width: 720px;
+  box-shadow: none;
+}
+
+.decl-acoes {
+  display: grid;
+  gap: 0.45rem;
+  min-width: 14rem;
+}
+.decl-acoes input {
+  padding: 0.45rem 0.6rem;
+  border-radius: 9px;
+  width: min(100%, 1200px);
+  box-sizing: border-box;
+}
+.decl-acoes-botoes {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 720px) {
+  .decl-acoes {
+    min-width: 0;
+  }
+}
