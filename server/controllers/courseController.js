@@ -261,6 +261,62 @@ exports.completeLesson = async (req, res) => {
   return res.json({ progress: serializeProgress(course.slug, entry, view) });
 };
 
+// Unidade = aulas de um módulo com o mesmo nome de unidade ("" = aulas soltas do módulo).
+// A aluna conclui a unidade de uma vez, ao final dela; as aulas ficam concluídas juntas.
+function unitLessons(view, moduleId, unit) {
+  const module = view.modules.find((item) => item.id === moduleId);
+  if (!module) throw httpError(400, "Módulo não encontrado neste curso.");
+  const lessons = module.lessons.filter(
+    (lesson) => (lesson.unit || "") === (unit || ""),
+  );
+  if (!lessons.length) throw httpError(400, "Unidade não encontrada neste módulo.");
+  return { module, lessons };
+}
+
+exports.completeUnit = async (req, res) => {
+  const course = await findCourseBySlugOr404(req.params.slug);
+  await requireViewAccess(course, req.user);
+
+  const { moduleId, unit = "" } = req.body;
+  const view = studentView(course);
+  const { module, lessons } = unitLessons(view, moduleId, unit);
+
+  // Unidade de bloco bloqueado não pode ser concluída. Repetir uma unidade já concluída continua permitido.
+  const before = await progressRepo.progressEntryForUser(req.user.id, course.id);
+  assertModuleUnlocked(view, computeBlocks(view, before), module.id, {
+    alreadyCompleted: lessons.every((lesson) => before.completedLessons.includes(lesson.id)),
+  });
+
+  for (const lesson of lessons) {
+    await progressRepo.markLessonCompleted(req.user.id, lesson.id);
+  }
+  const entry = await progressRepo.progressEntryForUser(req.user.id, course.id);
+  return res.json({ progress: serializeProgress(course.slug, entry, view) });
+};
+
+// Avaliação da unidade (nota 1 a 5 e comentário opcional). Só depois que a unidade está concluída.
+exports.rateUnit = async (req, res) => {
+  const course = await findCourseBySlugOr404(req.params.slug);
+  await requireViewAccess(course, req.user);
+
+  const { moduleId, unit = "", nota, comentario = "" } = req.body;
+  const valor = Number(nota);
+  if (!Number.isInteger(valor) || valor < 1 || valor > 5) {
+    throw httpError(400, "A nota deve ser de 1 a 5.");
+  }
+  const view = studentView(course);
+  const { module, lessons } = unitLessons(view, moduleId, unit);
+
+  const entry = await progressRepo.progressEntryForUser(req.user.id, course.id);
+  if (!lessons.every((lesson) => entry.completedLessons.includes(lesson.id))) {
+    throw httpError(400, "Conclua a unidade antes de avaliar.");
+  }
+
+  const texto = String(comentario || "").trim().slice(0, 500);
+  await progressRepo.saveUnitRating(req.user.id, module.id, unit || "", valor, texto);
+  return res.json({ ok: true });
+};
+
 exports.completeProject = async (req, res) => {
   const course = await findCourseBySlugOr404(req.params.slug);
   await requireViewAccess(course, req.user);

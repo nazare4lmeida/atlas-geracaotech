@@ -300,7 +300,7 @@ export default function DashboardPage() {
           </div>
         )}
 
-                {papel === 'admin' && (
+        {papel !== 'aluno' && (
           <section className="home-numeros" aria-label="Números do Geração Tech">
             <h2 className="home-numeros-titulo">Números do Geração Tech</h2>
             <GestaoDashboard />

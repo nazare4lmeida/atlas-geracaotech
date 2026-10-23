@@ -1,9 +1,11 @@
 import LessonItem from './LessonItem';
 import QuizDialog from './QuizDialog';
-import { useState } from 'react';
+import UnitCompletion from './UnitCompletion';
+import { Fragment, useState } from 'react';
 import { groupLessonsByUnit, countCompleted, unitKey } from '../../utils/courseOutline';
 
 // Módulo recolhível: contém as aulas soltas e as unidades (também recolhíveis), e o teste do módulo.
+// A conclusão é por unidade: a aluna não marca aula por aula.
 export default function ModuleBlock({
   module,
   open,
@@ -13,7 +15,7 @@ export default function ModuleBlock({
   openLessons,
   onToggleLesson,
   completedSet,
-  onComplete,
+  onCompleteUnit,
   onRead,
   quizResult,
   onLoadQuiz,
@@ -41,23 +43,30 @@ export default function ModuleBlock({
       {open && (
         <div className="module-body">
           {groups.map((group) => {
+            const unitDone = countCompleted(group.lessons, completedSet);
+            const unitFinished = unitDone === group.lessons.length;
+            const concluirUnidade = () => onCompleteUnit(module.id, group.unit);
+
             if (!group.unit) {
-              return group.lessons.map((lesson) => (
-                <LessonItem
-                  key={lesson.id}
-                  lesson={lesson}
-                  open={openLessons.has(lesson.id)}
-                  completed={completedSet.has(lesson.id)}
-                  onToggle={() => onToggleLesson(lesson.id)}
-                  onComplete={() => onComplete(lesson.id)}
-                  onRead={() => onRead(lesson.id)}
-                />
-              ));
+              return (
+                <Fragment key={group.key}>
+                  {group.lessons.map((lesson) => (
+                    <LessonItem
+                      key={lesson.id}
+                      lesson={lesson}
+                      open={openLessons.has(lesson.id)}
+                      completed={completedSet.has(lesson.id)}
+                      onToggle={() => onToggleLesson(lesson.id)}
+                      onRead={() => onRead(lesson.id)}
+                    />
+                  ))}
+                  <UnitCompletion done={unitFinished} onComplete={concluirUnidade} />
+                </Fragment>
+              );
             }
 
             const key = unitKey(module.id, group.unit);
             const unitOpen = openUnits.has(key);
-            const unitDone = countCompleted(group.lessons, completedSet);
             return (
               <div key={group.key} id={`unit-${module.id}-${group.key}`} className={`unit-block${unitOpen ? ' is-open' : ''}`}>
                 <button type="button" className="unit-head" aria-expanded={unitOpen} onClick={() => onToggleUnit(key)}>
@@ -74,10 +83,10 @@ export default function ModuleBlock({
                         open={openLessons.has(lesson.id)}
                         completed={completedSet.has(lesson.id)}
                         onToggle={() => onToggleLesson(lesson.id)}
-                        onComplete={() => onComplete(lesson.id)}
                         onRead={() => onRead(lesson.id)}
                       />
                     ))}
+                    <UnitCompletion done={unitFinished} onComplete={concluirUnidade} />
                   </div>
                 )}
               </div>

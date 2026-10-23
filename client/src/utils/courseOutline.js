@@ -22,3 +22,15 @@ export function groupLessonsByUnit(lessons = []) {
 export function countCompleted(lessons, completedSet) {
   return lessons.filter((lesson) => completedSet.has(lesson.id)).length;
 }
+
+// Todas as unidades do curso, na ordem da trilha (aulas soltas de um módulo formam uma unidade "").
+export function courseUnits(modules = []) {
+  return modules.flatMap((module) =>
+    groupLessonsByUnit(module.lessons).map((group) => ({
+      moduleId: module.id,
+      unit: group.unit,
+      title: group.unit || module.title,
+      lessons: group.lessons
+    }))
+  );
+}

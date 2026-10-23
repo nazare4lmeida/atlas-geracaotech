@@ -6,6 +6,8 @@ const {
   updateCourse,
   deleteCourse,
   completeLesson,
+  completeUnit,
+  rateUnit,
   completeProject,
   getCertificate
 } = require('../controllers/courseController');
@@ -59,6 +61,9 @@ router.post('/:slug/restore', asyncHandler(restoreCourse));
 
 // ---------- Progresso e certificado do aluno ----------
 router.post('/:slug/progress/lesson', asyncHandler(completeLesson));
+// Unidade: a aluna conclui a unidade inteira de uma vez e depois avalia.
+router.post('/:slug/progress/unit', asyncHandler(completeUnit));
+router.post('/:slug/progress/unit/avaliacao', asyncHandler(rateUnit));
 // Quiz: o servidor corrige cada resposta (o aluno não envia nota nem gabarito).
 router.get('/:slug/progress/quiz/:moduleId', asyncHandler(getQuizAttempt));
 router.post('/:slug/progress/quiz/answer', asyncHandler(answerQuiz));

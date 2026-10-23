@@ -21,7 +21,10 @@ const PATHS = {
   plus: 'M12 5v14M5 12h14',
   arrow: 'M5 12h14M13 6l6 6-6 6',
   star: 'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z',
-  bell: 'M6 16V11a6 6 0 1 1 12 0v5l2 2H4zM10 21a2 2 0 0 0 4 0'
+  bell: 'M6 16V11a6 6 0 1 1 12 0v5l2 2H4zM10 21a2 2 0 0 0 4 0',
+  chart: 'M4 20h16M7 16V11M12 16V7M17 16v-3',
+  key: 'M14 10a4 4 0 1 1-3.2-3.9L20 6v3h-2v2h-2v-1.5L14 10zM7.5 14.5l-3 3V20h2.5v-1.5H9v-1.5',
+  shield: 'M12 3l7.5 3v5.5c0 4.6-3.2 8.3-7.5 9.5-4.3-1.2-7.5-4.9-7.5-9.5V6z'
 };
 
 export default function Icon({ name, size = 18, className = '' }) {

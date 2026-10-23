@@ -3,6 +3,7 @@ import CodeMirror from '@uiw/react-codemirror';
 import { html } from '@codemirror/lang-html';
 import { css } from '@codemirror/lang-css';
 import { javascript } from '@codemirror/lang-javascript';
+import { previaDeCores } from './previaCores';
 import '../../styles/editor.css';
 
 // Estúdio de código do Atlas: HTML, CSS e JavaScript lado a lado com a prévia ao vivo e o console.
@@ -235,7 +236,8 @@ export default function CodeStudio() {
     setPrevia(montarPrevia(arquivos));
   }
 
-  const extensoes = useMemo(() => (ativo ? [linguagem(ativo.name)] : []), [ativo?.name]);
+  // Linguagem do arquivo + prévia de cores (amostra ao lado da cor e seletor ao clicar).
+  const extensoes = useMemo(() => (ativo ? [linguagem(ativo.name), ...previaDeCores()] : []), [ativo?.name]);
   const paletaAtual = PALETAS.find((p) => p.id === paleta) || PALETAS[0];
 
   return (

@@ -1,7 +1,8 @@
 import LessonBody from '../LessonBody';
 
 // Uma aula recolhível. O conteúdo só é montado quando a aula está aberta (vídeos não carregam antes disso).
-export default function LessonItem({ lesson, open, completed, onToggle, onComplete, onRead }) {
+// Não há botão de concluir aula: a conclusão é da unidade inteira (ao final dela). O ✓ mostra o que já foi concluído.
+export default function LessonItem({ lesson, open, completed, onToggle, onRead }) {
   return (
     <article id={`lesson-${lesson.id}`} className={`lesson-item${open ? ' is-open' : ''}${completed ? ' is-done' : ''}`}>
       <button type="button" className="lesson-item-head" aria-expanded={open} onClick={onToggle}>
@@ -40,14 +41,6 @@ export default function LessonItem({ lesson, open, completed, onToggle, onComple
           <div className="lesson-item-foot">
             <button type="button" className="ghost-button small" onClick={onRead}>
               Ler em tela cheia
-            </button>
-            <button
-              type="button"
-              className={completed ? 'ghost-button small done' : 'primary-button small'}
-              onClick={onComplete}
-              disabled={completed}
-            >
-              {completed ? 'Aula concluída ✓' : 'Marcar como concluída'}
             </button>
           </div>
         </div>

@@ -107,6 +107,17 @@ async function markLessonCompleted(userId, lessonId) {
   );
 }
 
+// Avaliação da unidade: uma por aluna e unidade (regravar substitui a anterior).
+async function saveUnitRating(userId, sectionId, unidade, nota, comentario) {
+  await query(
+    `insert into avaliacoes_unidade (user_id, section_id, unidade, nota, comentario)
+     values ($1, $2, $3, $4, $5)
+     on conflict (user_id, section_id, unidade)
+     do update set nota = excluded.nota, comentario = excluded.comentario, created_at = now()`,
+    [userId, sectionId, unidade, nota, comentario]
+  );
+}
+
 async function saveQuizResult(userId, sectionId, result) {
   await query(
     `insert into quiz_results (user_id, section_id, score, total, passed)
@@ -201,6 +212,7 @@ module.exports = {
   progressMapForUser,
   progressEntryForUser,
   markLessonCompleted,
+  saveUnitRating,
   saveQuizResult,
   markProjectCompleted,
   upsertCertificate,

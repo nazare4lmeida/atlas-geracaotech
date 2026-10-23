@@ -7,12 +7,13 @@ import CourseOutline from '../components/course/CourseOutline';
 import CourseProgressBar from '../components/course/CourseProgressBar';
 import WelcomeModal from '../components/course/WelcomeModal';
 import ReadingMode from '../components/course/ReadingMode';
+import UnitCelebration from '../components/course/UnitCelebration';
 import Sidebar from '../components/Sidebar';
 import { useAuth } from '../context/AuthContext';
 import { courseThemeStyle } from '../layouts/registry';
 import api from '../services/api';
 import { getCourseProgress, getBadgeLabel } from '../utils/courseProgress';
-import { unitKey } from '../utils/courseOutline';
+import { unitKey, courseUnits } from '../utils/courseOutline';
 import { trailModules, stepSummary } from '../utils/courseBlocks';
 import { groupLessonsByUnit } from '../utils/courseOutline';
 
@@ -261,13 +262,40 @@ export default function CourseDetailPage() {
     [course]
   );
 
-  const markLesson = useCallback(
-    async (lessonId) => {
-      const { data } = await api.post(`/courses/${course.slug}/progress/lesson`, { lessonId });
+  // Conclusão por unidade: a aluna termina a unidade e ela é marcada inteira. Depois abre a página de parabéns.
+  const [celebration, setCelebration] = useState(null);
+
+  const completeUnit = useCallback(
+    async (moduleId, unit = '') => {
+      const { data } = await api.post(`/courses/${course.slug}/progress/unit`, { moduleId, unit });
       setProgressMap((current) => ({ ...current, [course.slug]: data.progress }));
+
+      const doneIds = new Set(data.progress.completedLessons || []);
+      const units = courseUnits(course.modules);
+      const index = units.findIndex((item) => item.moduleId === moduleId && item.unit === unit);
+      const done = units.filter((item) => item.lessons.every((lesson) => doneIds.has(lesson.id))).length;
+      setCelebration({
+        key: `${moduleId}::${unit}`,
+        moduleId,
+        unit,
+        unitTitle: units[index]?.title || 'Unidade',
+        courseTitle: course.title,
+        done,
+        total: units.length,
+        nextTitle: units[index + 1]?.title || ''
+      });
     },
     [course]
   );
+
+  // Avaliação da unidade recém-concluída (nota de 1 a 5 e comentário opcional).
+  const rateCelebration = (nota, comentario) =>
+    api.post(`/courses/${course.slug}/progress/unit/avaliacao`, {
+      moduleId: celebration.moduleId,
+      unit: celebration.unit,
+      nota,
+      comentario
+    });
 
   // Quiz: o servidor corrige cada resposta. A nota só é gravada quando todas as questões foram respondidas.
   const loadQuiz = (moduleId) => api.get(`/courses/${course.slug}/progress/quiz/${moduleId}`).then(({ data }) => data);
@@ -417,7 +445,7 @@ export default function CourseDetailPage() {
                           toggleIn(setOpenLessons, id);
                         }}
                         completedSet={completedSet}
-                        onComplete={markLesson}
+                        onCompleteUnit={completeUnit}
                         onRead={openReading}
                         quizResult={progress.quizResults?.[item.module.id]}
                         onLoadQuiz={loadQuiz}
@@ -558,7 +586,7 @@ export default function CourseDetailPage() {
                             toggleIn(setOpenLessons, id);
                           }}
                           completedSet={completedSet}
-                          onComplete={markLesson}
+                          onCompleteUnit={completeUnit}
                           onRead={openReading}
                           quizResult={progress.quizResults?.[activeModule.id]}
                           onLoadQuiz={loadQuiz}
@@ -602,8 +630,22 @@ export default function CourseDetailPage() {
               setActiveLessonId(entries[next].lesson.id);
               setOpenLessons((current) => new Set(current).add(entries[next].lesson.id));
             }}
-            onComplete={markLesson}
+            onCompleteUnit={completeUnit}
             onClose={closeReading}
+          />
+        )}
+
+        {celebration && (
+          <UnitCelebration
+            key={celebration.key}
+            unitKey={celebration.key}
+            unitTitle={celebration.unitTitle}
+            courseTitle={celebration.courseTitle}
+            done={celebration.done}
+            total={celebration.total}
+            nextTitle={celebration.nextTitle}
+            onRate={rateCelebration}
+            onClose={() => setCelebration(null)}
           />
         )}
 

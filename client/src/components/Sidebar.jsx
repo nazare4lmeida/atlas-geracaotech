@@ -12,27 +12,28 @@ const items = [
   { to: '/perfil', label: 'Perfil', icon: 'user' }
 ];
 
+// Cada item tem um ícone próprio, para que nenhum se repita no mesmo menu.
 const teachingItems = [
   { to: '/gestao/presenca', label: 'Presença', icon: 'users' },
-  { to: '/ponto', label: 'Meu ponto', icon: 'note' }
+  { to: '/ponto', label: 'Meu ponto', icon: 'clock' }
 ];
 const atendenteItems = [
-  { to: '/gestao/atendimento', label: 'Atendimento', icon: 'note' },
+  { to: '/gestao/atendimento', label: 'Atendimento', icon: 'chat' },
   { to: '/minha-area', label: 'Meu perfil', icon: 'user' }
 ];
 const studentItems = [
-  { to: '/presenca', label: 'Minha presença', icon: 'users' },
-  { to: '/cronogramas', label: 'Cronogramas', icon: 'note' },
-  { to: '/atendimento', label: 'Atendimento', icon: 'note' }
+  { to: '/presenca', label: 'Minha presença', icon: 'check' },
+  { to: '/cronogramas', label: 'Cronogramas', icon: 'calendar' },
+  { to: '/atendimento', label: 'Atendimento', icon: 'chat' }
 ];
 const adminItems = [
   { to: '/gestao/relatorios', label: 'Relatórios', icon: 'grid' },
-  { to: '/gestao/atendimento', label: 'Atendimento', icon: 'note' },
-  { to: '/gestao/acompanhamento', label: 'Acompanhamento', icon: 'settings' },
-  { to: '/gestao/justificativas', label: 'Justificativas', icon: 'note' },
-  { to: '/gestao/ponto', label: 'Ponto dos professores', icon: 'settings' },
-  { to: '/gestao/acessos', label: 'Acessos', icon: 'users' },
-  { to: '/gestao/usuarios', label: 'Usuários', icon: 'users' }
+  { to: '/gestao/atendimento', label: 'Atendimento', icon: 'chat' },
+  { to: '/gestao/acompanhamento', label: 'Acompanhamento', icon: 'chart' },
+  { to: '/gestao/justificativas', label: 'Justificativas', icon: 'bulb' },
+  { to: '/gestao/ponto', label: 'Ponto dos professores', icon: 'clock' },
+  { to: '/gestao/acessos', label: 'Acessos', icon: 'key' },
+  { to: '/gestao/usuarios', label: 'Usuários', icon: 'shield' }
 ];
 
 export default function Sidebar() {

@@ -7,12 +7,18 @@ import { readingMinutes } from '../../utils/lessonHtml';
 
 // Modo leitura: a aula ocupa a tela inteira, sem a trilha e o restante da página.
 // Navegação por Anterior/Próxima (ou setas do teclado); Esc ou "Sair" devolvem à página do curso.
-export default function ReadingMode({ course, entries, index, completedSet, onIndex, onComplete, onClose }) {
+// A unidade é concluída no fim dela (última aula), não aula por aula.
+export default function ReadingMode({ course, entries, index, completedSet, onIndex, onCompleteUnit, onClose }) {
   const entry = entries[index];
   const { lesson, moduleTitle, unit } = entry;
-  const completed = completedSet.has(lesson.id);
   const total = entries.length;
   const next = entries[index + 1];
+  const unitEntries = entries.filter((item) => item.moduleId === entry.moduleId && item.unit === entry.unit);
+  const unitPosition = unitEntries.findIndex((item) => item.lesson.id === lesson.id) + 1;
+  const isUnitEnd = unitPosition === unitEntries.length;
+  const unitDone = unitEntries.every((item) => completedSet.has(item.lesson.id));
+  const [busy, setBusy] = useState(false);
+  const [erro, setErro] = useState(false);
   const minutes = useMemo(() => readingMinutes(lesson.content || ''), [lesson.content]);
   const scrollRef = useRef(null);
   const [read, setRead] = useState(0);
@@ -22,6 +28,18 @@ export default function ReadingMode({ course, entries, index, completedSet, onIn
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
     setRead(0);
   }, [index]);
+
+  async function concluirUnidade() {
+    setBusy(true);
+    setErro(false);
+    try {
+      await onCompleteUnit(entry.moduleId, entry.unit);
+    } catch {
+      setErro(true);
+    } finally {
+      setBusy(false);
+    }
+  }
 
   const onScroll = (event) => {
     const el = event.currentTarget;
@@ -114,14 +132,24 @@ export default function ReadingMode({ course, entries, index, completedSet, onIn
         <button type="button" className="ghost-button" disabled={index === 0} onClick={() => onIndex(index - 1)}>
           <Icon name="chevronLeft" size={16} /> Anterior
         </button>
-        <button
-          type="button"
-          className={completed ? 'ghost-button done' : 'primary-button'}
-          onClick={() => onComplete(lesson.id)}
-          disabled={completed}
-        >
-          {completed ? 'Aula concluída' : 'Marcar como concluída'}
-        </button>
+        {isUnitEnd ? (
+          <button
+            type="button"
+            className={unitDone ? 'ghost-button done' : 'primary-button'}
+            onClick={concluirUnidade}
+            disabled={unitDone || busy}
+          >
+            {unitDone ? 'Unidade concluída' : busy ? 'Salvando...' : 'Concluir unidade'}
+          </button>
+        ) : (
+          <span className="reading-unit-hint">
+            {erro
+              ? 'Não foi possível concluir agora. Tente de novo.'
+              : unitDone
+                ? 'Unidade concluída'
+                : `Aula ${unitPosition} de ${unitEntries.length} desta unidade`}
+          </span>
+        )}
         <button type="button" className="ghost-button" disabled={index >= total - 1} onClick={() => onIndex(index + 1)}>
           Próxima <Icon name="chevronRight" size={16} />
         </button>
