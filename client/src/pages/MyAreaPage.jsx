@@ -196,7 +196,7 @@ function Overview({ overview }) {
           {overview.certificates.map((item) => (
             <li key={item.auth_code || item.course_slug}>
               <span>{item.course_name}</span>
-              <Link to="/certificados">ver</Link>
+              <Link to="/documentos">ver</Link>
             </li>
           ))}
         </ul>

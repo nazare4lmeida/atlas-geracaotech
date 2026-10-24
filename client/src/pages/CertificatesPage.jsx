@@ -29,7 +29,8 @@ function markSeen(codes) {
 
 const dateText = (value) => (value ? new Date(value).toLocaleDateString('pt-BR') : '');
 
-export default function CertificatesPage() {
+// "embedded": usada dentro da página Documentos (sem menu lateral nem título próprio).
+export default function CertificatesPage({ embedded = false }) {
   const { isAdmin, isTeacher } = useAuth();
   const [dashboard, setDashboard] = useState({ progress: {}, certificates: [], certificateStatus: {} });
   const [courses, setCourses] = useState([]);
@@ -120,23 +121,32 @@ export default function CertificatesPage() {
     }
   };
 
-  if (isAdmin) {
-    return (
+  const envoltorio = (conteudo) =>
+    embedded ? (
+      conteudo
+    ) : (
       <div className="dashboard-layout">
         <Sidebar />
-        <div className="dashboard-content">
+        <div className="dashboard-content">{conteudo}</div>
+      </div>
+    );
+
+  if (isAdmin) {
+    return envoltorio(
+      <>
+        {!embedded && (
           <section className="section-heading">
             <h1>Certificados</h1>
             <p>Modelos, aptidão dos alunos e geração dos certificados.</p>
           </section>
-          <div className="cert-admin-wrap">
-            <CertificateTemplatesAdmin courses={courses} onCoursesChanged={loadCourses} />
-          </div>
-          <div className="cert-admin-wrap">
-            <CertificateEmissionAdmin courses={courses} />
-          </div>
+        )}
+        <div className="cert-admin-wrap">
+          <CertificateTemplatesAdmin courses={courses} onCoursesChanged={loadCourses} />
         </div>
-      </div>
+        <div className="cert-admin-wrap">
+          <CertificateEmissionAdmin courses={courses} />
+        </div>
+      </>
     );
   }
 
@@ -144,14 +154,14 @@ export default function CertificatesPage() {
   const pageCourses = courses.slice((page - 1) * pageSize, page * pageSize);
   const safePage = Math.min(page, Math.max(Math.ceil(courses.length / pageSize), 1));
 
-  return (
-    <div className="dashboard-layout">
-      <Sidebar />
-      <div className="dashboard-content">
-        <section className="section-heading">
-          <h1>Certificações</h1>
-          <p>Seus certificados emitidos pela Geração Tech e a situação de cada curso.</p>
-        </section>
+  return envoltorio(
+      <>
+        {!embedded && (
+          <section className="section-heading">
+            <h1>Certificações</h1>
+            <p>Seus certificados emitidos pela Geração Tech e a situação de cada curso.</p>
+          </section>
+        )}
 
         {notice && <div className={`alert ${notice.type === 'error' ? 'error' : 'success'}`}>{notice.text}</div>}
 
@@ -273,7 +283,6 @@ export default function CertificatesPage() {
           />
         </section>
         )}
-      </div>
-    </div>
+      </>
   );
 }

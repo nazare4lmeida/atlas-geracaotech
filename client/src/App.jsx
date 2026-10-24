@@ -13,7 +13,8 @@ import CoursesPage from './pages/CoursesPage';
 import CourseDetailPage from './pages/CourseDetailPage';
 import NotesPage from './pages/NotesPage';
 import EditorPage from './pages/EditorPage';
-import CertificatesPage from './pages/CertificatesPage';
+import DocumentosPage from './pages/DocumentosPage';
+import MuralPage from './pages/MuralPage';
 import MyAreaPage from './pages/MyAreaPage';
 import ManageCoursePage from './pages/ManageCoursePage';
 import ManageUsersPage from './pages/ManageUsersPage';
@@ -109,10 +110,20 @@ export default function App() {
           }
         />
         <Route
-          path="/certificados"
+          path="/documentos"
           element={
             <ProtectedRoute>
-              <CertificatesPage />
+              <DocumentosPage />
+            </ProtectedRoute>
+          }
+        />
+        {/* Links antigos da aba Certificados levam para Documentos. */}
+        <Route path="/certificados" element={<Navigate to="/documentos" replace />} />
+        <Route
+          path="/mural"
+          element={
+            <ProtectedRoute>
+              <MuralPage />
             </ProtectedRoute>
           }
         />

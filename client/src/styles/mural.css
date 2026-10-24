@@ -1,0 +1,299 @@
+/* Mural da turma e documentos do portal do aluno. */
+
+.mural-topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.mural-turma {
+  display: grid;
+  gap: 4px;
+  font-size: 0.85rem;
+}
+
+.mural-turma select {
+  min-width: 14rem;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--line, #dbe2ec);
+  font: inherit;
+}
+
+.mural-turma-unica {
+  margin: 0;
+  font-weight: 700;
+}
+
+.mural-abas {
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--surface-muted, rgba(127, 127, 127, 0.12));
+  gap: 4px;
+}
+
+.mural-abas button {
+  padding: 7px 14px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+  color: inherit;
+}
+
+.mural-abas button.is-active {
+  background: var(--surface, #fff);
+  font-weight: 700;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.mural-topo > .primary-button {
+  margin-left: auto;
+}
+
+.mural-compor,
+.mural-detalhe {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.mural-compor label,
+.mural-responder label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.88rem;
+}
+
+.mural-compor input,
+.mural-compor textarea,
+.mural-responder textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line, #dbe2ec);
+  font: inherit;
+  resize: vertical;
+}
+
+.mural-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mural-lista {
+  display: grid;
+  gap: 10px;
+}
+
+.mural-card {
+  display: grid;
+  gap: 6px;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  width: 100%;
+}
+
+.mural-card.is-fixado {
+  border-left: 4px solid #f59e0b;
+}
+
+.mural-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.mural-tag {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  background: rgba(127, 127, 127, 0.14);
+}
+
+.mural-tag.is-destaque {
+  background: rgba(245, 158, 11, 0.2);
+  color: #92400e;
+}
+
+.mural-tag.is-aberta {
+  background: rgba(59, 130, 246, 0.16);
+  color: #1e40af;
+}
+
+.mural-detalhe-topo {
+  display: grid;
+  gap: 6px;
+}
+
+.mural-detalhe-topo h2 {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.mural-corpo {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin: 0;
+}
+
+.mural-respostas-titulo {
+  margin: 8px 0 0;
+  font-size: 1rem;
+}
+
+.mural-respostas {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.mural-respostas li {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line, #dbe2ec);
+}
+
+.mural-respostas li.is-equipe {
+  border-color: rgba(59, 130, 246, 0.5);
+  background: rgba(59, 130, 246, 0.06);
+}
+
+.mural-respostas p {
+  margin: 6px 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.mural-link {
+  margin-left: 8px;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8rem;
+}
+
+.mural-responder {
+  display: grid;
+  gap: 10px;
+}
+
+.ghost-button.danger {
+  color: #b91c1c;
+}
+
+/* Documentos e portal do aluno */
+.documentos-termos,
+.portal-turma {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.documentos-matricula h3 {
+  margin: 8px 0 4px;
+}
+
+.documentos-lista {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.documentos-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line, #dbe2ec);
+}
+
+.portal-turma-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+  min-width: 0;
+}
+
+.portal-turma h2 {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+}
+
+.portal-dados {
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.portal-dados div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.92rem;
+}
+
+.portal-dados dt {
+  opacity: 0.7;
+}
+
+.portal-dados dd {
+  margin: 0;
+  font-weight: 600;
+  text-align: right;
+}
+
+.portal-datas {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.portal-datas li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.92rem;
+}
+
+.presenca-instrucoes {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.presenca-instrucoes h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.presenca-instrucoes ol {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: grid;
+  gap: 4px;
+  font-size: 0.92rem;
+}

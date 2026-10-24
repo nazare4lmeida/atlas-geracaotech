@@ -81,6 +81,16 @@ export default function PresencaAlunoPage() {
           </div>
         </section>
 
+        <section className="surface-card presenca-instrucoes" aria-labelledby="como-marcar">
+          <h2 id="como-marcar">Como marcar sua presença</h2>
+          <ol>
+            <li>No dia da aula, abra esta página. A aula aparece em <strong>Aulas de hoje</strong>.</li>
+            <li>Clique em <strong>Marcar presença</strong>. Não precisa de login nem de senha: você já está dentro do Atlas.</li>
+            <li>A marcação vale só no dia da aula, até 23h59. Quem não marcar fica com falta.</li>
+            <li>Faltou? Envie uma justificativa no histórico abaixo. A gestão analisa.</li>
+          </ol>
+        </section>
+
         <Feedback feedback={feedback} />
 
         {loading ? (

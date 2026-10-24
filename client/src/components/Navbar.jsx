@@ -24,7 +24,7 @@ export default function Navbar() {
         {isAuthenticated && isAtendente && <NavLink to="/gestao/atendimento">Atendimento</NavLink>}
         {isAuthenticated && !isAtendente && <NavLink to="/dashboard">Dashboard</NavLink>}
         {isAuthenticated && !isAtendente && <NavLink to="/cursos">Trilhas</NavLink>}
-        {isAuthenticated && !isAtendente && (!isTeacher || isAdmin) && <NavLink to="/certificados">Certificados</NavLink>}
+        {isAuthenticated && !isAtendente && (!isTeacher || isAdmin) && <NavLink to="/documentos">Documentos</NavLink>}
         {isAuthenticated && !isTeacher && !isAtendente && <NavLink to="/anotacoes">Anotações</NavLink>}
         {isAuthenticated && !isTeacher && !isAtendente && <NavLink to="/editor">Editor</NavLink>}
         {isAuthenticated && isTeacher && !isAtendente && <NavLink to="/gestao">Gestão</NavLink>}

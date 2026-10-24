@@ -3,6 +3,7 @@ import { Link, Navigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Icon from '../components/Icon';
 import GestaoDashboard from '../components/dashboard/GestaoDashboard';
+import TurmaCard from '../components/portal/TurmaCard';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import '../styles/dashboard.css';
@@ -16,7 +17,8 @@ const ACESSO_ALUNO = [
   { to: '/cronogramas', icon: 'calendar', titulo: 'Cronograma', texto: 'Datas e tópicos das aulas' },
   { to: '/presenca', icon: 'users', titulo: 'Minha presença', texto: 'Chamada e justificativas' },
   { to: '/atendimento', icon: 'chat', titulo: 'Atendimento', texto: 'Fale com a equipe' },
-  { to: '/certificados', icon: 'award', titulo: 'Certificados', texto: 'Os que você já conquistou' },
+  { to: '/documentos', icon: 'award', titulo: 'Documentos', texto: 'Termo, aditivos e certificados' },
+  { to: '/mural', icon: 'bell', titulo: 'Mural da turma', texto: 'Avisos e dúvidas da turma' },
   { to: '/anotacoes', icon: 'note', titulo: 'Anotações', texto: 'Guarde o que aprendeu' },
   { to: '/editor', icon: 'code', titulo: 'Editor', texto: 'Teste seu código' },
   { to: '/perfil', icon: 'user', titulo: 'Meu perfil', texto: 'Dados e avatar' }
@@ -180,12 +182,14 @@ export default function DashboardPage() {
           )}
         </section>
 
+        {papel === 'aluno' && <TurmaCard />}
+
         {papel === 'aluno' && indicadores && (
           <section className="home-indicadores" aria-label="Seu resumo">
             <Link to="/cursos"><strong>{indicadores.cursos}</strong><span>cursos</span></Link>
             <Link to="/cursos"><strong>{indicadores.emAndamento}</strong><span>em andamento</span></Link>
             <Link to="/presenca"><strong>{indicadores.presenca !== null ? `${indicadores.presenca}%` : '—'}</strong><span>presença</span></Link>
-            <Link to="/certificados"><strong>{indicadores.certificados}</strong><span>certificados</span></Link>
+            <Link to="/documentos"><strong>{indicadores.certificados}</strong><span>certificados</span></Link>
           </section>
         )}
 
@@ -300,7 +304,7 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {papel !== 'aluno' && (
+        {papel === 'admin' && (
           <section className="home-numeros" aria-label="Números do Geração Tech">
             <h2 className="home-numeros-titulo">Números do Geração Tech</h2>
             <GestaoDashboard />

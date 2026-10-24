@@ -24,7 +24,7 @@ export default function Footer() {
         <nav className="site-footer-links" aria-label="Rodapé">
           {isAuthenticated && !isAtendente && <Link to="/cursos">Trilhas</Link>}
           {isAuthenticated && !isTeacher && !isAtendente && <Link to="/presenca">Minha presença</Link>}
-          {isAuthenticated && !isAtendente && (!isTeacher || isAdmin) && <Link to="/certificados">Certificados</Link>}
+          {isAuthenticated && !isAtendente && (!isTeacher || isAdmin) && <Link to="/documentos">Documentos</Link>}
           {temAtendimento && <Link to={atendimento}>Atendimento</Link>}
           <Link to="/verificar">Verificar certificado</Link>
         </nav>

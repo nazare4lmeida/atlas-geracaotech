@@ -6,9 +6,10 @@ import Icon from './Icon';
 const items = [
   { to: '/dashboard', label: 'Visão geral', icon: 'home' },
   { to: '/cursos', label: 'Cursos', icon: 'book' },
+  { to: '/mural', label: 'Mural', icon: 'bell' },
   { to: '/anotacoes', label: 'Anotações', icon: 'note' },
   { to: '/editor', label: 'Editor', icon: 'code' },
-  { to: '/certificados', label: 'Certificados', icon: 'award' },
+  { to: '/documentos', label: 'Documentos', icon: 'award' },
   { to: '/perfil', label: 'Perfil', icon: 'user' }
 ];
 
@@ -19,6 +20,7 @@ const teachingItems = [
 ];
 const atendenteItems = [
   { to: '/gestao/atendimento', label: 'Atendimento', icon: 'chat' },
+  { to: '/mural', label: 'Mural', icon: 'bell' },
   { to: '/minha-area', label: 'Meu perfil', icon: 'user' }
 ];
 const studentItems = [
@@ -47,7 +49,7 @@ export default function Sidebar() {
     ? atendenteItems
     : [
         // Certificados: professor não vê (só a administração gerencia).
-        ...items.filter((item) => !(isTeacher && studentOnly.has(item.to)) && !(isTeacher && !isAdmin && item.to === '/certificados')),
+        ...items.filter((item) => !(isTeacher && studentOnly.has(item.to)) && !(isTeacher && !isAdmin && item.to === '/documentos')),
         // Administração não tem "Meu ponto": quem bate ponto é o professor.
         ...(isTeacher ? teachingItems.filter((item) => !(isAdmin && item.to === '/ponto')) : studentItems),
         ...(isAdmin ? adminItems : [])

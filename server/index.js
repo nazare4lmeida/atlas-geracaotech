@@ -23,6 +23,8 @@ const presencaRoutes = require('./routes/presencaRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const atendimentoRoutes = require('./routes/atendimentoRoutes');
 const docenteRoutes = require('./routes/docenteRoutes');
+const muralRoutes = require('./routes/muralRoutes');
+const portalRoutes = require('./routes/portalRoutes');
 const securityHeaders = require('./middleware/securityHeaders');
 
 const app = express();
@@ -54,6 +56,8 @@ app.use('/api/attendance', authMiddleware, attendanceRoutes);
 app.use('/api/presenca', authMiddleware, presencaRoutes);
 app.use('/api/dashboard', authMiddleware, dashboardRoutes);
 app.use('/api/atendimento', authMiddleware, atendimentoRoutes);
+app.use('/api/mural', authMiddleware, muralRoutes);
+app.use('/api/portal', authMiddleware, portalRoutes);
 app.use('/api/docente', authMiddleware, docenteRoutes);
 app.use('/api/reports', authMiddleware, reportRoutes);
 app.use('/api/accounts', authMiddleware, accountRoutes);
