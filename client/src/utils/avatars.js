@@ -1,6 +1,6 @@
 // Avatares do Atlas, gerados pelo DiceBear no próprio navegador.
 // 'avatar-01' a 'avatar-12': clássicos (estilo Lorelei com cor de fundo).
-// 'estilo:<nome>': qualquer um dos 53 estilos do DiceBear. Cada estilo é carregado só quando é usado.
+// 'estilo:<nome>' e 'estilo:<nome>:<n>': as 61 coleções do DiceBear, com VARIANTES rostos cada. Carregadas só quando usadas.
 import { Style, Avatar } from '@dicebear/core';
 import { useEffect, useState } from 'react';
 import loreleiDef from '@dicebear/styles/lorelei.json' with { type: 'json' };
@@ -25,12 +25,25 @@ const CLASSICOS = [
 ];
 
 // Nomes dos estilos do DiceBear (mesma lista aceita pelo servidor).
-const NOMES_ESTILOS = ['adventurer','avataaars','big-ears','big-smile','blobs','bottts','cameo','clay','constellation','critters','croodles','cutouts','disco','dylan','fun-emoji','gaze','glass','glyphs','icons','identicon','initial-face','initials','landscape','line-face','loops','lorelei','marbles','micah','miniavs','moods','notionists','open-peeps','patchwork','personas','pixel-art','pixelbot','planets','rings','shadows','shape-grid','shapes','slice','sprouts','squircles','stack','stripes','thumbs','toon-head','triangles','voxel-art','voxel-bot','waves','weave'];
+const NOMES_ESTILOS = ['adventurer', 'adventurer-neutral', 'avataaars', 'avataaars-neutral', 'big-ears', 'big-ears-neutral', 'big-smile', 'blobs', 'bottts', 'bottts-neutral', 'cameo', 'clay', 'constellation', 'critters', 'croodles', 'croodles-neutral', 'cutouts', 'disco', 'dylan', 'fun-emoji', 'gaze', 'glass', 'glyphs', 'icons', 'identicon', 'initial-face', 'initials', 'landscape', 'line-face', 'loops', 'lorelei', 'lorelei-neutral', 'marbles', 'micah', 'miniavs', 'moods', 'notionists', 'notionists-neutral', 'open-peeps', 'patchwork', 'personas', 'pixel-art', 'pixel-art-neutral', 'pixelbot', 'planets', 'rings', 'shadows', 'shape-grid', 'shapes', 'slice', 'sprouts', 'squircles', 'stack', 'stripes', 'thumbs', 'toon-head', 'triangles', 'voxel-art', 'voxel-bot', 'waves', 'weave'];
 
-// Lista de escolha: os 53 estilos primeiro, depois os clássicos.
+// Cada coleção tem VARIANTES rostos. A variação 1 usa a semente padrão (id 'estilo:<nome>');
+// as demais usam sementes numeradas (id 'estilo:<nome>:<n>'). O servidor aceita exatamente os mesmos ids.
+export const VARIANTES = 12;
+
+const idEstilo = (nome, n) => (n <= 1 ? `estilo:${nome}` : `estilo:${nome}:${n}`);
+const sementeEstilo = (n) => (n <= 1 ? SEMENTE : `${SEMENTE}-${n}`);
+
+// Lista de escolha: cada coleção com todas as suas variações, depois os clássicos.
 export const AVATARS = [
-  ...NOMES_ESTILOS.map((nome) => ({ id: `estilo:${nome}`, label: nome.replace(/-/g, ' ') })),
-  ...CLASSICOS.map(({ id, label }) => ({ id, label }))
+  ...NOMES_ESTILOS.flatMap((nome) =>
+    Array.from({ length: VARIANTES }, (_, i) => ({
+      id: idEstilo(nome, i + 1),
+      colecao: nome,
+      label: `Variação ${i + 1}`
+    }))
+  ),
+  ...CLASSICOS.map(({ id, label }) => ({ id, label, colecao: 'classicos' }))
 ];
 
 const cache = new Map();
@@ -50,10 +63,10 @@ export async function carregarAvatar(id) {
 
   let uri;
   if (chave.startsWith('estilo:')) {
-    const nome = chave.slice('estilo:'.length);
+    const [, nome, numero] = /^estilo:([^:]+)(?::(\d+))?$/.exec(chave);
     const caminho = Object.keys(carregadores).find((k) => k.endsWith(`/${nome}.min.json`));
     const definicao = caminho ? await carregadores[caminho]() : null;
-    uri = gerar(definicao || loreleiDef, {});
+    uri = gerar(definicao || loreleiDef, { seed: sementeEstilo(Number(numero) || 1) });
   } else {
     const classico = classicoDe(chave);
     uri = gerar(loreleiDef, { seed: classico.id, backgroundColor: [classico.cor] });
