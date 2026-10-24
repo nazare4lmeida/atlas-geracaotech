@@ -11,7 +11,7 @@ export const LAYOUTS = [
   {
     id: 'classico',
     name: 'Clássico',
-    description: 'Cabeçalho colorido, abas arredondadas e cartões com faixa lateral. Parecido com os cursos do Moodle.',
+    description: 'Cabeçalho colorido, abas arredondadas e cartões com faixa lateral.',
     swatch: { bg: '#ffffff', ink: '#0f2a4a', accent: '#134771' }
   },
   {

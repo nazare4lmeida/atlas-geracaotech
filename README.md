@@ -66,7 +66,7 @@ Contas do seed (senha `123456`): `admin@atlas.local`, `professor@atlas.local`, `
 
 ## Papéis e permissões
 
-Os papéis seguem a lógica do Moodle: uma conta tem um **papel global** e cada curso tem **papéis de matrícula**.
+Os papéis seguem a lógica: uma conta tem um **papel global** e cada curso tem **papéis de matrícula**.
 
 | Papel da conta | Pode |
 |---|---|
@@ -82,9 +82,9 @@ Os papéis seguem a lógica do Moodle: uma conta tem um **papel global** e cada 
 
 Contas também podem ser **desativadas** pelo administrador; uma conta desativada não entra no sistema.
 
-## Mapeamento para o Moodle
+## Mapeamento
 
-| Moodle | Atlas - Geração Tech |
+| Atlas - Geração Tech |
 |---|---|
 | Curso | Curso (título, slug, resumo, nível, carga horária, publicado, autoinscrição, projeto final) |
 | Seção / tópico | Módulo (seção), com título, descrição e visibilidade |
@@ -182,7 +182,7 @@ O teste de integração apaga os dados do banco indicado em `TEST_DATABASE_URL`.
 
 ## Backup e restauração de conteúdo
 
-Equivalente ao backup/restauração do Moodle, sem dados de alunos. O arquivo é JSON (`*.atlas-backup.json`) e contém título, configurações, seções, recursos, questões e projeto final.
+Equivalente ao backup/restauração dos cursos que sobem em arquivos, sem dados de alunos. O arquivo é JSON (`*.atlas-backup.json`) e contém título, configurações, seções, recursos, questões e projeto final.
 
 - **Exportar:** Gestão > curso > aba **Backup** > *Baixar backup*. Também disponível pela API: `GET /api/courses/:slug/backup`.
 - **Restaurar no curso:** aba **Backup** > *Escolher arquivo*. Substitui seções, recursos e questões; título, configurações, visibilidade e matrículas são mantidos. O progresso dos alunos nas seções substituídas é removido.

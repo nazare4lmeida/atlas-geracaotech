@@ -409,7 +409,7 @@ export default function ContentEditor({ course, onCourseChange, onFeedback }) {
         <div className="section-heading">
           <h2>Seções, recursos e atividades</h2>
           <p>
-            Organize o curso como no Moodle: cada seção reúne recursos (aulas) e uma atividade de teste.
+            Organize o curso: cada seção reúne recursos (aulas) e uma atividade de teste.
             Use Subir/Descer para ordenar e Ocultar para esconder algo dos alunos sem perder o conteúdo.
           </p>
         </div>
