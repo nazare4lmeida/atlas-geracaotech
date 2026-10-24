@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import { Feedback, errorText } from '../components/manage/shared';
+import UserEditDialog from '../components/users/UserEditDialog';
 import { exportTable } from '../utils/sheetExport';
 import '../styles/acompanhamento.css';
 
@@ -145,6 +147,45 @@ export default function ReportsPage() {
   const [feedback, setFeedback] = useState(null);
   const [busyId, setBusyId] = useState(null);
   const [atalho, setAtalho] = useState(null);
+  const [editingUser, setEditingUser] = useState(null);
+  const [allCourses, setAllCourses] = useState([]);
+  const { user: me } = useAuth();
+
+  useEffect(() => {
+    api.get('/courses').then(({ data }) => setAllCourses(data.courses || [])).catch(() => setAllCourses([]));
+  }, []);
+
+  // Abre o mesmo diálogo de edição da tela de Usuários, com os dados atuais da conta.
+  const openEdit = async (row) => {
+    setBusyId(`${row.userId}:edit`);
+    setFeedback(null);
+    try {
+      const { data } = await api.get('/users', { params: { q: row.email, pageSize: 10 } });
+      const found = data.users.find((item) => item.id === row.userId);
+      if (!found) throw new Error('Conta não encontrada. Atualize os dados e tente de novo.');
+      setEditingUser(found);
+    } catch (error) {
+      setFeedback({ type: 'error', text: errorText(error) });
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  // Remove só a matrícula neste curso. A conta e o progresso ficam preservados.
+  const removeEnrolment = async (row) => {
+    if (!window.confirm(`Remover ${row.name} do curso "${row.courseTitle}"? A conta e o progresso dele são mantidos; os grupos desse curso também são desfeitos.`)) return;
+    setBusyId(`${row.userId}:remove`);
+    setFeedback(null);
+    try {
+      await api.delete(`/courses/${row.courseSlug}/participants/${row.userId}`);
+      setFeedback({ type: 'success', text: `${row.name} foi removido de ${row.courseTitle}.` });
+      await load();
+    } catch (error) {
+      setFeedback({ type: 'error', text: errorText(error) });
+    } finally {
+      setBusyId(null);
+    }
+  };
 
   const load = async () => {
     setLoading(true);
@@ -424,6 +465,7 @@ export default function ReportsPage() {
                       </th>
                     ))}
                     <th>Conta</th>
+                    <th>Ações</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -467,12 +509,22 @@ export default function ReportsPage() {
                             )}
                           </div>
                         </td>
+                        <td className="nowrap">
+                          <div className="acompanhamento-conta-acoes">
+                            <button type="button" className="ghost-button small" disabled={busyId !== null} onClick={() => openEdit(row)}>
+                              Editar
+                            </button>
+                            <button type="button" className="danger-button small" disabled={busyId !== null} onClick={() => removeEnrolment(row)}>
+                              Remover do curso
+                            </button>
+                          </div>
+                        </td>
                       </tr>
                     );
                   })}
                   {!loading && sorted.length === 0 && (
                     <tr>
-                      <td colSpan={COLUMNS.length + 1} className="users-empty">Nenhum registro com esses filtros. Tente limpar um dos filtros.</td>
+                      <td colSpan={COLUMNS.length + 2} className="users-empty">Nenhum registro com esses filtros. Tente limpar um dos filtros.</td>
                     </tr>
                   )}
                 </tbody>
@@ -481,6 +533,16 @@ export default function ReportsPage() {
           </section>
         </div>
       </div>
+
+      {editingUser && (
+        <UserEditDialog
+          user={editingUser}
+          courses={allCourses}
+          currentUserId={me?.id}
+          onClose={() => setEditingUser(null)}
+          onChanged={load}
+        />
+      )}
     </div>
   );
 }

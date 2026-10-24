@@ -13,12 +13,18 @@ export function getCourseProgress(course, progress = {}) {
 
   const totalLessons = lessonIds.length;
   const completedLessons = lessonIds.filter((id) => completedSet.has(id)).length;
+  // A barra conta só as aulas marcadas como "conta na barra". O certificado continua usando o total acima.
+  const countedIds = modules.flatMap((module) =>
+    (module.lessons || []).filter((lesson) => lesson.countsProgress !== false).map((lesson) => lesson.id)
+  );
+  const countedLessons = countedIds.length;
+  const countedCompleted = countedIds.filter((id) => completedSet.has(id)).length;
   const totalQuizzes = modules.length;
   const passedQuizzes = modules.filter((module) => quizResults[module.id]?.passed).length;
   const finalProjectDone = Boolean(progress.finalProjectCompleted);
 
-  const stepsDone = completedLessons + passedQuizzes + (finalProjectDone ? 1 : 0);
-  const totalSteps = totalLessons + totalQuizzes + 1;
+  const stepsDone = countedCompleted + passedQuizzes + (finalProjectDone ? 1 : 0);
+  const totalSteps = countedLessons + totalQuizzes + 1;
   const exactPercentage = totalSteps > 0 ? (stepsDone / totalSteps) * 100 : 0;
   const percentage = Math.round(exactPercentage);
 
@@ -28,6 +34,8 @@ export function getCourseProgress(course, progress = {}) {
   return {
     totalLessons,
     completedLessons,
+    countedLessons,
+    countedCompleted,
     totalQuizzes,
     passedQuizzes,
     finalProjectDone,

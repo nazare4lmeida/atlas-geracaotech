@@ -203,7 +203,28 @@ async function listCertificatesForUser(userId) {
   }));
 }
 
+// Última aula aberta no modo leitura (null se o aluno ainda não abriu nenhuma).
+async function getReadingPosition(userId, courseId) {
+  const { rows } = await query(
+    'select lesson_id from posicao_leitura where user_id = $1 and course_id = $2',
+    [userId, courseId]
+  );
+  return rows[0] ? rows[0].lesson_id : null;
+}
+
+async function saveReadingPosition(userId, courseId, lessonId) {
+  await query(
+    `insert into posicao_leitura (user_id, course_id, lesson_id, updated_at)
+     values ($1, $2, $3, now())
+     on conflict (user_id, course_id)
+     do update set lesson_id = excluded.lesson_id, updated_at = now()`,
+    [userId, courseId, lessonId]
+  );
+}
+
 module.exports = {
+  getReadingPosition,
+  saveReadingPosition,
   progressEntriesForCourse,
   findCertificate,
   getQuizAnswers,

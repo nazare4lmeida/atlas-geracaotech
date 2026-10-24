@@ -3,6 +3,18 @@ const { withMediaUrls } = require('./mediaStorage');
 // Transforma cursos (objetos vindos de courseRepo) na representação enviada à API.
 // A visão depende de quem consulta: quem gerencia vê tudo; alunos veem apenas o conteúdo visível.
 
+const BAR_TONES = ['primary', 'ok', 'warn', 'danger'];
+
+// Configuração da barra de progresso com valores padrão. Qualquer valor inválido volta ao padrão.
+function normalizeProgressBar(value = {}) {
+  return {
+    titulo: String(value.titulo || '').trim().slice(0, 80),
+    mostrarContagem: value.mostrarContagem !== false,
+    mostrarPercentual: value.mostrarPercentual !== false,
+    tom: BAR_TONES.includes(value.tom) ? value.tom : 'primary'
+  };
+}
+
 function serializeCourse(course, access = {}) {
   const showAll = Boolean(access.canManage);
 
@@ -24,7 +36,8 @@ function serializeCourse(course, access = {}) {
           unit: lesson.unit || '',
           url: lesson.url || '',
           content: withMediaUrls(lesson.content || ''),
-          visible: lesson.visible !== false
+          visible: lesson.visible !== false,
+          countsProgress: lesson.countsProgress !== false
         })),
       quiz: (module.quiz || []).map((question) => ({
         id: question.id,
@@ -52,6 +65,7 @@ function serializeCourse(course, access = {}) {
     accent: course.accent || '#6366f1',
     layout: course.layout || DEFAULT_LAYOUT,
     theme: effectiveTheme(course),
+    progressBar: normalizeProgressBar(course.progressBar),
     visible: course.visible !== false,
     selfEnrolment: course.selfEnrolment !== false,
     finalProject: {
@@ -128,6 +142,7 @@ function summarizeProgress(courseView, entry) {
 }
 
 module.exports = {
+  normalizeProgressBar,
   serializeCourse,
   serializeCatalogItem,
   summarizeProgress

@@ -1,4 +1,7 @@
 import LessonBody from '../LessonBody';
+import AulaAoVivoCard from './AulaAoVivoCard';
+
+const RUAS_DO_TIPO = { video: 'Vídeo', link: 'Link', ao_vivo: 'Ao vivo', html: 'Texto', page: 'Texto' };
 
 // Uma aula recolhível. O conteúdo só é montado quando a aula está aberta (vídeos não carregam antes disso).
 // Não há botão de concluir aula: a conclusão é da unidade inteira (ao final dela). O ✓ mostra o que já foi concluído.
@@ -10,7 +13,7 @@ export default function LessonItem({ lesson, open, completed, onToggle, onRead }
           {completed ? '✓' : ''}
         </span>
         <span className="lesson-item-title">{lesson.title}</span>
-        <span className="lesson-item-kind">{lesson.type === 'video' ? 'Vídeo' : lesson.type === 'link' ? 'Link' : 'Texto'}</span>
+        <span className="lesson-item-kind">{RUAS_DO_TIPO[lesson.type] || 'Texto'}</span>
         <span className="lesson-chevron" aria-hidden="true">{open ? '−' : '+'}</span>
       </button>
 
@@ -36,7 +39,7 @@ export default function LessonItem({ lesson, open, completed, onToggle, onRead }
             </p>
           )}
 
-          <LessonBody content={lesson.content} />
+          {lesson.type === 'ao_vivo' ? <AulaAoVivoCard lesson={lesson} /> : <LessonBody content={lesson.content} />}
 
           <div className="lesson-item-foot">
             <button type="button" className="ghost-button small" onClick={onRead}>

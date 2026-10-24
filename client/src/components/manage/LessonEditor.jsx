@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { EditorContent, Mark, useEditor } from '@tiptap/react';
+import { EditorContent, Extension, Mark, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
@@ -45,6 +45,36 @@ const ThemeTone = Mark.create({
         ({ commands }) =>
           commands.unsetMark(this.name)
     };
+  }
+});
+
+// Estilos de parágrafo e título (centro, linha lateral, caixa, destaque). Guardamos o nome do estilo e a
+// classe é `atlas-bloco-<nome>`; as cores vêm do tema do curso. Veja `.lesson-html .atlas-bloco-*` em aulas-blocos.css.
+const ESTILOS_BLOCO = [
+  { id: 'centro', label: 'Centralizado' },
+  { id: 'lateral', label: 'Linha lateral' },
+  { id: 'caixa', label: 'Caixa com borda' },
+  { id: 'destaque', label: 'Fundo de destaque' }
+];
+
+const BlocoEstilo = Extension.create({
+  name: 'blocoEstilo',
+  addGlobalAttributes() {
+    return [
+      {
+        types: ['paragraph', 'heading'],
+        attributes: {
+          estilo: {
+            default: null,
+            parseHTML: (el) => {
+              const classe = [...el.classList].find((nome) => nome.startsWith('atlas-bloco-'));
+              return classe ? classe.slice('atlas-bloco-'.length) : null;
+            },
+            renderHTML: (attrs) => (attrs.estilo ? { class: `atlas-bloco-${attrs.estilo}` } : {})
+          }
+        }
+      }
+    ];
   }
 });
 
@@ -100,6 +130,7 @@ export default function LessonEditor({ value, onChange }) {
       Underline,
       Link.configure({ openOnClick: false, autolink: true }),
       ThemeTone,
+      BlocoEstilo,
       MediaImage.configure({ allowBase64: false })
     ],
     content: toEditableHtml(value),
@@ -143,6 +174,11 @@ export default function LessonEditor({ value, onChange }) {
   }
 
   const run = (fn) => () => fn(editor.chain().focus()).run();
+
+  // Estilo do bloco em que o cursor está (título ou parágrafo).
+  const tipoBloco = editor.isActive('heading') ? 'heading' : 'paragraph';
+  const estiloAtual = editor.getAttributes(tipoBloco).estilo || null;
+  const aplicarEstilo = (estilo) => editor.chain().focus().updateAttributes(tipoBloco, { estilo }).run();
 
   const pickImage = async (event) => {
     const file = event.target.files?.[0];
@@ -207,6 +243,18 @@ export default function LessonEditor({ value, onChange }) {
         <button type="button" onClick={run((c) => c.unsetTone())}>
           Sem cor
         </button>
+        <span className="lesson-editor-sep" />
+        {ESTILOS_BLOCO.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            className={estiloAtual === item.id ? 'is-on' : ''}
+            onClick={() => aplicarEstilo(estiloAtual === item.id ? null : item.id)}
+            title={item.label}
+          >
+            {item.label}
+          </button>
+        ))}
         <span className="lesson-editor-sep" />
         <label className={`lesson-editor-upload ${uploading ? 'is-busy' : ''}`}>
           {uploading ? 'Enviando...' : 'Inserir imagem'}

@@ -1,5 +1,6 @@
 import { useAuth } from '../context/AuthContext';
 import { answerInlineQuiz, looksLikeHtml, personalizeText, sanitizeLessonHtml } from '../utils/lessonHtml';
+import '../styles/aulas-blocos.css';
 
 // Exibe o conteúdo de uma aula. Texto simples continua como texto; HTML é limpo e exibido no layout do curso.
 export default function LessonBody({ content }) {

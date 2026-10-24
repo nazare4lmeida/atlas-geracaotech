@@ -16,7 +16,25 @@ const norm = (value) =>
     .trim()
     .toLowerCase();
 
-function validateRow(raw, courseByKey) {
+// Texto livre para comparar nomes de curso: sem acento, maiúsculas, pontuação ou espaços extras.
+const looseKey = (value) => norm(value).replace(/[^a-z0-9]+/g, ' ').trim();
+
+// Acha o curso pelo identificador ou pelo título. Aceita diferenças de acento, pontuação e espaços.
+// Um nome parcial só vale quando ele aponta para um único curso.
+function findCourseByText(text, courses) {
+  const key = looseKey(text);
+  if (!key) return null;
+  const exact = courses.find((course) => looseKey(course.slug) === key || looseKey(course.title) === key);
+  if (exact) return exact;
+  if (key.length < 6) return null;
+  const partial = courses.filter((course) => {
+    const title = looseKey(course.title);
+    return title.includes(key) || (title.length >= 6 && key.includes(title));
+  });
+  return partial.length === 1 ? partial[0] : null;
+}
+
+function validateRow(raw, courses) {
   const name = String(raw.nome || '').trim();
   const email = String(raw.email || '').trim().toLowerCase();
   const digits = digitsOf(raw.cpf);
@@ -31,8 +49,8 @@ function validateRow(raw, courseByKey) {
 
   let course = null;
   if (courseText) {
-    course = courseByKey.get(norm(courseText));
-    if (!course) throw new Error(`Curso não encontrado: "${courseText}". Use o título ou o identificador do curso.`);
+    course = findCourseByText(courseText, courses);
+    if (!course) throw new Error(`Curso não encontrado: "${courseText}". Use o nome exato do curso, como aparece na aba "Cursos disponíveis" do modelo.`);
   }
   if (groupText && !course) throw new Error('Informe o curso para indicar o grupo.');
 
@@ -43,20 +61,16 @@ async function importRows(rows) {
   if (!Array.isArray(rows) || rows.length === 0) throw new Error('A planilha não tem linhas para importar.');
   if (rows.length > MAX_ROWS) throw new Error(`Importe no máximo ${MAX_ROWS} linhas por vez.`);
 
-  const courseByKey = new Map();
-  (await repo.listCoursesLookup()).forEach((course) => {
-    courseByKey.set(norm(course.slug), course);
-    courseByKey.set(norm(course.title), course);
-  });
+  const courses = await repo.listCoursesLookup();
 
   const groupCache = new Map(); // courseId -> Map(nome normalizado -> id)
-  const report = { linhas: rows.length, criados: 0, existentes: 0, matriculas: 0, grupos: 0, erros: [] };
+  const report = { linhas: rows.length, criados: 0, existentes: 0, matriculas: 0, grupos: 0, semCurso: 0, erros: [] };
 
   for (const [index, raw] of rows.entries()) {
     const line = Number(raw.linha) || index + 2;
     let row;
     try {
-      row = validateRow(raw || {}, courseByKey);
+      row = validateRow(raw || {}, courses);
     } catch (error) {
       report.erros.push({ linha: line, mensagem: error.message });
       continue;
@@ -88,6 +102,8 @@ async function importRows(rows) {
         user = { id };
         report.criados += 1;
       }
+
+      if (!row.course) report.semCurso += 1;
 
       if (row.course) {
         const enrolled = await repo.enrollIfMissing(row.course.id, user.id, row.role);

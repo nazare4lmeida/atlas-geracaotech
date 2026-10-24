@@ -3,7 +3,25 @@ import api from '../../services/api';
 import { errorText } from '../manage/shared';
 import { ROLE_LABELS } from '../../utils/roles';
 
-// Edição completa de um aluno: dados da conta, matrículas por curso e grupos. Cada ação grava na hora.
+// Senha forte gerada no navegador: maiúscula, minúscula, número e símbolo, sem espaços nem letras acentuadas.
+function gerarSenha() {
+  const grupos = ['ABCDEFGHJKLMNPQRSTUVWXYZ', 'abcdefghijkmnopqrstuvwxyz', '23456789', '!@#$%&*?-+='];
+  const todas = grupos.join('');
+  const aleatorio = (limite) => {
+    const valor = new Uint32Array(1);
+    crypto.getRandomValues(valor);
+    return valor[0] % limite;
+  };
+  const chars = grupos.map((grupo) => grupo[aleatorio(grupo.length)]);
+  while (chars.length < 12) chars.push(todas[aleatorio(todas.length)]);
+  for (let i = chars.length - 1; i > 0; i -= 1) {
+    const j = aleatorio(i + 1);
+    [chars[i], chars[j]] = [chars[j], chars[i]];
+  }
+  return chars.join('');
+}
+
+// Edição completa de um aluno: dados da conta, senha, matrículas por curso e grupos. Cada ação grava na hora.
 export default function UserEditDialog({ user: initial, courses, currentUserId, onClose, onChanged }) {
   const [user, setUser] = useState(initial);
   const [form, setForm] = useState({
@@ -15,6 +33,7 @@ export default function UserEditDialog({ user: initial, courses, currentUserId, 
   });
   const [groupsByCourse, setGroupsByCourse] = useState({});
   const [newEnrol, setNewEnrol] = useState({ slug: '', role: 'student' });
+  const [pwd, setPwd] = useState({ password: '', mustChange: true, show: false });
   const [feedback, setFeedback] = useState(null);
   const isMe = initial.id === currentUserId;
 
@@ -54,6 +73,22 @@ export default function UserEditDialog({ user: initial, courses, currentUserId, 
       setForm((current) => ({ ...current, cpf: '' }));
       say('success', 'Dados salvos.');
       await refresh();
+    } catch (error) {
+      fail(error);
+    }
+  };
+
+  // Define a senha pela gestão. O usuário recebe a senha por fora do Atlas; por padrão troca no próximo acesso.
+  const savePassword = async (event) => {
+    event.preventDefault();
+    setFeedback(null);
+    try {
+      const { data } = await api.post(`/accounts/${initial.id}/set-password`, {
+        password: pwd.password,
+        mustChangePassword: pwd.mustChange
+      });
+      setPwd({ password: '', mustChange: true, show: false });
+      say('success', data.message);
     } catch (error) {
       fail(error);
     }
@@ -159,6 +194,40 @@ export default function UserEditDialog({ user: initial, courses, currentUserId, 
               <button type="submit" className="primary-button">Salvar dados</button>
             </div>
           </form>
+        </section>
+
+        <section className="edit-section">
+          <h3>Senha</h3>
+          {isMe ? (
+            <p className="muted">Para trocar a sua própria senha, use Minha área.</p>
+          ) : (
+            <form className="edit-grid" onSubmit={savePassword}>
+              <label>
+                <span>Nova senha (8 a 128 caracteres; maiúscula, minúscula, número e símbolo; sem espaços)</span>
+                <div className="edit-inline">
+                  <input
+                    type={pwd.show ? 'text' : 'password'}
+                    value={pwd.password}
+                    autoComplete="new-password"
+                    onChange={(event) => setPwd({ ...pwd, password: event.target.value })}
+                  />
+                  <button type="button" className="ghost-button small" onClick={() => setPwd({ ...pwd, show: !pwd.show })}>
+                    {pwd.show ? 'Ocultar' : 'Mostrar'}
+                  </button>
+                  <button type="button" className="ghost-button small" onClick={() => setPwd({ ...pwd, password: gerarSenha(), show: true })}>
+                    Gerar
+                  </button>
+                </div>
+              </label>
+              <label className="edit-check">
+                <input type="checkbox" checked={pwd.mustChange} onChange={(event) => setPwd({ ...pwd, mustChange: event.target.checked })} />
+                <span>Exigir troca de senha no próximo acesso</span>
+              </label>
+              <div className="edit-actions">
+                <button type="submit" className="primary-button" disabled={!pwd.password}>Definir senha</button>
+              </div>
+            </form>
+          )}
         </section>
 
         <section className="edit-section">

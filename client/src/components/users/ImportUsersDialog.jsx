@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import api from '../../services/api';
 import { errorText } from '../manage/shared';
 import { downloadTemplate, readSheet, validateRows } from '../../utils/userSheet';
@@ -7,10 +7,17 @@ import { downloadTemplate, readSheet, validateRows } from '../../utils/userSheet
 export default function ImportUsersDialog({ onClose, onImported }) {
   const [fileName, setFileName] = useState('');
   const [rows, setRows] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [ignored, setIgnored] = useState([]);
   const [reading, setReading] = useState(false);
   const [importing, setImporting] = useState(false);
   const [report, setReport] = useState(null);
   const [error, setError] = useState('');
+
+  // Lista de cursos para conferir a coluna "curso" antes de enviar (e para o modelo).
+  useEffect(() => {
+    api.get('/courses').then(({ data }) => setCourses(data.courses || [])).catch(() => setCourses([]));
+  }, []);
 
   const valid = rows.filter((row) => row.errors.length === 0);
   const invalid = rows.filter((row) => row.errors.length > 0);
@@ -24,12 +31,13 @@ export default function ImportUsersDialog({ onClose, onImported }) {
     setFileName(file.name);
     setReading(true);
     try {
-      const raw = await readSheet(file);
+      const { rows: raw, ignored: ignoradas } = await readSheet(file);
+      setIgnored(ignoradas);
       if (raw.length === 0) {
         setRows([]);
         setError('A planilha não tem linhas. Use o modelo para conferir as colunas.');
       } else {
-        setRows(validateRows(raw));
+        setRows(validateRows(raw, courses));
       }
     } catch {
       setRows([]);
@@ -64,10 +72,10 @@ export default function ImportUsersDialog({ onClose, onImported }) {
         {!report && (
           <>
             <p className="muted">
-              Colunas: nome, email, cpf, papel_no_curso, curso, grupo. Cada linha é uma matrícula; o mesmo aluno pode aparecer em vários cursos.
+              Colunas: nome, email, cpf, papel_no_curso, curso, grupo. Em <strong>curso</strong>, use o nome do curso exatamente como está na aba "Cursos disponíveis" do modelo. Cada linha é uma matrícula; o mesmo aluno pode aparecer em vários cursos.
             </p>
             <div className="import-actions">
-              <button type="button" className="ghost-button" onClick={downloadTemplate}>Baixar modelo (.xlsx)</button>
+              <button type="button" className="ghost-button" onClick={() => downloadTemplate(courses)}>Baixar modelo (.xlsx)</button>
               <label className="primary-button import-file">
                 {reading ? 'Lendo…' : 'Escolher arquivo (.xlsx ou .csv)'}
                 <input type="file" accept=".xlsx,.csv" hidden onChange={handleFile} disabled={reading} />
@@ -76,6 +84,12 @@ export default function ImportUsersDialog({ onClose, onImported }) {
             </div>
 
             {error && <div className="alert error">{error}</div>}
+
+            {ignored.length > 0 && (
+              <div className="alert error">
+                Colunas não reconhecidas (serão ignoradas): <strong>{ignored.join(', ')}</strong>. Se alguma delas é o curso, renomeie para "curso" ou use o modelo.
+              </div>
+            )}
 
             {rows.length > 0 && (
               <>
@@ -109,7 +123,13 @@ export default function ImportUsersDialog({ onClose, onImported }) {
                           <td>{row.data.papel_no_curso}</td>
                           <td>{row.data.curso}</td>
                           <td>{row.data.grupo}</td>
-                          <td>{row.errors.length ? row.errors.join('; ') : 'OK'}</td>
+                          <td>
+                            {row.errors.length
+                              ? row.errors.join('; ')
+                              : row.warnings?.length
+                                ? `OK · ${row.warnings.join('; ')}`
+                                : 'OK'}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -134,6 +154,9 @@ export default function ImportUsersDialog({ onClose, onImported }) {
               <li>Contas já existentes: <strong>{report.existentes}</strong></li>
               <li>Matrículas feitas: <strong>{report.matriculas}</strong></li>
               <li>Grupos criados: <strong>{report.grupos}</strong></li>
+              {report.semCurso > 0 && (
+                <li>Linhas sem curso (contas criadas sem matrícula): <strong>{report.semCurso}</strong></li>
+              )}
             </ul>
             {report.erros.length > 0 && (
               <>

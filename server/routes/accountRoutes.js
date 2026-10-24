@@ -9,5 +9,6 @@ router.use(requireRole('admin'));
 
 router.post('/:userId/reset-first-access', asyncHandler(accounts.resetFirstAccess));
 router.post('/:userId/unlock', asyncHandler(accounts.unlock));
+router.post('/:userId/set-password', asyncHandler(accounts.setPassword));
 
 module.exports = router;

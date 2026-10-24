@@ -6,6 +6,8 @@ const {
   updateCourse,
   deleteCourse,
   completeLesson,
+  getReadingPosition,
+  saveReadingPosition,
   completeUnit,
   rateUnit,
   completeProject,
@@ -25,7 +27,8 @@ const {
   addQuestion,
   updateQuestion,
   deleteQuestion,
-  updateFinalProject
+  updateFinalProject,
+  updateProgressBar
 } = require('../controllers/moduleController');
 const {
   listParticipants,
@@ -61,6 +64,8 @@ router.post('/:slug/restore', asyncHandler(restoreCourse));
 
 // ---------- Progresso e certificado do aluno ----------
 router.post('/:slug/progress/lesson', asyncHandler(completeLesson));
+router.get('/:slug/reading-position', asyncHandler(getReadingPosition));
+router.put('/:slug/reading-position', asyncHandler(saveReadingPosition));
 // Unidade: a aluna conclui a unidade inteira de uma vez e depois avalia.
 router.post('/:slug/progress/unit', asyncHandler(completeUnit));
 router.post('/:slug/progress/unit/avaliacao', asyncHandler(rateUnit));
@@ -96,6 +101,7 @@ router.delete('/:slug/modules/:moduleId/questions/:questionId', asyncHandler(del
 
 // ---------- Projeto final ----------
 router.put('/:slug/final-project', asyncHandler(updateFinalProject));
+router.put('/:slug/progress-bar', requireRole('admin', 'teacher'), asyncHandler(updateProgressBar));
 
 // ---------- Participantes ----------
 router.get('/:slug/participants', asyncHandler(listParticipants));

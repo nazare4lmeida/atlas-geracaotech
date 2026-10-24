@@ -2,12 +2,23 @@ const courseRepo = require('../db/courseRepo');
 const accessRepo = require('../db/accessRepo');
 const httpError = require('../utils/httpError');
 const { findCourseBySlugOr404, requireManageAccess, buildAccess } = require('../services/access');
-const { serializeCourse } = require('../services/courseView');
+const { serializeCourse, normalizeProgressBar } = require('../services/courseView');
 
 // Seções (módulos), recursos (aulas), questões do teste e projeto final.
 // Todas as rotas exigem permissão de gestão no curso (admin ou docente do curso).
 
-const LESSON_TYPES = ['video', 'page', 'link'];
+const LESSON_TYPES = ['video', 'page', 'link', 'html', 'ao_vivo'];
+
+// Aceita vazio (encontro sem dados ainda) ou um objeto JSON simples.
+function isPlainJsonObject(text) {
+  if (!text) return true;
+  try {
+    const parsed = JSON.parse(text);
+    return Boolean(parsed) && typeof parsed === 'object' && !Array.isArray(parsed);
+  } catch {
+    return false;
+  }
+}
 
 async function loadManagedCourse(req) {
   const course = await findCourseBySlugOr404(req.params.slug);
@@ -80,13 +91,29 @@ function normalizeLessonFields(body, current = {}) {
     throw httpError(400, 'Recursos do tipo página precisam de conteúdo.');
   }
 
+  if (type === 'html' && !content) {
+    throw httpError(400, 'O bloco HTML precisa de conteúdo.');
+  }
+
+  // Encontro ao vivo: o link é opcional (pode ser divulgado depois), mas se existir precisa ser http(s).
+  // Dia e horários ficam em content como JSON, com tamanho limitado.
+  if (type === 'ao_vivo') {
+    if (url && !isHttpUrl(url)) {
+      throw httpError(400, 'Informe um link válido para o encontro (começando com https://).');
+    }
+    if (content.length > 500 || !isPlainJsonObject(content)) {
+      throw httpError(400, 'Dados do encontro inválidos.');
+    }
+  }
+
   return {
     title,
     unit,
     type,
-    url: type === 'page' ? '' : url,
+    url: type === 'page' || type === 'html' ? '' : url,
     content,
-    visible: body.visible !== undefined ? Boolean(body.visible) : current.visible !== false
+    visible: body.visible !== undefined ? Boolean(body.visible) : current.visible !== false,
+    countsProgress: body.countsProgress !== undefined ? Boolean(body.countsProgress) : current.countsProgress !== false
   };
 }
 
@@ -246,6 +273,13 @@ exports.deleteQuestion = async (req, res) => {
 };
 
 // ---------- Projeto final ----------
+
+// Barra de progresso do aluno: título, o que aparece e a cor. Só as aulas marcadas entram no percentual.
+exports.updateProgressBar = async (req, res) => {
+  const course = await loadManagedCourse(req);
+  await courseRepo.updateCourse(course.id, { progressBar: normalizeProgressBar(req.body) });
+  return respond(res, req.user, course.id);
+};
 
 exports.updateFinalProject = async (req, res) => {
   const course = await loadManagedCourse(req);

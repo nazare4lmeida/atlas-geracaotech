@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import ModuleBlock from '../components/course/ModuleBlock';
 import ModuleCard from '../components/course/ModuleCard';
@@ -6,6 +6,7 @@ import ProgressCard from '../components/course/ProgressCard';
 import CourseOutline from '../components/course/CourseOutline';
 import CourseProgressBar from '../components/course/CourseProgressBar';
 import WelcomeModal from '../components/course/WelcomeModal';
+import LessonBody from '../components/LessonBody';
 import ReadingMode from '../components/course/ReadingMode';
 import UnitCelebration from '../components/course/UnitCelebration';
 import Sidebar from '../components/Sidebar';
@@ -115,15 +116,25 @@ export default function CourseDetailPage() {
   const [welcomeOpen, setWelcomeOpen] = useState(false);
   const [activeLessonId, setActiveLessonId] = useState(null);
   const [readingIndex, setReadingIndex] = useState(null);
+  // Última aula aberta no modo leitura (vem do servidor, então vale em qualquer dispositivo).
+  const [savedLessonId, setSavedLessonId] = useState(null);
+  const resumedRef = useRef(false);
+  const saveTimerRef = useRef(null);
 
   useEffect(() => {
     let active = true;
     setStatus('loading');
+    resumedRef.current = false;
 
-    Promise.all([api.get(`/courses/${slug}`), api.get('/users/dashboard')])
-      .then(([courseRes, dashboardRes]) => {
+    Promise.all([
+      api.get(`/courses/${slug}`),
+      api.get('/users/dashboard'),
+      api.get(`/courses/${slug}/reading-position`).catch(() => ({ data: { lessonId: null } }))
+    ])
+      .then(([courseRes, dashboardRes, positionRes]) => {
         if (!active) return;
         const loaded = courseRes.data.course;
+        setSavedLessonId(positionRes.data.lessonId || null);
         const progress = dashboardRes.data.progress?.[loaded.slug] || {};
         const completed = new Set(progress.completedLessons || []);
         const initial = initialOpenState(loaded, completed);
@@ -326,12 +337,35 @@ export default function CourseDetailPage() {
     });
   };
 
+  // Guarda a aula atual no servidor. Espera um instante para não gravar a cada tecla das setas.
+  const rememberPosition = useCallback(
+    (lessonId) => {
+      if (!course || !lessonId) return;
+      setSavedLessonId(lessonId);
+      clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = setTimeout(() => {
+        api.put(`/courses/${course.slug}/reading-position`, { lessonId }).catch(() => {});
+      }, 600);
+    },
+    [course]
+  );
+
+  // Ao abrir o curso, a trilha vai direto para a aula onde o aluno parou (uma vez por carregamento).
+  useEffect(() => {
+    if (resumedRef.current || !savedLessonId || entries.length === 0) return;
+    resumedRef.current = true;
+    const entry = entries.find((item) => item.lesson.id === savedLessonId);
+    if (entry) pickLesson(entry.moduleId, entry.unit ? `${entry.moduleId}::${entry.unit}` : null, savedLessonId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [savedLessonId, entries]);
+
   const openReading = (lessonId) => {
     const index = entries.findIndex((entry) => entry.lesson.id === lessonId);
     if (index >= 0) {
       setActiveLessonId(lessonId);
       setOpenLessons((current) => new Set(current).add(lessonId));
       setReadingIndex(index);
+      rememberPosition(lessonId);
     }
   };
 
@@ -397,7 +431,16 @@ export default function CourseDetailPage() {
         ) : (
           <>
             <div className="course-sticky">
+              {savedLessonId && entries.some((entry) => entry.lesson.id === savedLessonId) && (
+                <div className="course-resume">
+                  <span>Você parou em: <strong>{entries.find((entry) => entry.lesson.id === savedLessonId).lesson.title}</strong></span>
+                  <button type="button" className="primary-button small" onClick={() => openReading(savedLessonId)}>
+                    Continuar leitura
+                  </button>
+                </div>
+              )}
               <CourseProgressBar
+                config={course.progressBar}
                 summary={
                   layoutMode === 'moderno' && moduleSummary ? moduleSummary
                     : layoutMode === 'moderno' && blockSummaryValue ? blockSummaryValue
@@ -602,7 +645,7 @@ export default function CourseDetailPage() {
                   <section className="surface-card final-project">
                     <div className="section-heading">
                       <h2>{course.finalProject.title}</h2>
-                      <p>{course.finalProject.description}</p>
+                      <LessonBody content={course.finalProject.description} />
                     </div>
                     <button type="button" className="primary-button" onClick={completeProject}>
                       {progress.finalProjectCompleted ? 'Projeto marcado como concluído' : 'Marcar projeto como concluído'}
@@ -629,6 +672,7 @@ export default function CourseDetailPage() {
               setReadingIndex(next);
               setActiveLessonId(entries[next].lesson.id);
               setOpenLessons((current) => new Set(current).add(entries[next].lesson.id));
+              rememberPosition(entries[next].lesson.id);
             }}
             onCompleteUnit={completeUnit}
             onClose={closeReading}

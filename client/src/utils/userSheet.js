@@ -13,9 +13,31 @@ const HEADER_ALIASES = {
   'papel no curso': 'papel_no_curso',
   papel: 'papel_no_curso',
   curso: 'curso',
+  'nome do curso': 'curso',
+  nome_curso: 'curso',
+  nome_do_curso: 'curso',
+  'curso nome': 'curso',
+  formacao: 'curso',
+  'formação': 'curso',
   grupo: 'grupo',
   turma: 'grupo'
 };
+
+// Mesma regra do servidor: identificador ou título do curso, sem acento, maiúsculas, pontuação ou espaços extras.
+const looseKey = (value) => norm(value).replace(/[^a-z0-9]+/g, ' ').trim();
+
+export function findCourseOnClient(text, courses = []) {
+  const key = looseKey(text);
+  if (!key) return null;
+  const exact = courses.find((course) => looseKey(course.slug) === key || looseKey(course.title) === key);
+  if (exact) return exact;
+  if (key.length < 6) return null;
+  const partial = courses.filter((course) => {
+    const title = looseKey(course.title);
+    return title.includes(key) || (title.length >= 6 && key.includes(title));
+  });
+  return partial.length === 1 ? partial[0] : null;
+}
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const ROLE_WORDS = ['aluno', 'estudante', 'docente', 'professor'];
@@ -65,12 +87,18 @@ export async function readSheet(file) {
     workbook = XLSX.read(await file.arrayBuffer(), { type: 'array' });
   }
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
-  if (!sheet) return [];
-  return XLSX.utils.sheet_to_json(sheet, { defval: '', raw: false }).map(normalizeRow);
+  if (!sheet) return { rows: [], ignored: [] };
+
+  // Cabeçalhos que não viram nenhuma coluna do Atlas são informados ao usuário (antes eram ignorados em silêncio).
+  const headers = (XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' })[0] || []).map((header) => String(header).trim());
+  const ignored = headers.filter((header) => header && !HEADER_ALIASES[norm(header).replace(/\s+/g, ' ')]);
+
+  const rows = XLSX.utils.sheet_to_json(sheet, { defval: '', raw: false }).map(normalizeRow);
+  return { rows, ignored };
 }
 
 // Confere cada linha no navegador (antes de enviar). O servidor confere de novo, com o banco.
-export function validateRows(rows) {
+export function validateRows(rows, courses = []) {
   const emailCpf = new Map();
 
   return rows.map((data, index) => {
@@ -89,6 +117,12 @@ export function validateRows(rows) {
     if (!isValidCpf(cpf)) errors.push('CPF inválido');
     if (!ROLE_WORDS.includes(papel)) errors.push('Papel: use "aluno" ou "docente"');
     if (grupo && !curso) errors.push('Grupo sem curso');
+    // Curso que não existe no Atlas: o servidor recusaria a linha, então avisamos antes de enviar.
+    if (curso && courses.length && !findCourseOnClient(curso, courses)) {
+      errors.push(`Curso não encontrado: "${curso}"`);
+    }
+    // Sem curso a conta é criada, mas o aluno fica sem matrícula. Mostramos isso antes de importar.
+    const warnings = curso ? [] : ['Sem curso: a conta será criada sem matrícula'];
 
     if (EMAIL_PATTERN.test(email)) {
       const known = emailCpf.get(email);
@@ -99,13 +133,14 @@ export function validateRows(rows) {
     return {
       linha: Number(data.__linha) || index + 2,
       errors,
+      warnings,
       data: { nome, email, cpf, papel_no_curso: papel, curso, grupo }
     };
   });
 }
 
 // Modelo para download: cabeçalho, um exemplo e uma aba com instruções.
-export function downloadTemplate() {
+export function downloadTemplate(courses = []) {
   const workbook = XLSX.utils.book_new();
   const example = [
     {
@@ -130,6 +165,9 @@ export function downloadTemplate() {
     ['Formate a coluna cpf como texto para não perder zeros à esquerda.']
   ];
   XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(instructions), 'Instruções');
+  // Lista dos nomes de curso aceitos: a coluna "curso" precisa bater com um deles.
+  const cursos = [['Nome do curso (copie exatamente como aparece aqui)'], ...courses.map((course) => [course.title])];
+  XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(cursos), 'Cursos disponíveis');
   XLSX.writeFile(workbook, 'modelo-usuarios-atlas.xlsx');
 }
 

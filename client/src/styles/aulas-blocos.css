@@ -1,0 +1,199 @@
+/* Editor de conteúdo do curso: seleção em massa, seletor de tipos, bloco HTML com prévia
+   e cartão de encontro ao vivo. Cores vêm das variáveis do tema (funciona em claro e escuro). */
+
+/* ---------- Ações em massa ---------- */
+.bulk-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.6rem 0;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.bulk-count {
+  font-weight: 600;
+  margin-right: 0.3rem;
+}
+
+.bulk-check {
+  width: 16px;
+  height: 16px;
+  margin: 0 0.5rem 0 0;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+/* ---------- Seletor de tipo de recurso ---------- */
+.tipo-picker {
+  margin: 0.6rem 0;
+  padding: 0.8rem;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+}
+
+.tipo-picker-title {
+  margin: 0 0 0.6rem;
+  font-weight: 600;
+}
+
+.tipo-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.6rem;
+  margin-bottom: 0.6rem;
+}
+
+.tipo-card {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.7rem 0.8rem;
+  text-align: left;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.tipo-card:hover,
+.tipo-card:focus-visible {
+  border-color: var(--primary);
+}
+
+.tipo-card span {
+  font-size: 0.82rem;
+  color: var(--text-soft);
+}
+
+/* ---------- Bloco HTML com prévia ---------- */
+.html-editor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.8rem;
+  align-items: start;
+}
+
+.html-editor-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+}
+
+.html-preview {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.html-preview-label {
+  font-size: 0.8rem;
+  color: var(--text-soft);
+}
+
+.html-preview-body {
+  min-height: 200px;
+  max-height: 520px;
+  overflow: auto;
+  padding: 0.8rem;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+}
+
+@media (max-width: 860px) {
+  .html-editor {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------- Cartão de encontro ao vivo (aluno) ---------- */
+.encontro-card {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--primary);
+  border-radius: 12px;
+}
+
+.encontro-top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.82rem;
+  color: var(--text-soft);
+}
+
+.encontro-kicker {
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.encontro-titulo {
+  font-size: 1.05rem;
+}
+
+.encontro-horario {
+  margin: 0;
+  color: var(--text-soft);
+}
+
+/* Cabeçalho da seção com a caixa de marcar à esquerda do título. */
+.manage-item-title {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+/* ---------- Estilos de bloco do material (aluno e prévia do editor) ----------
+   Cores sempre do tema do curso (--primary), então funciona em claro e escuro. */
+.lesson-html .atlas-bloco-centro {
+  text-align: center;
+}
+
+.lesson-html .atlas-bloco-lateral {
+  padding-left: 0.9rem;
+  border-left: 4px solid var(--primary);
+}
+
+.lesson-html .atlas-bloco-caixa {
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--primary);
+  border-radius: 10px;
+}
+
+.lesson-html .atlas-bloco-destaque {
+  padding: 0.6rem 0.9rem;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
+}
+
+/* ---------- Retomada de leitura: mostra onde o aluno parou e leva direto para a aula ---------- */
+.course-resume {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem 1rem;
+  margin: 0 0 0.6rem;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--primary);
+  border-radius: 10px;
+  font-size: 0.9rem;
+}
+
+/* ---------- Cor da barra de progresso (configurada pela gestão) ---------- */
+.course-progress.tom-ok .course-progress-track span {
+  background: #15803d;
+}
+.course-progress.tom-warn .course-progress-track span {
+  background: #a16207;
+}
+.course-progress.tom-danger .course-progress-track span {
+  background: #b91c1c;
+}

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import LessonBody from '../LessonBody';
+import AulaAoVivoCard from './AulaAoVivoCard';
 import { courseThemeStyle } from '../../layouts/registry';
 import Icon from '../Icon';
 import { readingMinutes } from '../../utils/lessonHtml';
@@ -112,7 +113,7 @@ export default function ReadingMode({ course, entries, index, completedSet, onIn
             </p>
           )}
 
-          <LessonBody content={lesson.content} />
+          {lesson.type === 'ao_vivo' ? <AulaAoVivoCard lesson={lesson} /> : <LessonBody content={lesson.content} />}
 
           {next && (
             <div className="reading-next">

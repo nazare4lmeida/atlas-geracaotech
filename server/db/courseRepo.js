@@ -16,11 +16,20 @@ const COURSE_COLUMNS = {
   visible: 'visible',
   selfEnrolment: 'self_enrolment',
   layout: 'layout',
-  theme: 'theme'
+  theme: 'theme',
+  progressBar: 'barra_progresso'
 };
 
 const SECTION_COLUMNS = { title: 'title', description: 'description', visible: 'visible' };
-const LESSON_COLUMNS = { title: 'title', unit: 'unit', type: 'type', url: 'url', content: 'content', visible: 'visible' };
+const LESSON_COLUMNS = {
+  title: 'title',
+  unit: 'unit',
+  type: 'type',
+  url: 'url',
+  content: 'content',
+  visible: 'visible',
+  countsProgress: 'conta_progresso'
+};
 const QUESTION_COLUMNS = {
   question: 'question',
   options: 'options',
@@ -42,6 +51,7 @@ function mapCourseRow(row) {
     accent: row.accent,
     layout: row.layout,
     theme: row.theme || {},
+    progressBar: row.barra_progresso || {},
     visible: row.visible,
     selfEnrolment: row.self_enrolment,
     finalProject: {
@@ -126,7 +136,8 @@ async function fetchCourses(whereSql = '', params = []) {
       url: row.url,
       unit: row.unit || '',
       content: row.content,
-      visible: row.visible
+      visible: row.visible,
+      countsProgress: row.conta_progresso !== false
     });
   });
 
@@ -166,7 +177,7 @@ async function updateRow(client, table, id, columnMap, fields) {
 
   Object.entries(columnMap).forEach(([field, column]) => {
     if (fields[field] === undefined) return;
-    const isJson = column === 'options' || column === 'option_feedback';
+    const isJson = column === 'options' || column === 'option_feedback' || column === 'barra_progresso';
     params.push(isJson ? JSON.stringify(fields[field]) : fields[field]);
     const cast = isJson ? '::jsonb' : '';
     sets.push(`${column} = $${params.length}${cast}`);
@@ -403,9 +414,9 @@ async function createLesson(sectionId, fields) {
     const id = newId('les');
     const position = await nextPosition(client, 'lessons', 'section_id', sectionId);
     await client.query(
-      `insert into lessons (id, section_id, position, title, unit, type, url, content, visible)
-       values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-      [id, sectionId, position, fields.title, fields.unit || '', fields.type, fields.url, fields.content, fields.visible]
+      `insert into lessons (id, section_id, position, title, unit, type, url, content, visible, conta_progresso)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+      [id, sectionId, position, fields.title, fields.unit || '', fields.type, fields.url, fields.content, fields.visible, fields.countsProgress !== false]
     );
     return id;
   });

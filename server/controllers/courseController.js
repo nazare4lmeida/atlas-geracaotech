@@ -234,6 +234,29 @@ exports.deleteCourse = async (req, res) => {
 
 // ---------- Progresso do aluno ----------
 
+// Posição de leitura do aluno: a última aula aberta no modo leitura. Só guarda aulas que existem no curso.
+exports.getReadingPosition = async (req, res) => {
+  const course = await findCourseBySlugOr404(req.params.slug);
+  await requireViewAccess(course, req.user);
+  const lessonId = await progressRepo.getReadingPosition(req.user.id, course.id);
+  return res.json({ lessonId });
+};
+
+exports.saveReadingPosition = async (req, res) => {
+  const course = await findCourseBySlugOr404(req.params.slug);
+  await requireViewAccess(course, req.user);
+
+  const lessonId = String(req.body.lessonId || '');
+  const view = studentView(course);
+  const exists = view.modules.some((module) => module.lessons.some((lesson) => lesson.id === lessonId));
+  if (!lessonId || !exists) {
+    throw httpError(400, 'Aula não encontrada neste curso.');
+  }
+
+  await progressRepo.saveReadingPosition(req.user.id, course.id, lessonId);
+  return res.json({ lessonId });
+};
+
 exports.completeLesson = async (req, res) => {
   const course = await findCourseBySlugOr404(req.params.slug);
   await requireViewAccess(course, req.user);
