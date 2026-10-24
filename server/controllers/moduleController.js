@@ -168,7 +168,6 @@ exports.addModule = async (req, res) => {
   await courseRepo.createSection(course.id, {
     title,
     description: String(req.body.description || '').trim(),
-    content: String(req.body.content || '').trim(),
     visible: req.body.visible !== undefined ? Boolean(req.body.visible) : true
   });
 
@@ -185,7 +184,6 @@ exports.updateModule = async (req, res) => {
     if (!fields.title) throw httpError(400, 'Informe o título da seção.');
   }
   if (req.body.description !== undefined) fields.description = String(req.body.description).trim();
-  if (req.body.content !== undefined) fields.content = String(req.body.content).trim();
   if (req.body.visible !== undefined) fields.visible = Boolean(req.body.visible);
 
   await courseRepo.updateSection(section.id, fields);

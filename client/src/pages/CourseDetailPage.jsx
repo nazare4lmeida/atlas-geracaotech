@@ -676,6 +676,8 @@ export default function CourseDetailPage() {
             }}
             onCompleteUnit={completeUnit}
             onClose={closeReading}
+            canEdit={Boolean(course.permissions?.canManage)}
+            onLessonSaved={setCourse}
           />
         )}
 

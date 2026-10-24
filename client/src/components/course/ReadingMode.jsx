@@ -5,11 +5,14 @@ import AulaAoVivoCard from './AulaAoVivoCard';
 import { courseThemeStyle } from '../../layouts/registry';
 import Icon from '../Icon';
 import { readingMinutes } from '../../utils/lessonHtml';
+import api from '../../services/api';
+import LessonEditor from '../manage/LessonEditor';
+import { errorText } from '../manage/shared';
 
 // Modo leitura: a aula ocupa a tela inteira, sem a trilha e o restante da página.
 // Navegação por Anterior/Próxima (ou setas do teclado); Esc ou "Sair" devolvem à página do curso.
 // A unidade é concluída no fim dela (última aula), não aula por aula.
-export default function ReadingMode({ course, entries, index, completedSet, onIndex, onCompleteUnit, onClose }) {
+export default function ReadingMode({ course, entries, index, completedSet, onIndex, onCompleteUnit, onClose, canEdit = false, onLessonSaved }) {
   const entry = entries[index];
   const { lesson, moduleTitle, unit } = entry;
   const total = entries.length;
@@ -23,12 +26,42 @@ export default function ReadingMode({ course, entries, index, completedSet, onIn
   const minutes = useMemo(() => readingMinutes(lesson.content || ''), [lesson.content]);
   const scrollRef = useRef(null);
   const [read, setRead] = useState(0);
+  // Edição in loco (admin e docente do curso): altera título, link e conteúdo da aula exibida.
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState({ title: '', url: '', content: '' });
+  const [saving, setSaving] = useState(false);
+  const [editError, setEditError] = useState('');
+  const editable = canEdit && lesson.type !== 'ao_vivo';
 
   // Ao trocar de aula, volta ao topo e zera a barra.
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
     setRead(0);
+    setEditing(false);
+    setEditError('');
   }, [index]);
+
+  function iniciarEdicao() {
+    setDraft({ title: lesson.title, url: lesson.url || '', content: lesson.content || '' });
+    setEditError('');
+    setEditing(true);
+  }
+
+  async function salvarEdicao() {
+    setSaving(true);
+    setEditError('');
+    const body = { title: draft.title, content: draft.content };
+    if (lesson.type === 'video' || lesson.type === 'link') body.url = draft.url;
+    try {
+      const { data } = await api.put(`/courses/${course.slug}/modules/${entry.moduleId}/lessons/${lesson.id}`, body);
+      onLessonSaved?.(data.course);
+      setEditing(false);
+    } catch (error) {
+      setEditError(errorText(error));
+    } finally {
+      setSaving(false);
+    }
+  }
 
   async function concluirUnidade() {
     setBusy(true);
@@ -52,6 +85,7 @@ export default function ReadingMode({ course, entries, index, completedSet, onIn
     const previous = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     const onKey = (event) => {
+      if (editing) return; // enquanto edita, Esc e as setas não trocam de aula
       if (event.key === 'Escape') onClose();
       if (event.key === 'ArrowRight' && index < total - 1) onIndex(index + 1);
       if (event.key === 'ArrowLeft' && index > 0) onIndex(index - 1);
@@ -61,7 +95,7 @@ export default function ReadingMode({ course, entries, index, completedSet, onIn
       document.body.style.overflow = previous;
       window.removeEventListener('keydown', onKey);
     };
-  }, [index, total, onIndex, onClose]);
+  }, [index, total, onIndex, onClose, editing]);
 
   return createPortal(
     // O portal fica fora do .course-layout: aplicamos o tema do curso aqui, senão cores e variáveis somem.
@@ -82,6 +116,11 @@ export default function ReadingMode({ course, entries, index, completedSet, onIn
           {unit && <span>{unit}</span>}
         </div>
         <span className="reading-count">Aula {index + 1} de {total}</span>
+        {editable && !editing && (
+          <button type="button" className="ghost-button reading-edit" onClick={iniciarEdicao}>
+            Editar conteúdo
+          </button>
+        )}
         <button type="button" className="reading-exit" onClick={onClose}>
           <Icon name="close" size={16} />
           <span>Sair da leitura</span>
@@ -94,6 +133,48 @@ export default function ReadingMode({ course, entries, index, completedSet, onIn
           <h1>{lesson.title}</h1>
           <p className="reading-meta">Leitura de cerca de {minutes} min</p>
 
+          {editing ? (
+            <form
+              className="reading-edit-form"
+              onSubmit={(event) => {
+                event.preventDefault();
+                salvarEdicao();
+              }}
+            >
+              <label>
+                <span>Título da aula</span>
+                <input value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} required />
+              </label>
+              {(lesson.type === 'video' || lesson.type === 'link') && (
+                <label>
+                  <span>{lesson.type === 'video' ? 'Link do vídeo' : 'Link do recurso'}</span>
+                  <input
+                    type="url"
+                    value={draft.url}
+                    onChange={(event) => setDraft({ ...draft, url: event.target.value })}
+                    required
+                  />
+                </label>
+              )}
+              <div className="lesson-editor-field">
+                <span className="lesson-editor-label">Conteúdo da aula</span>
+                <LessonEditor
+                  value={draft.content}
+                  onChange={(html) => setDraft((current) => ({ ...current, content: html }))}
+                />
+              </div>
+              {editError && <span className="lesson-editor-error">{editError}</span>}
+              <div className="reading-edit-actions">
+                <button type="button" className="ghost-button" onClick={() => setEditing(false)} disabled={saving}>
+                  Cancelar
+                </button>
+                <button type="submit" className="primary-button" disabled={saving}>
+                  {saving ? 'Salvando...' : 'Salvar alterações'}
+                </button>
+              </div>
+            </form>
+          ) : (
+            <>
           {lesson.type === 'video' && lesson.url && (
             <div className="video-wrapper">
               <iframe
@@ -114,6 +195,8 @@ export default function ReadingMode({ course, entries, index, completedSet, onIn
           )}
 
           {lesson.type === 'ao_vivo' ? <AulaAoVivoCard lesson={lesson} /> : <LessonBody content={lesson.content} />}
+            </>
+          )}
 
           {next && (
             <div className="reading-next">
@@ -130,7 +213,7 @@ export default function ReadingMode({ course, entries, index, completedSet, onIn
       </div>
 
       <footer className="reading-bottom">
-        <button type="button" className="ghost-button" disabled={index === 0} onClick={() => onIndex(index - 1)}>
+        <button type="button" className="ghost-button" disabled={index === 0 || editing} onClick={() => onIndex(index - 1)}>
           <Icon name="chevronLeft" size={16} /> Anterior
         </button>
         {isUnitEnd ? (
@@ -138,7 +221,7 @@ export default function ReadingMode({ course, entries, index, completedSet, onIn
             type="button"
             className={unitDone ? 'ghost-button done' : 'primary-button'}
             onClick={concluirUnidade}
-            disabled={unitDone || busy}
+            disabled={unitDone || busy || editing}
           >
             {unitDone ? 'Unidade concluída' : busy ? 'Salvando...' : 'Concluir unidade'}
           </button>
@@ -151,7 +234,7 @@ export default function ReadingMode({ course, entries, index, completedSet, onIn
                 : `Aula ${unitPosition} de ${unitEntries.length} desta unidade`}
           </span>
         )}
-        <button type="button" className="ghost-button" disabled={index >= total - 1} onClick={() => onIndex(index + 1)}>
+        <button type="button" className="ghost-button" disabled={index >= total - 1 || editing} onClick={() => onIndex(index + 1)}>
           Próxima <Icon name="chevronRight" size={16} />
         </button>
       </footer>

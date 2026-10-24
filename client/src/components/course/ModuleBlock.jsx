@@ -1,7 +1,6 @@
 import LessonItem from './LessonItem';
 import QuizDialog from './QuizDialog';
 import UnitCompletion from './UnitCompletion';
-import LessonBody from '../LessonBody';
 import { Fragment, useState } from 'react';
 import { groupLessonsByUnit, countCompleted, unitKey } from '../../utils/courseOutline';
 
@@ -43,11 +42,6 @@ export default function ModuleBlock({
 
       {open && (
         <div className="module-body">
-          {module.content && (
-            <div className="module-content">
-              <LessonBody content={module.content} />
-            </div>
-          )}
           {groups.map((group) => {
             const unitDone = countCompleted(group.lessons, completedSet);
             const unitFinished = unitDone === group.lessons.length;

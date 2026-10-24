@@ -198,7 +198,25 @@
   background: #b91c1c;
 }
 
-/* Conteúdo no topo da seção (aluno). */
-.module-content {
-  padding: 0.25rem 0 0.9rem;
+
+/* ---------- Edição do conteúdo no modo leitura (admin e docente do curso) ---------- */
+.reading-edit {
+  white-space: nowrap;
+}
+
+.reading-edit-form {
+  display: grid;
+  gap: 0.9rem;
+  margin-top: 1rem;
+}
+
+.reading-edit-form label {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.reading-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
 }

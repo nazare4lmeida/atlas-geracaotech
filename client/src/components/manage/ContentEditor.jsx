@@ -106,8 +106,8 @@ function ProgressBarForm({ initial, onSubmit }) {
   );
 }
 
-function SectionForm({ initial = { title: '', description: '', content: '', visible: true }, submitLabel, onSubmit, onCancel }) {
-  const { values, handleChange, setFieldValue } = useForm(initial);
+function SectionForm({ initial = { title: '', description: '', visible: true }, submitLabel, onSubmit, onCancel }) {
+  const { values, handleChange } = useForm(initial);
 
   return (
     <form
@@ -125,10 +125,6 @@ function SectionForm({ initial = { title: '', description: '', content: '', visi
         <span>Descrição curta (aparece no cabeçalho da seção, em texto simples)</span>
         <textarea name="description" rows="2" value={values.description} onChange={handleChange} />
       </label>
-      <div className="lesson-editor-field">
-        <span className="lesson-editor-label">Conteúdo da seção (aparece para o aluno ao abrir a seção, com formatação)</span>
-        <LessonEditor value={values.content || ''} onChange={(html) => setFieldValue('content', html)} />
-      </div>
       <label className="checkbox-row">
         <input type="checkbox" name="visible" checked={values.visible} onChange={handleChange} />
         <span>Visível para os alunos</span>
@@ -463,7 +459,7 @@ function SectionBlock({ section, index, total, editing, setEditing, actions, exp
 
       {editing === sectionKey && (
         <SectionForm
-          initial={{ title: section.title, description: section.description, content: section.content || '', visible: section.visible }}
+          initial={{ title: section.title, description: section.description, visible: section.visible }}
           submitLabel="Salvar seção"
           onSubmit={(values) => actions.updateSection(section, values).then((ok) => ok && setEditing(null))}
           onCancel={() => setEditing(null)}
