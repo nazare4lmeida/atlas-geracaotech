@@ -24,6 +24,7 @@ function serializeCourse(course, access = {}) {
       id: module.id,
       title: module.title,
       description: module.description || '',
+      content: withMediaUrls(module.content || ''),
       visible: module.visible !== false,
       kind: module.kind || 'modulo',
       blockId: module.blockId || null,

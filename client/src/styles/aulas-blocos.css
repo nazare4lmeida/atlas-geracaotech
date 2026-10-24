@@ -197,3 +197,8 @@
 .course-progress.tom-danger .course-progress-track span {
   background: #b91c1c;
 }
+
+/* Conteúdo no topo da seção (aluno). */
+.module-content {
+  padding: 0.25rem 0 0.9rem;
+}

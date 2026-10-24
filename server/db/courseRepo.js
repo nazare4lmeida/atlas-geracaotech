@@ -20,7 +20,7 @@ const COURSE_COLUMNS = {
   progressBar: 'barra_progresso'
 };
 
-const SECTION_COLUMNS = { title: 'title', description: 'description', visible: 'visible' };
+const SECTION_COLUMNS = { title: 'title', description: 'description', visible: 'visible', content: 'conteudo' };
 const LESSON_COLUMNS = {
   title: 'title',
   unit: 'unit',
@@ -118,6 +118,7 @@ async function fetchCourses(whereSql = '', params = []) {
       id: row.id,
       title: row.title,
       description: row.description,
+      content: row.conteudo || '',
       visible: row.visible,
       kind: row.kind || 'modulo',
       blockId: row.block_id || null,
@@ -284,9 +285,9 @@ async function createDefaultBlocks(client, courseId) {
 async function insertModules(client, courseId, modules) {
   for (const [sectionIndex, module] of modules.entries()) {
     await client.query(
-      `insert into sections (id, course_id, position, title, description, visible)
-       values ($1, $2, $3, $4, $5, $6)`,
-      [module.id, courseId, sectionIndex, module.title, module.description || '', module.visible !== false]
+      `insert into sections (id, course_id, position, title, description, visible, conteudo)
+       values ($1, $2, $3, $4, $5, $6, $7)`,
+      [module.id, courseId, sectionIndex, module.title, module.description || '', module.visible !== false, module.content || '']
     );
 
     for (const [lessonIndex, lesson] of (module.lessons || []).entries()) {
@@ -367,9 +368,9 @@ async function createSection(courseId, fields) {
     const id = newId('mod');
     const position = await nextPosition(client, 'sections', 'course_id', courseId);
     await client.query(
-      `insert into sections (id, course_id, position, title, description, visible)
-       values ($1, $2, $3, $4, $5, $6)`,
-      [id, courseId, position, fields.title, fields.description || '', fields.visible !== false]
+      `insert into sections (id, course_id, position, title, description, visible, conteudo)
+       values ($1, $2, $3, $4, $5, $6, $7)`,
+      [id, courseId, position, fields.title, fields.description || '', fields.visible !== false, fields.content || '']
     );
     // Módulo novo ganha o próprio bloco, no fim da trilha.
     const blockPosition = await nextPosition(client, 'course_blocks', 'course_id', courseId);
