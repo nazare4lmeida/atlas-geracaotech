@@ -6,14 +6,14 @@ import { Feedback, errorText } from '../components/manage/shared';
 import CalendarioAulas from '../components/presenca/CalendarioAulas';
 import AulaFormulario from '../components/presenca/AulaFormulario';
 import ChamadaAula from '../components/presenca/ChamadaAula';
+import RelatorioPresenca from '../components/presenca/RelatorioPresenca';
 import '../styles/cronograma.css';
 import '../styles/docente.css';
 
-// Cronograma e presença da turma. A administração gera e ajusta o cronograma (em massa, por grade de dias
-// e horários) e define os professores. O professor da turma vê o cronograma e faz a chamada.
-// O Atlas é a fonte das aulas: o site do GT não sincroniza mais o cronograma.
+// Presença de turmas e grupos de curso: é o mesmo espaço para o aluno. Admin gerencia tudo;
+// professor faz a chamada e gerencia os grupos dos seus cursos; gestão acompanha, filtra e exporta.
 export default function PresencaTurmasPage() {
-  const { isAdmin } = useAuth();
+  const { isAdmin, isTeacher, isGestao } = useAuth();
   const [turmas, setTurmas] = useState([]);
   const [turmaId, setTurmaId] = useState('');
   const [aulas, setAulas] = useState([]);
@@ -30,13 +30,27 @@ export default function PresencaTurmasPage() {
   const [feedback, setFeedback] = useState(null);
   const [loading, setLoading] = useState(false);
   const [linkEditado, setLinkEditado] = useState(null);
+  const [podeGerenciarGrupo, setPodeGerenciarGrupo] = useState(false);
+  const [novaAulaGrupo, setNovaAulaGrupo] = useState(null);
 
   useEffect(() => {
-    api
-      .get('/docente/turmas')
-      .then(({ data }) => {
-        setTurmas(data.turmas);
-        const primeira = data.turmas.find((t) => t.ativa) || data.turmas[0];
+    const espacos = api.get('/presenca/gestao/espacos').then(({ data }) => data).catch(() => ({ turmas: [], grupos: [] }));
+    const docente = api.get('/docente/turmas').then(({ data }) => data.turmas).catch(() => null);
+    Promise.all([docente, espacos])
+      .then(([turmasDocente, espacosData]) => {
+        const listaTurmas = (turmasDocente || espacosData.turmas || []).map((t) => ({ ...t, tipo: 'turma' }));
+        const listaGrupos = (espacosData.grupos || []).map((g) => ({
+          ...g,
+          tipo: 'grupo',
+          modalidade: 'Grupo',
+          turno: '',
+          diasSemana: '',
+          horario: '',
+          ativa: true
+        }));
+        const lista = [...listaTurmas, ...listaGrupos];
+        setTurmas(lista);
+        const primeira = lista.find((t) => t.ativa) || lista[0];
         if (primeira) setTurmaId(primeira.id);
       })
       .catch((error) => setFeedback({ type: 'error', text: errorText(error) }));
@@ -45,16 +59,24 @@ export default function PresencaTurmasPage() {
     }
   }, [isAdmin]);
 
+  const turma = turmas.find((t) => t.id === turmaId);
+  const ehGrupo = turma?.tipo === 'grupo';
+  // Quem pode mudar as aulas: admin nas turmas; nos grupos, quem gerencia o curso (admin ou docente do curso).
+  const podeEditar = ehGrupo ? podeGerenciarGrupo : isAdmin;
+  // Quem faz a chamada: o mesmo que pode editar, além do professor da turma.
+  const podeChamada = ehGrupo ? podeGerenciarGrupo : isAdmin || isTeacher;
+
   const carregarAulas = () => {
-    if (!turmaId) return Promise.resolve();
+    if (!turmaId || !turma) return Promise.resolve();
     setLoading(true);
+    const url = ehGrupo ? `/presenca/gestao/espacos/grupo/${turmaId}/aulas` : `/docente/turmas/${turmaId}/aulas`;
     return api
-      .get(`/docente/turmas/${turmaId}/aulas`)
+      .get(url)
       .then(({ data }) => {
         setAulas(data.aulas);
         setHoje(data.hoje);
-        setProfessores(data.professores);
-        // Mantém só as seleções que ainda existem.
+        setProfessores(data.professores || []);
+        if (ehGrupo) setPodeGerenciarGrupo(Boolean(data.podeGerenciar));
         setSelecionadas((atual) => new Set([...atual].filter((id) => data.aulas.some((a) => a.sessionId === id))));
       })
       .catch((error) => setFeedback({ type: 'error', text: errorText(error) }))
@@ -64,15 +86,13 @@ export default function PresencaTurmasPage() {
   useEffect(() => {
     setFormulario(null);
     setChamada(null);
+    setNovaAulaGrupo(null);
     setSelecionadas(new Set());
     setEditandoProfessores(false);
     carregarAulas();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [turmaId]);
+  }, [turmaId, turmas.length]);
 
-  const turma = turmas.find((t) => t.id === turmaId);
-
-  // Link da aula ao vivo da turma: aparece na página inicial de alunos e professores.
   async function salvarLink(event) {
     event.preventDefault();
     try {
@@ -108,10 +128,22 @@ export default function PresencaTurmasPage() {
     carregarAulas();
   }
 
+  async function criarAulaGrupo(event) {
+    event.preventDefault();
+    try {
+      await api.post(`/presenca/gestao/espacos/grupo/${turmaId}/aulas`, novaAulaGrupo);
+      setNovaAulaGrupo(null);
+      setFeedback({ type: 'success', text: 'Aula criada para o grupo.' });
+      carregarAulas();
+    } catch (error) {
+      setFeedback({ type: 'error', text: errorText(error) });
+    }
+  }
+
   async function alternarCancelamento(aula) {
     const cancelar = aula.situacao !== 'cancelada';
     try {
-      await api.post(`/docente/aulas/${aula.sessionId}/cancelamento`, { cancelada: cancelar });
+      await api.post(`/presenca/gestao/aulas/${aula.sessionId}/cancelamento`, { cancelada: cancelar });
       setFeedback({ type: 'success', text: cancelar ? 'Aula cancelada. Ela sai do cálculo de presença, mas o histórico fica.' : 'Aula reativada.' });
       carregarAulas();
     } catch (error) {
@@ -122,7 +154,7 @@ export default function PresencaTurmasPage() {
   async function remover(aula) {
     if (!window.confirm(`Remover a aula de ${formatarData(aula.date)}? Esta ação não pode ser desfeita.`)) return;
     try {
-      await api.delete(`/docente/aulas/${aula.sessionId}`);
+      await api.delete(`/presenca/gestao/aulas/${aula.sessionId}`);
       setFeedback({ type: 'success', text: 'Aula removida.' });
       if (chamada?.sessionId === aula.sessionId) setChamada(null);
       carregarAulas();
@@ -131,7 +163,7 @@ export default function PresencaTurmasPage() {
     }
   }
 
-  // Ações em lote sobre as aulas selecionadas.
+  // Ações em lote (só turmas, pelo cronograma).
   async function executarLote(acao, parametros = {}, confirmacao = null) {
     if (confirmacao && !window.confirm(confirmacao)) return;
     try {
@@ -187,6 +219,11 @@ export default function PresencaTurmasPage() {
   }
 
   const tudoSelecionado = aulas.length > 0 && selecionadas.size === aulas.length;
+  const cursos = useMemo(() => {
+    const mapa = new Map();
+    turmas.forEach((t) => t.cursoId && mapa.set(t.cursoId, t.curso));
+    return [...mapa].map(([id, nome]) => ({ id, nome }));
+  }, [turmas]);
 
   return (
     <div className="dashboard-layout">
@@ -194,12 +231,14 @@ export default function PresencaTurmasPage() {
       <div className="dashboard-content cron-gestao">
         <section className="welcome-banner">
           <div>
-            <span className="eyebrow">{isAdmin ? 'Gestão' : 'Professor'}</span>
+            <span className="eyebrow">{isAdmin ? 'Gestão' : isGestao ? 'Gestão' : 'Professor'}</span>
             <h1>Presença</h1>
             <p>
               {isAdmin
-                ? 'Cronograma, datas e presença da turma. Aulas e tópicos são ajustados aqui, em massa ou aula a aula.'
-                : 'Cronograma da turma e chamada. Ajustes no cronograma são feitos pela administração.'}
+                ? 'Turmas e grupos de curso. Aulas e tópicos são ajustados aqui, em massa ou aula a aula. Em Relatório, filtre e exporte a presença.'
+                : isGestao
+                  ? 'Acompanhamento da presença das turmas e grupos, com filtros e exportação. Os ajustes são feitos pela equipe do curso.'
+                  : 'Turmas e grupos dos seus cursos: chamada e cronograma.'}
             </p>
           </div>
         </section>
@@ -208,21 +247,21 @@ export default function PresencaTurmasPage() {
 
         <section className="cron-barra">
           <label>
-            <span>Turma</span>
+            <span>Turma ou grupo</span>
             <select value={turmaId} onChange={(e) => setTurmaId(e.target.value)}>
               {turmas.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.curso} · {t.nome}{t.ativa ? '' : ' (inativa)'}
+                <option key={`${t.tipo}:${t.id}`} value={t.id}>
+                  {t.curso} · {t.tipo === 'grupo' ? 'Grupo' : 'Turma'}: {t.nome}{t.ativa ? '' : ' (inativa)'}
                 </option>
               ))}
             </select>
           </label>
           {turma && (
             <p className="muted">
-              {turma.modalidade} · {turma.turno}{turma.diasSemana ? ` · ${turma.diasSemana}` : ''}{turma.horario ? ` · ${turma.horario}` : ''} · {turma.alunos} aluno(s) ativo(s)
+              {turma.tipo === 'grupo' ? 'Grupo do curso' : turma.modalidade} {turma.turno ? `· ${turma.turno}` : ''}{turma.diasSemana ? ` · ${turma.diasSemana}` : ''}{turma.horario ? ` · ${turma.horario}` : ''} · {turma.alunos} aluno(s){ehGrupo ? ' no grupo' : ' ativo(s)'}
             </p>
           )}
-          {isAdmin && turma && (
+          {isAdmin && turma && !ehGrupo && (
             <form className="docente-link-turma" onSubmit={salvarLink}>
               <label>
                 <span>Link da aula ao vivo</span>
@@ -237,10 +276,10 @@ export default function PresencaTurmasPage() {
               <button type="submit" className="ghost-button small" disabled={linkEditado === null}>Salvar link</button>
             </form>
           )}
-          {!isAdmin && turma?.linkAoVivo && (
+          {!isAdmin && turma?.linkAoVivo && !ehGrupo && (
             <a className="ghost-button small" href={turma.linkAoVivo} target="_blank" rel="noopener noreferrer">Entrar na aula ao vivo</a>
           )}
-          {isAdmin && (
+          {podeEditar && !ehGrupo && (
             <div className="docente-acoes">
               <button type="button" className="primary-button small" onClick={() => setFormulario({ modo: 'gerar' })} disabled={!turmaId}>
                 Gerar aulas
@@ -250,46 +289,77 @@ export default function PresencaTurmasPage() {
               </button>
             </div>
           )}
-        </section>
-
-        <section className="docente-professores" aria-label="Professores da turma">
-          <div className="docente-professores-lista">
-            <span className="docente-rotulo">Professores</span>
-            {professores.length === 0 && <span className="muted">Nenhum professor vinculado.</span>}
-            {professores.map((p) => (
-              <span key={p.id} className="docente-chip">{p.name}</span>
-            ))}
-            {isAdmin && !editandoProfessores && (
-              <button
-                type="button"
-                className="ghost-button small"
-                onClick={() => {
-                  setEscolhidos(professores.map((p) => p.id));
-                  setEditandoProfessores(true);
-                }}
-              >
-                Editar
+          {podeEditar && ehGrupo && (
+            <div className="docente-acoes">
+              <button type="button" className="primary-button small" onClick={() => setNovaAulaGrupo({ data: '', titulo: '', horario: '' })}>
+                Nova aula do grupo
               </button>
-            )}
-          </div>
-          {isAdmin && editandoProfessores && (
-            <div className="docente-professores-editar">
-              {todosProfessores.length === 0 && <span className="muted">Nenhuma conta de professor ativa.</span>}
-              {todosProfessores.map((p) => (
-                <label key={p.id} className="docente-check">
-                  <input type="checkbox" checked={escolhidos.includes(p.id)} onChange={() => alternarProfessor(p.id)} />
-                  {p.name}
-                </label>
-              ))}
-              <div className="docente-acoes">
-                <button type="button" className="primary-button small" onClick={salvarProfessores}>Salvar</button>
-                <button type="button" className="ghost-button small" onClick={() => setEditandoProfessores(false)}>Cancelar</button>
-              </div>
             </div>
           )}
         </section>
 
-        {formulario && turma && isAdmin && (
+        {!ehGrupo && (
+          <section className="docente-professores" aria-label="Professores da turma">
+            <div className="docente-professores-lista">
+              <span className="docente-rotulo">Professores</span>
+              {professores.length === 0 && <span className="muted">Nenhum professor vinculado.</span>}
+              {professores.map((p) => (
+                <span key={p.id} className="docente-chip">{p.name}</span>
+              ))}
+              {isAdmin && !editandoProfessores && (
+                <button
+                  type="button"
+                  className="ghost-button small"
+                  onClick={() => {
+                    setEscolhidos(professores.map((p) => p.id));
+                    setEditandoProfessores(true);
+                  }}
+                >
+                  Editar
+                </button>
+              )}
+            </div>
+            {isAdmin && editandoProfessores && (
+              <div className="docente-professores-editar">
+                {todosProfessores.length === 0 && <span className="muted">Nenhuma conta de professor ativa.</span>}
+                {todosProfessores.map((p) => (
+                  <label key={p.id} className="docente-check">
+                    <input type="checkbox" checked={escolhidos.includes(p.id)} onChange={() => alternarProfessor(p.id)} />
+                    {p.name}
+                  </label>
+                ))}
+                <div className="docente-acoes">
+                  <button type="button" className="primary-button small" onClick={salvarProfessores}>Salvar</button>
+                  <button type="button" className="ghost-button small" onClick={() => setEditandoProfessores(false)}>Cancelar</button>
+                </div>
+              </div>
+            )}
+          </section>
+        )}
+
+        {novaAulaGrupo && (
+          <form className="surface-card docente-form" onSubmit={criarAulaGrupo}>
+            <h2>Nova aula do grupo</h2>
+            <label>
+              <span>Data</span>
+              <input type="date" value={novaAulaGrupo.data} onChange={(e) => setNovaAulaGrupo({ ...novaAulaGrupo, data: e.target.value })} required />
+            </label>
+            <label>
+              <span>Horário (opcional)</span>
+              <input placeholder="08:00-10:00" value={novaAulaGrupo.horario} onChange={(e) => setNovaAulaGrupo({ ...novaAulaGrupo, horario: e.target.value })} maxLength={60} />
+            </label>
+            <label>
+              <span>Tópico (opcional)</span>
+              <input value={novaAulaGrupo.titulo} onChange={(e) => setNovaAulaGrupo({ ...novaAulaGrupo, titulo: e.target.value })} maxLength={200} />
+            </label>
+            <div className="docente-acoes">
+              <button type="submit" className="primary-button small">Criar aula</button>
+              <button type="button" className="ghost-button small" onClick={() => setNovaAulaGrupo(null)}>Cancelar</button>
+            </div>
+          </form>
+        )}
+
+        {formulario && turma && isAdmin && !ehGrupo && (
           <AulaFormulario
             modo={formulario.modo}
             turma={turma}
@@ -299,26 +369,31 @@ export default function PresencaTurmasPage() {
           />
         )}
 
-        <section className="cron-numeros" aria-label="Resumo da turma">
-          <div><strong>{resumo.total}</strong><span>aulas no cronograma</span></div>
-          <div><strong>{resumo.realizadas}</strong><span>realizadas</span></div>
-          <div><strong>{resumo.previstas}</strong><span>previstas</span></div>
-          <div><strong>{resumo.media !== null ? `${resumo.media}%` : '—'}</strong><span>presença média nas realizadas</span></div>
-        </section>
+        {aba !== 'relatorio' && (
+          <section className="cron-numeros" aria-label="Resumo da turma">
+            <div><strong>{resumo.total}</strong><span>aulas no cronograma</span></div>
+            <div><strong>{resumo.realizadas}</strong><span>realizadas</span></div>
+            <div><strong>{resumo.previstas}</strong><span>previstas</span></div>
+            <div><strong>{resumo.media !== null ? `${resumo.media}%` : '—'}</strong><span>presença média nas realizadas</span></div>
+          </section>
+        )}
 
         <div className="cron-abas" role="tablist">
           <button type="button" role="tab" aria-selected={aba === 'calendario'} className={aba === 'calendario' ? 'is-active' : ''} onClick={() => setAba('calendario')}>Calendário</button>
           <button type="button" role="tab" aria-selected={aba === 'aulas'} className={aba === 'aulas' ? 'is-active' : ''} onClick={() => setAba('aulas')}>Aulas</button>
+          <button type="button" role="tab" aria-selected={aba === 'relatorio'} className={aba === 'relatorio' ? 'is-active' : ''} onClick={() => setAba('relatorio')}>Relatório</button>
         </div>
 
         {loading && <div className="page-state">Carregando aulas…</div>}
+
+        {!loading && aba === 'relatorio' && <RelatorioPresenca cursos={cursos} />}
 
         {!loading && aba === 'calendario' && (
           <CalendarioAulas
             aulas={aulas}
             hoje={hoje}
-            onSelect={abrirChamada}
-            emptyText={isAdmin ? 'Esta turma ainda não tem aulas. Use Gerar aulas ou Nova aula avulsa.' : 'Esta turma ainda não tem aulas cadastradas.'}
+            onSelect={podeChamada ? abrirChamada : undefined}
+            emptyText={podeEditar ? 'Esta turma ainda não tem aulas. Crie uma aula para começar.' : 'Ainda não há aulas cadastradas.'}
             renderChip={(aula, lista) =>
               lista ? (
                 <span className="cron-presenca">
@@ -338,7 +413,7 @@ export default function PresencaTurmasPage() {
 
         {!loading && aba === 'aulas' && (
           <section className="cron-tabela-box">
-            {isAdmin && selecionadas.size > 0 && (
+            {podeEditar && !ehGrupo && selecionadas.size > 0 && (
               <div className="docente-lote" role="region" aria-label="Ações em lote">
                 <strong>{selecionadas.size} aula(s) selecionada(s)</strong>
                 <div className="docente-lote-acoes">
@@ -388,7 +463,7 @@ export default function PresencaTurmasPage() {
               <table className="users-table">
                 <thead>
                   <tr>
-                    {isAdmin && (
+                    {podeEditar && !ehGrupo && (
                       <th>
                         <input type="checkbox" aria-label="Selecionar todas" checked={tudoSelecionado} onChange={alternarTodas} />
                       </th>
@@ -399,7 +474,7 @@ export default function PresencaTurmasPage() {
                 <tbody>
                   {aulas.map((a) => (
                     <tr key={a.sessionId} className={a.situacao === 'cancelada' ? 'docente-linha-cancelada' : ''}>
-                      {isAdmin && (
+                      {podeEditar && !ehGrupo && (
                         <td>
                           <input
                             type="checkbox"
@@ -427,10 +502,10 @@ export default function PresencaTurmasPage() {
                       </td>
                       <td className="docente-acoes-celula">
                         <div className="docente-acoes-linha">
-                          <button type="button" className="ghost-button small" onClick={() => abrirChamada(a)}>Chamada</button>
-                          {isAdmin && (
+                          {podeChamada && <button type="button" className="ghost-button small" onClick={() => abrirChamada(a)}>Chamada</button>}
+                          {podeEditar && (
                             <>
-                              <button type="button" className="ghost-button small" onClick={() => setFormulario({ modo: 'editar', aula: a })}>Editar</button>
+                              {!ehGrupo && <button type="button" className="ghost-button small" onClick={() => setFormulario({ modo: 'editar', aula: a })}>Editar</button>}
                               <button type="button" className="ghost-button small" onClick={() => alternarCancelamento(a)}>
                                 {a.situacao === 'cancelada' ? 'Reativar' : 'Cancelar'}
                               </button>
@@ -449,7 +524,7 @@ export default function PresencaTurmasPage() {
                       </td>
                     </tr>
                   ))}
-                  {aulas.length === 0 && <tr><td colSpan={isAdmin ? 9 : 8} className="users-empty">Nenhuma aula nesta turma.</td></tr>}
+                  {aulas.length === 0 && <tr><td colSpan={podeEditar && !ehGrupo ? 9 : 8} className="users-empty">Nenhuma aula nesta turma ou grupo.</td></tr>}
                 </tbody>
               </table>
             </div>

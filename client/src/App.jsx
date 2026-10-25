@@ -158,7 +158,7 @@ export default function App() {
         <Route
           path="/gestao/presenca"
           element={
-            <ProtectedRoute roles={TEACHING_ROLES}>
+            <ProtectedRoute roles={[...TEACHING_ROLES, 'gestao']}>
               <PresencaTurmasPage />
             </ProtectedRoute>
           }

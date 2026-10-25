@@ -25,7 +25,7 @@ export default function ChamadaAula({ aula, onClose, onChange }) {
     setAlunos(null);
     setErro('');
     api
-      .get(`/docente/aulas/${aula.sessionId}/presenca`)
+      .get(`/presenca/gestao/aulas/${aula.sessionId}/presenca`)
       .then(({ data }) => ativo && setAlunos(data.alunos))
       .catch((error) => ativo && setErro(errorText(error)));
     return () => {
@@ -47,7 +47,7 @@ export default function ChamadaAula({ aula, onClose, onChange }) {
     setSalvando(aluno.userId);
     setErro('');
     try {
-      await api.put(`/docente/aulas/${aula.sessionId}/presenca/${aluno.userId}`, { status });
+      await api.put(`/presenca/gestao/aulas/${aula.sessionId}/presenca/${aluno.userId}`, { status });
       setAlunos((atual) =>
         atual.map((a) => (a.userId === aluno.userId ? { ...a, status, origem: status ? 'gestao' : null } : a))
       );
