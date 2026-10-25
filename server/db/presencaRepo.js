@@ -4,9 +4,9 @@ const { query, withTransaction } = require('./pool');
 // só no dia da aula. Depois que o dia termina, quem não marcou fica ausente (ver fecharAulasVencidas).
 
 const ALUNO_NA_TURMA = `
-  join turmas t on t.id = s.turma_id
-  join turma_alunos ta on ta.turma_id = s.turma_id and ta.situacao = 'ativo'
-  join matriculas m on m.id = ta.matricula_id and m.situacao = 'ativo' and m.user_id = $1`;
+  join presenca_participantes pp on pp.session_id = s.id and pp.user_id = $1
+  left join turmas t on t.id = s.turma_id
+  left join course_groups g on g.id = s.group_id`;
 
 const JUSTIFICATIVA_ATUAL = `
   left join lateral (
@@ -27,15 +27,14 @@ async function fecharAulasVencidas(hoje) {
   const { rowCount } = await query(
     `with vencidas as (
        select id from attendance_sessions
-        where turma_id is not null and fechada = false and status_aula = 'ativa' and session_date < $1::date
+        where (turma_id is not null or group_id is not null) and fechada = false and status_aula = 'ativa' and session_date < $1::date
      ),
      faltas as (
        insert into attendance_records (session_id, user_id, status, note, origem, marcado_em)
-       select s.id, m.user_id, 'ausente', '', 'automatico', now()
+       select s.id, pp.user_id, 'ausente', '', 'automatico', now()
          from attendance_sessions s
          join vencidas v on v.id = s.id
-         join turma_alunos ta on ta.turma_id = s.turma_id and ta.situacao = 'ativo'
-         join matriculas m on m.id = ta.matricula_id and m.situacao = 'ativo' and m.user_id is not null
+         join presenca_participantes pp on pp.session_id = s.id
        on conflict (session_id, user_id) do nothing
        returning 1
      )
@@ -48,14 +47,14 @@ async function fecharAulasVencidas(hoje) {
 // Aulas de hoje do aluno (todas as turmas em que está ativo), com a marcação atual.
 async function aulasDoDia(userId, hoje) {
   const { rows } = await query(
-    `select s.id, s.session_date, s.title, t.nome as turma, r.status, r.tipo_justificativa, r.origem,
+    `select s.id, s.session_date, s.title, coalesce(t.nome, g.name) as turma, r.status, r.tipo_justificativa, r.origem,
             j.id as justificativa_id, j.status as justificativa_status
        from attendance_sessions s
        ${ALUNO_NA_TURMA}
        left join attendance_records r on r.session_id = s.id and r.user_id = $1
        ${JUSTIFICATIVA_ATUAL}
       where s.session_date = $2::date and s.status_aula = 'ativa'
-      order by t.nome, s.title, s.id`,
+      order by coalesce(t.nome, g.name), s.title, s.id`,
     [userId, hoje]
   );
   return rows.map(mapAula);
@@ -64,14 +63,14 @@ async function aulasDoDia(userId, hoje) {
 // Histórico do aluno: aulas já realizadas (até hoje), mais recentes primeiro.
 async function historicoDoAluno(userId, hoje) {
   const { rows } = await query(
-    `select s.id, s.session_date, s.title, t.nome as turma, r.status, r.tipo_justificativa, r.origem,
+    `select s.id, s.session_date, s.title, coalesce(t.nome, g.name) as turma, r.status, r.tipo_justificativa, r.origem,
             j.id as justificativa_id, j.status as justificativa_status, j.motivo, j.resposta
        from attendance_sessions s
        ${ALUNO_NA_TURMA}
        left join attendance_records r on r.session_id = s.id and r.user_id = $1
        ${JUSTIFICATIVA_ATUAL}
       where s.session_date <= $2::date and s.status_aula = 'ativa'
-      order by s.session_date desc, t.nome, s.id
+      order by s.session_date desc, coalesce(t.nome, g.name), s.id
       limit 500`,
     [userId, hoje]
   );
@@ -276,12 +275,12 @@ async function aulasDaTurma(turmaId, hoje) {
 async function cronogramaDoAluno(userId, hoje) {
   const { rows } = await query(
     `select s.id, s.session_date, s.horario, s.modulo, s.title, s.professor, s.fechada, s.status_aula,
-            t.nome as turma, c.title as curso, r.status, r.tipo_justificativa
+            coalesce(t.nome, g.name) as turma, c.title as curso, r.status, r.tipo_justificativa
        from attendance_sessions s
        ${ALUNO_NA_TURMA}
        join courses c on c.id = s.course_id
        left join attendance_records r on r.session_id = s.id and r.user_id = $1
-      order by s.session_date, s.horario, c.title, t.nome, s.id
+      order by s.session_date, s.horario, c.title, coalesce(t.nome, g.name), s.id
       limit 1000`,
     [userId]
   );
