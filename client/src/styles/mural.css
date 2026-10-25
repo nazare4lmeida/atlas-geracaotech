@@ -297,3 +297,38 @@
   gap: 4px;
   font-size: 0.92rem;
 }
+
+/* Regras do fórum: fixas no topo do mural, sempre visíveis. */
+.mural-regras {
+  margin: 0 0 1rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--primary);
+  border-radius: 10px;
+  font-size: 0.9rem;
+}
+
+.mural-regras p {
+  margin: 0.3rem 0 0;
+  color: var(--text-soft);
+}
+
+.mural-card.is-oculto {
+  opacity: 0.7;
+}
+
+.mural-moderacao {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.mural-denuncia {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.mural-filtro textarea {
+  width: 100%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+}

@@ -2,7 +2,7 @@ const accessRepo = require('../db/accessRepo');
 const httpError = require('../utils/httpError');
 const {
   findCourseBySlugOr404,
-  requireManageAccess,
+  requireParticipantsAccess,
   requireViewAccess
 } = require('../services/access');
 
@@ -13,7 +13,7 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{
 
 async function loadManagedCourse(req) {
   const course = await findCourseBySlugOr404(req.params.slug);
-  await requireManageAccess(course, req.user);
+  await requireParticipantsAccess(course, req.user);
   return course;
 }
 

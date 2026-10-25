@@ -176,6 +176,8 @@ export default function ManageUsersPage() {
                 <option value="">Todos</option>
                 <option value="admin">Administradores</option>
                 <option value="atendente">Atendentes</option>
+                <option value="gestao">Gestão</option>
+                <option value="editor">Editores</option>
                 <option value="teacher">Professores</option>
                 <option value="student">Alunos</option>
               </select>
@@ -322,6 +324,8 @@ export default function ManageUsersPage() {
                 <option value="teacher">Professor</option>
                 <option value="admin">Administrador</option>
                 <option value="atendente">Atendente</option>
+                <option value="gestao">Gestão</option>
+                <option value="editor">Editor</option>
               </select>
             </label>
             {values.role === 'student' ? (

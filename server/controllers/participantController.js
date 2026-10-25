@@ -2,14 +2,14 @@ const courseRepo = require('../db/courseRepo');
 const accessRepo = require('../db/accessRepo');
 const progressRepo = require('../db/progressRepo');
 const httpError = require('../utils/httpError');
-const { findCourseBySlugOr404, requireManageAccess, isAdmin, isTeacherAccount } = require('../services/access');
+const { findCourseBySlugOr404, requireParticipantsAccess, isAdmin, isTeacherAccount } = require('../services/access');
 const { serializeCourse, summarizeProgress } = require('../services/courseView');
 
 // Participantes do curso (equivalente a "Participantes" no Moodle), com relatório de progresso.
 
 async function loadManagedCourse(req) {
   const course = await findCourseBySlugOr404(req.params.slug);
-  await requireManageAccess(course, req.user);
+  await requireParticipantsAccess(course, req.user);
   return course;
 }
 

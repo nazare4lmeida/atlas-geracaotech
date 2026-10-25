@@ -1,7 +1,7 @@
 const courseRepo = require('../db/courseRepo');
 const accessRepo = require('../db/accessRepo');
 const httpError = require('../utils/httpError');
-const { buildAccess, canCreateCourse, findCourseBySlugOr404, requireManageAccess } = require('../services/access');
+const { buildAccess, canCreateCourse, findCourseBySlugOr404, requireParticipantsAccess } = require('../services/access');
 const { serializeCourse } = require('../services/courseView');
 const { buildBackup, importAsNewCourse, restoreIntoCourse } = require('../services/courseBackup');
 
@@ -17,7 +17,7 @@ async function respondWithCourse(res, user, courseId, status = 200) {
 
 exports.exportCourse = async (req, res) => {
   const course = await findCourseBySlugOr404(req.params.slug);
-  await requireManageAccess(course, req.user);
+  await requireParticipantsAccess(course, req.user);
 
   const backup = buildBackup(course);
   res.setHeader('Content-Disposition', `attachment; filename="${course.slug}.atlas-backup.json"`);
@@ -35,7 +35,7 @@ exports.importCourse = async (req, res) => {
 
 exports.restoreCourse = async (req, res) => {
   const course = await findCourseBySlugOr404(req.params.slug);
-  await requireManageAccess(course, req.user);
+  await requireParticipantsAccess(course, req.user);
 
   const courseId = await restoreIntoCourse(course, req.body);
   return respondWithCourse(res, req.user, courseId);

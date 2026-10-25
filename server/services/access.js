@@ -18,9 +18,13 @@ function isTeacherAccount(user) {
   return user?.role === 'teacher' || user?.role === 'admin';
 }
 
-// Criar e importar cursos é só da administração. Professores editam apenas os cursos que lecionam.
+function isEditor(user) {
+  return user?.role === 'editor';
+}
+
+// Criar cursos: administração e editor. Importar e excluir cursos alheios: só a administração.
 function canCreateCourse(user) {
-  return isAdmin(user);
+  return isAdmin(user) || isEditor(user);
 }
 
 // Apenas o administrador ou quem criou o curso pode excluí-lo.
@@ -32,7 +36,17 @@ function canDeleteCourse(user, course) {
 // Calcula, de forma pura, o que um usuário pode fazer em um curso dado sua matrícula.
 function computeAccess(user, enrolment) {
   if (isAdmin(user)) {
-    return { canManage: true, role: 'admin', enrolment: enrolment || null, suspended: false };
+    return { canManage: true, canManageParticipants: true, role: 'admin', enrolment: enrolment || null, suspended: false };
+  }
+
+  // Editor: edita o conteúdo de todos os cursos, mas não mexe em alunos, grupos nem presença.
+  if (isEditor(user)) {
+    return { canManage: true, canManageParticipants: false, role: 'editor', enrolment: enrolment || null, suspended: false };
+  }
+
+  // Gestão: só acompanha. Vê os cursos como visitante, sem editar nada.
+  if (user?.role === 'gestao') {
+    return { canManage: false, canManageParticipants: false, role: 'gestao', enrolment: enrolment || null, suspended: false };
   }
 
   if (!enrolment) {
@@ -44,10 +58,10 @@ function computeAccess(user, enrolment) {
   }
 
   if (enrolment.role === 'teacher') {
-    return { canManage: true, role: 'teacher', enrolment, suspended: false };
+    return { canManage: true, canManageParticipants: true, role: 'teacher', enrolment, suspended: false };
   }
 
-  return { canManage: false, role: 'student', enrolment, suspended: false };
+  return { canManage: false, canManageParticipants: false, role: 'student', enrolment, suspended: false };
 }
 
 // Permissões completas usadas nas respostas da API (inclui quem pode excluir o curso).
@@ -112,8 +126,22 @@ async function requireManageAccess(course, user) {
   return access;
 }
 
+// Alunos, grupos, presença e cópias de segurança: administração e docente do curso (não o editor).
+async function requireParticipantsAccess(course, user) {
+  const enrolment = await accessRepo.findEnrollment(course.id, user.id);
+  const access = computeAccess(user, enrolment);
+
+  if (!access.canManageParticipants) {
+    throw httpError(403, 'Você não tem permissão para gerenciar os alunos deste curso.');
+  }
+
+  return access;
+}
+
 module.exports = {
   isAdmin,
+  isEditor,
+  requireParticipantsAccess,
   isTeacherAccount,
   canCreateCourse,
   canDeleteCourse,

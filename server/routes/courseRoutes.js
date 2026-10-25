@@ -52,7 +52,7 @@ const router = express.Router();
 
 // ---------- Cursos ----------
 router.get('/', asyncHandler(listCourses));
-router.post('/', requireRole('admin'), asyncHandler(createCourse));
+router.post('/', requireRole('admin', 'editor'), asyncHandler(createCourse));
 router.post('/import', requireRole('admin'), asyncHandler(importCourse));
 router.get('/:slug', asyncHandler(getCourse));
 router.put('/:slug', asyncHandler(updateCourse));
@@ -101,7 +101,7 @@ router.delete('/:slug/modules/:moduleId/questions/:questionId', asyncHandler(del
 
 // ---------- Projeto final ----------
 router.put('/:slug/final-project', asyncHandler(updateFinalProject));
-router.put('/:slug/progress-bar', requireRole('admin', 'teacher'), asyncHandler(updateProgressBar));
+router.put('/:slug/progress-bar', requireRole('admin', 'teacher', 'editor'), asyncHandler(updateProgressBar));
 
 // ---------- Participantes ----------
 router.get('/:slug/participants', asyncHandler(listParticipants));

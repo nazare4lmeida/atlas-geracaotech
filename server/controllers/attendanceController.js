@@ -1,6 +1,6 @@
 const courseRepo = require('../db/courseRepo');
 const attendanceRepo = require('../db/attendanceRepo');
-const { requireManageAccess } = require('../services/access');
+const { requireParticipantsAccess } = require('../services/access');
 const { digitsOf, hashCpf } = require('../services/cpf');
 const { isoDate } = require('../services/validators');
 const httpError = require('../utils/httpError');
@@ -16,7 +16,7 @@ async function courseOr404(courseId) {
 
 async function manageCourse(courseId, user) {
   const course = await courseOr404(courseId);
-  await requireManageAccess(course, user);
+  await requireParticipantsAccess(course, user);
   return course;
 }
 

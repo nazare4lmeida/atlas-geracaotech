@@ -85,6 +85,7 @@ function serializeCourse(course, access = {}) {
     modules,
     permissions: {
       canManage: showAll,
+      canManageParticipants: Boolean(access.canManageParticipants),
       canDelete: Boolean(access.canDelete),
       role: access.role || null,
       enrolled: Boolean(access.enrolment)

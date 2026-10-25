@@ -6,7 +6,7 @@ const { sanitizeUser } = require('../services/users');
 
 // Gestão de contas (somente administradores), equivalente a "Contas de usuário" no Moodle.
 
-const ROLES = ['admin', 'teacher', 'student', 'atendente'];
+const ROLES = ['admin', 'teacher', 'student', 'atendente', 'gestao', 'editor'];
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const STATUSES = ['active', 'pending', 'inactive'];

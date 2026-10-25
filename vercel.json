@@ -22,12 +22,8 @@
       "handle": "filesystem"
     },
     {
-      "src": "/(.*\\.[a-zA-Z0-9]+)$",
-      "dest": "/client/$1"
-    },
-    {
       "src": "/(.*)",
-      "dest": "/client/index.html"
+      "dest": "/client/$1"
     }
   ]
 }

@@ -5,7 +5,7 @@ const { query, closePool } = require('../db/pool');
 // Serve para criar o primeiro administrador em um banco já existente.
 async function main() {
   const [email, role] = process.argv.slice(2);
-  const validRoles = ['admin', 'teacher', 'student', 'atendente'];
+  const validRoles = ['admin', 'teacher', 'student', 'atendente', 'gestao', 'editor'];
 
   if (!email || !validRoles.includes(role)) {
     console.error('Uso: npm run set-role -- <email> <admin|teacher|student>');
