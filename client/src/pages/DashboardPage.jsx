@@ -83,8 +83,22 @@ function dataCurta(iso) {
 }
 
 export default function DashboardPage() {
-  const { user, isTeacher, isAdmin, isAtendente } = useAuth();
+  const { user, isTeacher, isAdmin, isAtendente, isGestao, isEditor } = useAuth();
   if (isAtendente) return <Navigate to="/gestao/atendimento" replace />;
+  if (isEditor) return <Navigate to="/cursos" replace />;
+  if (isGestao) {
+    return (
+      <div className="dashboard-layout">
+        <Sidebar />
+        <div className="dashboard-content">
+          <section className="home-numeros" aria-label="Números do Geração Tech">
+            <h2 className="home-numeros-titulo">Números do Geração Tech</h2>
+            <GestaoDashboard />
+          </section>
+        </div>
+      </div>
+    );
+  }
 
   const papel = isAdmin ? 'admin' : isTeacher ? 'professor' : 'aluno';
   const acessos = papel === 'admin' ? ACESSO_ADMIN : papel === 'professor' ? ACESSO_PROFESSOR : ACESSO_ALUNO;
@@ -304,7 +318,7 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {papel === 'admin' && (
+        {papel !== 'aluno' && (
           <section className="home-numeros" aria-label="Números do Geração Tech">
             <h2 className="home-numeros-titulo">Números do Geração Tech</h2>
             <GestaoDashboard />

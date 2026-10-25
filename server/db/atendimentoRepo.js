@@ -360,7 +360,35 @@ async function resumoGestao() {
   };
 }
 
+// Uma linha por mensagem, com a sessão e o aluno. Usada só no relatório completo da gestão.
+async function relatorioCompleto({ de, ate }) {
+  const { rows } = await query(
+    `select s.id as sessao_id, s.status, s.created_at as abertura, u.name as aluno, a.name as atendente,
+            m.remetente, m.conteudo, m.created_at as hora
+       from atendimento_mensagens m
+       join atendimento_sessoes s on s.id = m.sessao_id
+       join users u on u.id = s.user_id
+       left join users a on a.id = s.atendente_id
+      where ($1::date is null or m.created_at >= $1::date)
+        and ($2::date is null or m.created_at < ($2::date + interval '1 day'))
+      order by s.created_at, m.id
+      limit 50000`,
+    [de, ate]
+  );
+  return rows.map((r) => ({
+    sessao: r.sessao_id,
+    status: r.status,
+    abertura: r.abertura,
+    aluno: r.aluno,
+    atendente: r.atendente || '',
+    remetente: r.remetente,
+    hora: r.hora,
+    conteudo: r.conteudo
+  }));
+}
+
 module.exports = {
+  relatorioCompleto,
   anexoDaMensagem,
   anexoDoAluno,
   anexoDaEquipe,

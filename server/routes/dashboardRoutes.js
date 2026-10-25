@@ -6,6 +6,6 @@ const asyncHandler = require('../utils/asyncHandler');
 const router = express.Router();
 
 // Visão geral da gestão: administração e professores.
-router.get('/gestao', requireRole('admin', 'teacher'), asyncHandler(dashboard.gestao));
+router.get('/gestao', requireRole('admin', 'teacher', 'gestao'), asyncHandler(dashboard.gestao));
 
 module.exports = router;

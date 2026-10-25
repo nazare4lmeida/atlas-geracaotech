@@ -11,6 +11,7 @@ const userRoutes = require('./routes/userRoutes');
 const courseRoutes = require('./routes/courseRoutes');
 const catalogRoutes = require('./routes/catalogRoutes');
 const mediaRoutes = require('./routes/mediaRoutes');
+const siteSettingsRoutes = require('./routes/siteSettingsRoutes');
 const certificateRoutes = require('./routes/certificateRoutes');
 const verifyRoutes = require('./routes/verifyRoutes');
 const rateLimit = require('./middleware/rateLimit');
@@ -66,6 +67,7 @@ app.use('/api/users', authMiddleware, userRoutes);
 app.use('/api/courses', authMiddleware, courseRoutes);
 // Imagens: o envio exige login de professor/admin; a leitura usa link assinado (ver routes/mediaRoutes.js).
 app.use('/api/media', mediaRoutes);
+app.use('/api/site-settings', siteSettingsRoutes);
 app.use('/api/certificate-templates', authMiddleware, certificateRoutes);
 // Verificação pública de certificado (QR code e página /verificar): sem login, com limite por IP.
 app.use('/api/verify', rateLimit({ max: 60 }), verifyRoutes);

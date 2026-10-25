@@ -16,7 +16,8 @@ router.post('/aluno/anexo', asyncHandler(atendimento.anexoAluno));
 router.get('/anexos/:id', asyncHandler(atendimento.abrirAnexo));
 
 // Acompanhamento: administração e atendentes veem a fila e as conversas.
-router.get('/gestao/resumo', requireRole('admin', 'atendente'), asyncHandler(atendimento.resumoGestao));
+const atendimentoRelatorio = require('../controllers/atendimentoRelatorioController');
+router.get('/gestao/resumo', requireRole('admin', 'atendente', 'gestao'), asyncHandler(atendimento.resumoGestao));
 router.get('/gestao/sessoes', requireRole('admin', 'atendente'), asyncHandler(atendimento.listarSessoes));
 router.get('/gestao/sessoes/:id', requireRole('admin', 'atendente'), asyncHandler(atendimento.detalheSessao));
 
@@ -28,6 +29,7 @@ router.post('/gestao/sessoes/:id/anexo', requireRole('atendente'), asyncHandler(
 
 // Perguntas do robô: configuração da administração.
 
+router.get('/gestao/relatorio', requireRole('admin', 'gestao'), asyncHandler(atendimentoRelatorio.relatorioGestao));
 router.get('/gestao/faq', requireRole('admin'), asyncHandler(atendimento.listarFaq));
 router.post('/gestao/faq', requireRole('admin'), asyncHandler(atendimento.criarFaq));
 router.patch('/gestao/faq/:id', requireRole('admin'), asyncHandler(atendimento.atualizarFaq));

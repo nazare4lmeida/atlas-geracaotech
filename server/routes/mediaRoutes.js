@@ -11,7 +11,7 @@ const router = express.Router();
 router.post(
   '/',
   authMiddleware,
-  requireRole('admin', 'teacher'),
+  requireRole('admin', 'teacher', 'editor'),
   express.raw({ type: 'image/*', limit: MAX_BYTES }),
   asyncHandler(async (req, res) => {
     const result = await uploadMedia(req.body, req.headers['content-type']);

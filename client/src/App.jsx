@@ -1,4 +1,7 @@
+import { useEffect } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
+import api from './services/api';
+import { aplicarAparencia } from './utils/aparencia';
 import AppShell from './components/AppShell';
 import ProtectedRoute from './components/ProtectedRoute';
 import { useAuth } from './context/AuthContext';
@@ -23,6 +26,8 @@ import PresencaAlunoPage from './pages/PresencaAlunoPage';
 import PresencaTurmasPage from './pages/PresencaTurmasPage';
 import ProfessorPontoPage from './pages/ProfessorPontoPage';
 import GestaoPontoPage from './pages/GestaoPontoPage';
+import AparenciaPage from './pages/AparenciaPage';
+import AtendimentoNumerosPage from './pages/AtendimentoNumerosPage';
 import CronogramasPage from './pages/CronogramasPage';
 import JustificativasPage from './pages/JustificativasPage';
 import RelatoriosGestaoPage from './pages/RelatoriosGestaoPage';
@@ -38,7 +43,16 @@ function GestaoIndex() {
   return <Navigate to={isAdmin ? '/gestao/acompanhamento' : '/gestao/presenca'} replace />;
 }
 
+// Gestão vê só os números do atendimento; admin e atendente seguem para a tela completa.
+function AtendimentoRota() {
+  const { isGestao } = useAuth();
+  return isGestao ? <AtendimentoNumerosPage /> : <AtendimentoGestaoPage />;
+}
+
 export default function App() {
+  useEffect(() => {
+    api.get('/site-settings/aparencia').then(({ data }) => aplicarAparencia(data.valor)).catch(() => {});
+  }, []);
   return (
     <Routes>
       {/* Entrada do Atlas: a página inicial é o login (sem a barra de navegação). */}
@@ -142,7 +156,7 @@ export default function App() {
         <Route
           path="/gestao/cursos/:slug"
           element={
-            <ProtectedRoute roles={TEACHING_ROLES}>
+            <ProtectedRoute roles={['admin', 'teacher', 'editor']}>
               <ManageCoursePage />
             </ProtectedRoute>
           }
@@ -182,7 +196,7 @@ export default function App() {
         <Route
           path="/gestao/ponto"
           element={
-            <ProtectedRoute roles={['admin']}>
+            <ProtectedRoute roles={['admin', 'gestao']}>
               <GestaoPontoPage />
             </ProtectedRoute>
           }
@@ -198,7 +212,7 @@ export default function App() {
         <Route
           path="/gestao/acompanhamento"
           element={
-            <ProtectedRoute roles={['admin']}>
+            <ProtectedRoute roles={['admin', 'gestao']}>
               <ReportsPage />
             </ProtectedRoute>
           }
@@ -214,15 +228,15 @@ export default function App() {
         <Route
           path="/gestao/atendimento"
           element={
-            <ProtectedRoute roles={['admin', 'atendente']}>
-              <AtendimentoGestaoPage />
+            <ProtectedRoute roles={['admin', 'atendente', 'gestao']}>
+              <AtendimentoRota />
             </ProtectedRoute>
           }
         />
         <Route
           path="/gestao/relatorios"
           element={
-            <ProtectedRoute roles={['admin']}>
+            <ProtectedRoute roles={['admin', 'gestao']}>
               <RelatoriosGestaoPage />
             </ProtectedRoute>
           }
@@ -252,6 +266,14 @@ export default function App() {
           }
         />
 
+        <Route
+          path="/aparencia"
+          element={
+            <ProtectedRoute roles={['admin', 'editor']}>
+              <AparenciaPage />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/home" element={<Navigate to="/" replace />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>

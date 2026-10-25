@@ -6,12 +6,11 @@ const asyncHandler = require('../utils/asyncHandler');
 
 const router = express.Router();
 
-// Acompanhamento e acessos: somente administradores.
-router.use(requireRole('admin'));
+// Acompanhamento: administração e gestão. Logins continuam só da administração.
 
-router.get('/enrollments', asyncHandler(reports.enrollmentReport));
-router.get('/operacao/marcos', asyncHandler(reports.operacaoMarcos));
-router.get('/operacao/alunos', asyncHandler(reports.operacaoAlunos));
-router.get('/logins', asyncHandler(management.listLogins));
+router.get('/enrollments', requireRole('admin', 'gestao'), asyncHandler(reports.enrollmentReport));
+router.get('/operacao/marcos', requireRole('admin', 'gestao'), asyncHandler(reports.operacaoMarcos));
+router.get('/operacao/alunos', requireRole('admin', 'gestao'), asyncHandler(reports.operacaoAlunos));
+router.get('/logins', requireRole('admin'), asyncHandler(management.listLogins));
 
 module.exports = router;

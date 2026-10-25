@@ -28,6 +28,23 @@ const studentItems = [
   { to: '/cronogramas', label: 'Cronogramas', icon: 'calendar' },
   { to: '/atendimento', label: 'Atendimento', icon: 'chat' }
 ];
+// Gestão: acompanhamento, sem acessos nem usuários.
+const gestaoItems = [
+  { to: '/dashboard', label: 'Visão geral', icon: 'home' },
+  { to: '/mural', label: 'Mural', icon: 'bell' },
+  { to: '/gestao/presenca', label: 'Presença', icon: 'users' },
+  { to: '/gestao/relatorios', label: 'Relatórios', icon: 'grid' },
+  { to: '/gestao/acompanhamento', label: 'Acompanhamento', icon: 'chart' },
+  { to: '/gestao/ponto', label: 'Ponto dos professores', icon: 'clock' },
+  { to: '/gestao/atendimento', label: 'Atendimento', icon: 'chat' },
+  { to: '/minha-area', label: 'Meu perfil', icon: 'user' }
+];
+// Editor: cursos e a aparência do site.
+const editorItems = [
+  { to: '/cursos', label: 'Cursos', icon: 'book' },
+  { to: '/aparencia', label: 'Aparência', icon: 'settings' },
+  { to: '/minha-area', label: 'Meu perfil', icon: 'user' }
+];
 const adminItems = [
   { to: '/gestao/relatorios', label: 'Relatórios', icon: 'grid' },
   { to: '/gestao/atendimento', label: 'Atendimento', icon: 'chat' },
@@ -39,15 +56,19 @@ const adminItems = [
 ];
 
 export default function Sidebar() {
-  const { isAdmin, isTeacher, isAtendente } = useAuth();
+  const { isAdmin, isTeacher, isAtendente, isGestao, isEditor } = useAuth();
   const [collapsed, setCollapsed] = useSidebarCollapsed();
 
   // Anotações e editor de código são exclusivos do aluno.
   const studentOnly = new Set(['/anotacoes', '/editor']);
   // Atendente: menu enxuto, só o atendimento e o perfil.
-  const visibleItems = isAtendente
-    ? atendenteItems
-    : [
+  const visibleItems = isEditor
+    ? editorItems
+    : isGestao
+      ? gestaoItems
+      : isAtendente
+        ? atendenteItems
+        : [
         // Certificados: professor não vê (só a administração gerencia).
         ...items.filter((item) => !(isTeacher && studentOnly.has(item.to)) && !(isTeacher && !isAdmin && item.to === '/documentos')),
         // Administração não tem "Meu ponto": quem bate ponto é o professor.

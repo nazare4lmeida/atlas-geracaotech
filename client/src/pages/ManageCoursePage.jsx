@@ -100,7 +100,7 @@ export default function ManageCoursePage() {
         </section>
 
         <nav className="module-tabs" aria-label="Seções de gestão">
-          {TABS.map((item) => (
+          {TABS.filter((item) => !['participantes', 'grupos', 'backup'].includes(item.id) || course?.permissions?.canManageParticipants).map((item) => (
             <button
               key={item.id}
               type="button"

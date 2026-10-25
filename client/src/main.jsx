@@ -8,6 +8,7 @@ import './styles/global.css';
 import './styles/manage.css';
 import './styles/layouts.css';
 import './styles/course.css';
+import './styles/aparencia.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

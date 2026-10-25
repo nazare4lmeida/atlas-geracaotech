@@ -5,6 +5,8 @@ const asyncHandler = require('../utils/asyncHandler');
 
 // Área do professor (montada em /api/docente, com autenticação). Administração também acessa.
 const router = express.Router();
+router.get('/gestao/ponto', requireRole('admin', 'gestao'), asyncHandler(docente.gestaoPonto));
+router.get('/gestao/ponto/exportar', requireRole('admin', 'gestao'), asyncHandler(docente.exportarPontoGestao));
 router.use(requireRole('admin', 'teacher'));
 
 // Turmas e cronograma das turmas que ministra. Editar o cronograma é só da administração.
@@ -43,7 +45,5 @@ router.post('/ponto/extra', asyncHandler(docente.aulaExtra));
 router.get('/ponto', asyncHandler(docente.historicoPonto));
 
 // Administração: ponto de todos os professores, só para visualizar e exportar (a gestão não altera os registros).
-router.get('/gestao/ponto', requireRole('admin'), asyncHandler(docente.gestaoPonto));
-router.get('/gestao/ponto/exportar', requireRole('admin'), asyncHandler(docente.exportarPontoGestao));
 
 module.exports = router;
