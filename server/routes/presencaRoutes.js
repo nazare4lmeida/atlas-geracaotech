@@ -24,6 +24,7 @@ router.get('/gestao/turmas/:turmaId/aulas', requireRole('admin', 'teacher'), asy
 router.get('/gestao/espacos', requireRole('admin', 'teacher', 'gestao'), asyncHandler(espacos.listarEspacos));
 router.get('/gestao/espacos/:tipo/:id/aulas', requireRole('admin', 'teacher', 'gestao'), asyncHandler(espacos.aulasDoEspaco));
 router.post('/gestao/espacos/:tipo/:id/aulas', requireRole('admin', 'teacher'), asyncHandler(espacos.criarAula));
+router.post('/gestao/espacos/:tipo/:id/gerar', requireRole('admin', 'teacher'), asyncHandler(espacos.gerarCronograma));
 router.post('/gestao/aulas/:sessionId/cancelamento', requireRole('admin', 'teacher'), asyncHandler(espacos.cancelarAula));
 router.delete('/gestao/aulas/:sessionId', requireRole('admin', 'teacher'), asyncHandler(espacos.removerAula));
 router.get('/gestao/aulas/:sessionId/presenca', requireRole('admin', 'teacher', 'gestao'), asyncHandler(espacos.presencaDaAula));

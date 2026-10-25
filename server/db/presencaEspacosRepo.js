@@ -126,31 +126,62 @@ async function aulasDoEspaco(tipo, id, hoje) {
 }
 
 // Cria aula avulsa. Na turma não repete a data; no grupo, sim (um grupo pode ter mais de uma aula no dia).
-async function criarAula(tipo, id, { data, titulo, horario }) {
+async function criarAula(tipo, id, { data, titulo, horario, modulo = '' }) {
   return withTransaction(async (client) => {
     if (tipo === 'turma') {
       const ocupada = await client.query(`select 1 from attendance_sessions where turma_id = $1 and session_date = $2::date`, [id, data]);
       if (ocupada.rowCount) return { erro: 'data_ocupada' };
       const { rows } = await client.query(
         `insert into attendance_sessions (course_id, turma_id, session_date, title, horario, modulo, professor, origem, status_aula, tipo)
-         select t.curso_id, t.id, $2::date, $3, coalesce(nullif($4, ''), t.horario, ''), '',
+         select t.curso_id, t.id, $2::date, $3, coalesce(nullif($4, ''), t.horario, ''), $5,
                 coalesce((select string_agg(u.name, ', ' order by u.name) from turma_professores tp join users u on u.id = tp.user_id where tp.turma_id = t.id), ''),
                 'atlas', 'ativa', 'regular'
            from turmas t where t.id = $1
          returning id`,
-        [id, data, titulo || '', horario || '']
+        [id, data, titulo || '', horario || '', modulo || '']
       );
       return rows[0] ? { id: rows[0].id } : { erro: 'espaco_inexistente' };
     }
+    const ocupada = await client.query(`select 1 from attendance_sessions where group_id = $1 and session_date = $2::date`, [id, data]);
+    if (ocupada.rowCount) return { erro: 'data_ocupada' };
     const { rows } = await client.query(
       `insert into attendance_sessions (course_id, group_id, session_date, title, horario, modulo, professor, origem, status_aula, tipo)
-       select g.course_id, g.id, $2::date, $3, $4, '', '', 'atlas', 'ativa', 'regular'
+       select g.course_id, g.id, $2::date, $3, $4, $5,
+              coalesce((select string_agg(u.name, ', ' order by u.name) from enrollments e join users u on u.id = e.user_id
+                         where e.course_id = g.course_id and e.role = 'teacher' and e.status = 'active'), ''),
+              'atlas', 'ativa', 'regular'
          from course_groups g where g.id = $1
        returning id`,
-      [id, data, titulo || '', horario || '']
+      [id, data, titulo || '', horario || '', modulo || '']
     );
     return rows[0] ? { id: rows[0].id } : { erro: 'espaco_inexistente' };
   });
+}
+
+// Gera uma aula por data nos dias da semana escolhidos, entre inicio e fim.
+// A ementa (módulo e título) é distribuída em ordem, uma aula por item. Datas já ocupadas são puladas.
+async function gerarCronograma(tipo, id, { inicio, fim, dias, horario, ementa }) {
+  const criadas = [];
+  let puladas = 0;
+  let proximo = 0;
+  const cursor = new Date(`${inicio}T00:00:00Z`);
+  const limite = new Date(`${fim}T00:00:00Z`);
+  let guarda = 0;
+  while (cursor <= limite && guarda++ < 800) {
+    if (dias.includes(cursor.getUTCDay())) {
+      const data = cursor.toISOString().slice(0, 10);
+      const item = ementa[proximo] || { modulo: '', titulo: '' };
+      const resultado = await criarAula(tipo, id, { data, titulo: item.titulo, horario, modulo: item.modulo });
+      if (resultado.erro === 'data_ocupada') puladas++;
+      else if (resultado.erro) return resultado;
+      else {
+        criadas.push(data);
+        if (proximo < ementa.length) proximo++;
+      }
+    }
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+  return { criadas: criadas.length, puladas, sobrandoEmenta: Math.max(0, ementa.length - proximo) };
 }
 
 async function definirCancelamento(sessionId, cancelada) {
@@ -289,6 +320,7 @@ async function relatorio(filtros, hoje, escopoProfessorId) {
 }
 
 module.exports = {
+  gerarCronograma,
   acessoEspaco,
   espacoDaAula,
   listarEspacos,

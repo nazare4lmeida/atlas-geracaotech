@@ -7,6 +7,8 @@ import CalendarioAulas from '../components/presenca/CalendarioAulas';
 import AulaFormulario from '../components/presenca/AulaFormulario';
 import ChamadaAula from '../components/presenca/ChamadaAula';
 import RelatorioPresenca from '../components/presenca/RelatorioPresenca';
+import GerarCronograma from '../components/presenca/GerarCronograma';
+import { baixarHtml, gerarCronogramaHtml } from '../utils/cronogramaHtml';
 import '../styles/cronograma.css';
 import '../styles/docente.css';
 
@@ -32,6 +34,7 @@ export default function PresencaTurmasPage() {
   const [linkEditado, setLinkEditado] = useState(null);
   const [podeGerenciarGrupo, setPodeGerenciarGrupo] = useState(false);
   const [novaAulaGrupo, setNovaAulaGrupo] = useState(null);
+  const [gerando, setGerando] = useState(false);
 
   useEffect(() => {
     const espacos = api.get('/presenca/gestao/espacos').then(({ data }) => data).catch(() => ({ turmas: [], grupos: [] }));
@@ -87,6 +90,7 @@ export default function PresencaTurmasPage() {
     setFormulario(null);
     setChamada(null);
     setNovaAulaGrupo(null);
+    setGerando(false);
     setSelecionadas(new Set());
     setEditandoProfessores(false);
     carregarAulas();
@@ -328,7 +332,7 @@ export default function PresencaTurmasPage() {
           )}
           {podeEditar && !ehGrupo && (
             <div className="docente-acoes">
-              <button type="button" className="primary-button small" onClick={() => setFormulario({ modo: 'gerar' })} disabled={!turmaId}>
+              <button type="button" className="primary-button small" onClick={() => setGerando(true)} disabled={!turmaId}>
                 Gerar cronograma
               </button>
               <label className="ghost-button small">
@@ -353,7 +357,10 @@ export default function PresencaTurmasPage() {
           )}
           {podeEditar && ehGrupo && (
             <div className="docente-acoes">
-              <button type="button" className="primary-button small" onClick={() => setNovaAulaGrupo({ data: '', titulo: '', horario: '' })}>
+              <button type="button" className="primary-button small" onClick={() => setGerando(true)}>
+                Gerar cronograma
+              </button>
+              <button type="button" className="ghost-button small" onClick={() => setNovaAulaGrupo({ data: '', titulo: '', horario: '' })}>
                 Nova aula do grupo
               </button>
             </div>
@@ -397,6 +404,40 @@ export default function PresencaTurmasPage() {
               </div>
             )}
           </section>
+        )}
+
+        {gerando && turma && podeEditar && (
+          <GerarCronograma
+            tipo={turma.tipo}
+            id={turmaId}
+            onCancel={() => setGerando(false)}
+            onDone={(mensagem) => {
+              setGerando(false);
+              setFeedback({ type: 'success', text: mensagem });
+              carregarAulas();
+            }}
+          />
+        )}
+
+        {turma && aulas.length > 0 && (
+          <div className="docente-acoes">
+            <button
+              type="button"
+              className="ghost-button small"
+              onClick={() =>
+                baixarHtml(
+                  `cronograma-${turma.nome}`,
+                  gerarCronogramaHtml({
+                    titulo: `${turma.curso} · ${turma.tipo === 'grupo' ? 'Grupo' : 'Turma'}: ${turma.nome}`,
+                    subtitulo: 'Cronograma de aulas e presença',
+                    aulas
+                  })
+                )
+              }
+            >
+              Exportar cronograma (HTML)
+            </button>
+          </div>
         )}
 
         {novaAulaGrupo && (

@@ -109,3 +109,23 @@ exports.relatorio = async (req, res) => {
   const linhas = await espacos.relatorio({ tipo, modalidade, cursoId, de, ate, busca }, hoje, escopo);
   return res.json({ linhas, hoje });
 };
+
+exports.gerarCronograma = async (req, res) => {
+  const { tipo, id } = req.params;
+  if (!['turma', 'grupo'].includes(tipo)) throw httpError(404, 'Espaço não encontrado.');
+  await exigirEspaco(req.user, tipo, id, { gerenciar: true });
+  const inicio = isoDate(req.body?.inicio);
+  const fim = isoDate(req.body?.fim);
+  if (!inicio || !fim) throw httpError(400, 'Informe a data inicial e a final.');
+  if (fim < inicio) throw httpError(400, 'A data final deve ser depois da inicial.');
+  const dias = Array.isArray(req.body?.dias) ? req.body.dias.map(Number).filter((d) => Number.isInteger(d) && d >= 0 && d <= 6) : [];
+  if (!dias.length) throw httpError(400, 'Escolha pelo menos um dia da semana.');
+  const horario = String(req.body?.horario || '').trim().slice(0, 60);
+  const ementa = (Array.isArray(req.body?.ementa) ? req.body.ementa : []).slice(0, 500).map((item) => ({
+    modulo: String(item?.modulo || '').trim().slice(0, 120),
+    titulo: String(item?.titulo || '').trim().slice(0, 200)
+  }));
+  const resultado = await espacos.gerarCronograma(tipo, id, { inicio, fim, dias, horario, ementa });
+  if (resultado.erro) throw httpError(404, 'Espaço não encontrado.');
+  return res.status(201).json(resultado);
+};
