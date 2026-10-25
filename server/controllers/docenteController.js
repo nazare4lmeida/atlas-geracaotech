@@ -193,6 +193,27 @@ exports.criarAulaAvulsa = async (req, res) => {
   return res.status(201).json(resultado);
 };
 
+exports.importarAulas = async (req, res) => {
+  const turmaId = uuidOu404(req.params.turmaId);
+  await exigirTurma(req.user, turmaId);
+  const entrada = Array.isArray(req.body?.linhas) ? req.body.linhas.slice(0, 500) : [];
+  if (!entrada.length) throw httpError(400, 'Nenhuma linha para importar.');
+  const linhas = entrada.map((linha, indice) => ({
+    data: dataValida(linha?.data, `Linha ${indice + 1}: data`),
+    horario: linha?.horario ? horaRange(linha.horario) : '',
+    modulo: textoOpcional(linha?.modulo, 120, `Linha ${indice + 1}: módulo`),
+    titulo: textoOpcional(linha?.titulo, 200, `Linha ${indice + 1}: título`)
+  }));
+  const resultado = checar(await docente.importarAulas(turmaId, linhas));
+  return res.status(201).json(resultado);
+};
+
+exports.preencherModulos = async (req, res) => {
+  const turmaId = uuidOu404(req.params.turmaId);
+  await exigirTurma(req.user, turmaId);
+  return res.json(checar(await docente.preencherModulos(turmaId)));
+};
+
 exports.atualizarAula = async (req, res) => {
   const sessionId = uuidOu404(req.params.sessionId);
   await exigirAula(req.user, sessionId);

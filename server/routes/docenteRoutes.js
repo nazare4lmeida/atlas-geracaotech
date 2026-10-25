@@ -15,6 +15,8 @@ router.get('/turmas/:turmaId/aulas', asyncHandler(docente.aulasDaTurma));
 router.put('/turmas/:turmaId/link', requireRole('admin'), asyncHandler(docente.definirLink));
 router.post('/turmas/:turmaId/aulas/gerar', requireRole('admin'), asyncHandler(docente.gerarAulas));
 router.post('/turmas/:turmaId/aulas/lote', requireRole('admin'), asyncHandler(docente.editarLote));
+router.post('/turmas/:turmaId/aulas/importar', requireRole('admin'), asyncHandler(docente.importarAulas));
+router.post('/turmas/:turmaId/aulas/preencher-modulos', requireRole('admin'), asyncHandler(docente.preencherModulos));
 router.post('/turmas/:turmaId/aulas', requireRole('admin'), asyncHandler(docente.criarAulaAvulsa));
 router.patch('/aulas/:sessionId', requireRole('admin'), asyncHandler(docente.atualizarAula));
 router.post('/aulas/:sessionId/cancelamento', requireRole('admin'), asyncHandler(docente.cancelarAula));

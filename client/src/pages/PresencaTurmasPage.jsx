@@ -128,6 +128,53 @@ export default function PresencaTurmasPage() {
     carregarAulas();
   }
 
+  // CSV com cabeçalho data;horario;modulo;titulo (o professor é o da turma). Data em dd/mm/aaaa ou aaaa-mm-dd.
+  async function importarCsv(arquivo) {
+    if (!arquivo) return;
+    try {
+      const texto = await arquivo.text();
+      const linhas = texto.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+      const separador = (linhas[0] || '').includes(';') ? ';' : ',';
+      const cabecalho = (linhas[0] || '').toLowerCase().split(separador).map((c) => c.trim().replace(/"/g, ''));
+      const temCabecalho = cabecalho.includes('data');
+      const colunas = temCabecalho ? cabecalho : ['data', 'horario', 'modulo', 'titulo'];
+      const dados = temCabecalho ? linhas.slice(1) : linhas;
+      const itens = [];
+      for (let i = 0; i < dados.length; i++) {
+        const valores = dados[i].split(separador).map((v) => v.trim().replace(/^"|"$/g, ''));
+        const linha = Object.fromEntries(colunas.map((c, idx) => [c, valores[idx] || '']));
+        const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(linha.data);
+        const data = m ? `${m[3]}-${m[2]}-${m[1]}` : /^\d{4}-\d{2}-\d{2}$/.test(linha.data) ? linha.data : null;
+        if (!data) {
+          setFeedback({ type: 'error', text: `Linha ${i + 1}: data inválida. Use dd/mm/aaaa.` });
+          return;
+        }
+        itens.push({ data, horario: linha.horario || '', modulo: linha.modulo || '', titulo: linha.titulo || '' });
+      }
+      if (!itens.length) {
+        setFeedback({ type: 'error', text: 'O arquivo não tem linhas para importar.' });
+        return;
+      }
+      const { data } = await api.post(`/docente/turmas/${turmaId}/aulas/importar`, { linhas: itens });
+      const ignoradas = data.ignoradas.length ? ` ${data.ignoradas.length} linha(s) ignorada(s) por data já ocupada.` : '';
+      setFeedback({ type: 'success', text: `${data.criadas} aula(s) importada(s).${ignoradas}` });
+      carregarAulas();
+    } catch (error) {
+      setFeedback({ type: 'error', text: errorText(error) });
+    }
+  }
+
+  async function preencherModulos() {
+    try {
+      const { data } = await api.post(`/docente/turmas/${turmaId}/aulas/preencher-modulos`);
+      const sobra = data.sobrando ? ` Sobraram ${data.sobrando} aula(s) da ementa sem uso.` : '';
+      setFeedback({ type: 'success', text: `${data.preenchidas} aula(s) receberam módulo e título da ementa.${sobra}` });
+      carregarAulas();
+    } catch (error) {
+      setFeedback({ type: 'error', text: errorText(error) });
+    }
+  }
+
   async function criarAulaGrupo(event) {
     event.preventDefault();
     try {
@@ -282,7 +329,22 @@ export default function PresencaTurmasPage() {
           {podeEditar && !ehGrupo && (
             <div className="docente-acoes">
               <button type="button" className="primary-button small" onClick={() => setFormulario({ modo: 'gerar' })} disabled={!turmaId}>
-                Gerar aulas
+                Gerar cronograma
+              </button>
+              <label className="ghost-button small">
+                Importar CSV
+                <input
+                  type="file"
+                  accept=".csv,text/csv"
+                  hidden
+                  onChange={(e) => {
+                    importarCsv(e.target.files?.[0]);
+                    e.target.value = '';
+                  }}
+                />
+              </label>
+              <button type="button" className="ghost-button small" onClick={preencherModulos} disabled={!turmaId}>
+                Preencher módulos
               </button>
               <button type="button" className="ghost-button small" onClick={() => setFormulario({ modo: 'avulsa' })} disabled={!turmaId}>
                 Nova aula avulsa

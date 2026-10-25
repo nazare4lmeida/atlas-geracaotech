@@ -342,6 +342,77 @@ async function criarAulaAvulsa(turmaId, { data, horario, modulo, titulo }) {
   });
 }
 
+// Importação de CSV: uma aula por linha. Datas já ocupadas na turma são puladas e informadas.
+async function importarAulas(turmaId, linhas) {
+  return withTransaction(async (client) => {
+    const { rows } = await client.query('select curso_id, horario from turmas where id = $1', [turmaId]);
+    if (!rows[0]) return { erro: 'turma_inexistente' };
+    const ocupadas = new Set(
+      (await client.query('select session_date::text as data from attendance_sessions where turma_id = $1', [turmaId])).rows.map((r) => r.data)
+    );
+    const criadas = [];
+    const ignoradas = [];
+    for (const linha of linhas) {
+      if (ocupadas.has(linha.data)) {
+        ignoradas.push({ data: linha.data, motivo: 'Já existe aula nessa data' });
+        continue;
+      }
+      await client.query(
+        `insert into attendance_sessions (course_id, turma_id, session_date, title, horario, modulo, professor, origem, status_aula, tipo)
+         values ($1, $2, $3::date, $4, $5, $6,
+                 coalesce((select string_agg(u.name, ', ' order by u.name) from turma_professores tp join users u on u.id = tp.user_id where tp.turma_id = $2), ''),
+                 'atlas', 'ativa', 'regular')`,
+        [rows[0].curso_id, turmaId, linha.data, linha.titulo || '', linha.horario || rows[0].horario || '', linha.modulo || '']
+      );
+      ocupadas.add(linha.data);
+      criadas.push(linha.data);
+    }
+    return { criadas: criadas.length, ignoradas };
+  });
+}
+
+// Preenche módulo e título, em ordem, com as seções e aulas da ementa do curso.
+// Só mexe nos campos em branco; aulas já preenchidas não consomem a ementa.
+async function preencherModulos(turmaId) {
+  return withTransaction(async (client) => {
+    const { rows } = await client.query('select curso_id from turmas where id = $1', [turmaId]);
+    if (!rows[0]) return { erro: 'turma_inexistente' };
+    const ementa = (
+      await client.query(
+        `select s.title as modulo, l.title as titulo
+           from lessons l join sections s on s.id = l.section_id
+          where s.course_id = $1
+          order by s.position, l.position`,
+        [rows[0].curso_id]
+      )
+    ).rows;
+    const aulas = (
+      await client.query(
+        `select id, title, modulo from attendance_sessions
+          where turma_id = $1 order by session_date, id`,
+        [turmaId]
+      )
+    ).rows;
+    let proximo = 0;
+    let preenchidas = 0;
+    for (const aula of aulas) {
+      const faltaTitulo = !String(aula.title || '').trim();
+      const faltaModulo = !String(aula.modulo || '').trim();
+      if (!(faltaTitulo || faltaModulo) || proximo >= ementa.length) continue;
+      const item = ementa[proximo++];
+      await client.query(
+        `update attendance_sessions
+            set title = case when coalesce(trim(title), '') = '' then $2 else title end,
+                modulo = case when coalesce(trim(modulo), '') = '' then $3 else modulo end
+          where id = $1`,
+        [aula.id, item.titulo, item.modulo]
+      );
+      preenchidas++;
+    }
+    return { preenchidas, sobrando: ementa.length - proximo };
+  });
+}
+
 // Edita data, horário, módulo ou título. Não permite duas aulas no mesmo dia da turma.
 async function atualizarAula(sessionId, campos) {
   return withTransaction(async (client) => {
@@ -690,6 +761,8 @@ module.exports = {
   gerarAulas,
   editarLote,
   criarAulaAvulsa,
+  importarAulas,
+  preencherModulos,
   atualizarAula,
   definirCancelamento,
   removerAula,
