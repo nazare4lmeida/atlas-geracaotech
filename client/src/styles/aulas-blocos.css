@@ -237,3 +237,52 @@
   font-size: 0.9rem;
   color: var(--text-soft);
 }
+
+/* ---------- Edição manual (modo leitura, admin e docente) ---------- */
+.manual-editor-wrap {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.manual-editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.9rem;
+  align-items: center;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.manual-editor-grupo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  align-items: center;
+}
+
+.manual-editor-btn {
+  padding: 0.3rem 0.55rem;
+  font-size: 0.85rem;
+}
+
+.manual-editor {
+  min-height: 320px;
+  max-height: 620px;
+  overflow: auto;
+  padding: 1rem 1.1rem;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  outline: none;
+}
+
+.manual-editor:focus {
+  border-color: var(--primary);
+}
+
+.manual-editor-hint,
+.reading-edit-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-soft);
+}

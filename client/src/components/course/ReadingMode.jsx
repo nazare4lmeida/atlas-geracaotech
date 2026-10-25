@@ -7,6 +7,7 @@ import Icon from '../Icon';
 import { readingMinutes } from '../../utils/lessonHtml';
 import api from '../../services/api';
 import LessonEditor, { needsHtmlMode } from '../manage/LessonEditor';
+import ManualEditor from '../manage/ManualEditor';
 import { errorText } from '../manage/shared';
 import { sanitizeLessonHtml } from '../../utils/lessonHtml';
 
@@ -32,7 +33,7 @@ export default function ReadingMode({ course, entries, index, completedSet, onIn
   const [draft, setDraft] = useState({ title: '', url: '', content: '' });
   const [saving, setSaving] = useState(false);
   const [editError, setEditError] = useState('');
-  const [modoEdicao, setModoEdicao] = useState('visual');
+  const [modoEdicao, setModoEdicao] = useState('manual');
   const editable = canEdit && lesson.type !== 'ao_vivo';
 
   // Ao trocar de aula, volta ao topo e zera a barra.
@@ -45,7 +46,8 @@ export default function ReadingMode({ course, entries, index, completedSet, onIn
 
   function iniciarEdicao() {
     setDraft({ title: lesson.title, url: lesson.url || '', content: lesson.content || '' });
-    setModoEdicao(lesson.type === 'html' ? 'html' : 'visual');
+    const temBlocos = lesson.type === 'html' || needsHtmlMode(lesson.content || '');
+    setModoEdicao(temBlocos ? 'manual' : 'visual');
     setEditError('');
     setEditing(true);
   }
@@ -102,6 +104,8 @@ export default function ReadingMode({ course, entries, index, completedSet, onIn
 
   // Conteúdo com blocos (div, estilos, cartões) não cabe no editor visual sem perder a estrutura: edita em HTML.
   const soHtml = editing && (lesson.type === 'html' || needsHtmlMode(draft.content));
+  // Sem o editor visual quando a aula tem blocos (ele apagaria a formatação).
+  const modoAtual = soHtml && modoEdicao === 'visual' ? 'manual' : modoEdicao;
   const campoHtml = (
     <div className="html-editor">
       <label>
@@ -183,46 +187,55 @@ export default function ReadingMode({ course, entries, index, completedSet, onIn
                   />
                 </label>
               )}
-              {soHtml ? (
-                <>
-                  <p className="reading-edit-hint">
-                    Esta aula tem blocos (cartões, caixas, cores). Eles são editados em HTML, com a prévia ao lado, para não perder a formatação.
-                  </p>
-                  {campoHtml}
-                </>
-              ) : (
-                <>
-                  <div className="reading-edit-modes" role="group" aria-label="Modo de edição do conteúdo">
-                    <button
-                      type="button"
-                      className={modoEdicao === 'visual' ? 'primary-button' : 'ghost-button'}
-                      aria-pressed={modoEdicao === 'visual'}
-                      onClick={() => setModoEdicao('visual')}
-                    >
-                      Editor visual
-                    </button>
-                    <button
-                      type="button"
-                      className={modoEdicao === 'html' ? 'primary-button' : 'ghost-button'}
-                      aria-pressed={modoEdicao === 'html'}
-                      onClick={() => setModoEdicao('html')}
-                    >
-                      HTML com prévia
-                    </button>
-                  </div>
-                  {modoEdicao === 'html' ? (
-                    campoHtml
-                  ) : (
-                    <div className="lesson-editor-field">
-                      <span className="lesson-editor-label">Conteúdo da aula</span>
-                      <LessonEditor
-                        value={draft.content}
-                        onChange={(html) => setDraft((current) => ({ ...current, content: html }))}
-                      />
-                    </div>
-                  )}
-                </>
+              <div className="reading-edit-modes" role="group" aria-label="Modo de edição do conteúdo">
+                {!soHtml && (
+                  <button
+                    type="button"
+                    className={modoAtual === 'visual' ? 'primary-button' : 'ghost-button'}
+                    aria-pressed={modoAtual === 'visual'}
+                    onClick={() => setModoEdicao('visual')}
+                  >
+                    Editor visual
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className={modoAtual === 'manual' ? 'primary-button' : 'ghost-button'}
+                  aria-pressed={modoAtual === 'manual'}
+                  onClick={() => setModoEdicao('manual')}
+                >
+                  Edição manual
+                </button>
+                <button
+                  type="button"
+                  className={modoAtual === 'codigo' ? 'primary-button' : 'ghost-button'}
+                  aria-pressed={modoAtual === 'codigo'}
+                  onClick={() => setModoEdicao('codigo')}
+                >
+                  Código HTML
+                </button>
+              </div>
+              {soHtml && (
+                <p className="reading-edit-hint">
+                  Esta aula tem blocos (cartões, caixas, cores). O editor visual não os mantém, então a edição é manual ou pelo código.
+                </p>
               )}
+              {modoAtual === 'visual' && (
+                <div className="lesson-editor-field">
+                  <span className="lesson-editor-label">Conteúdo da aula</span>
+                  <LessonEditor
+                    value={draft.content}
+                    onChange={(html) => setDraft((current) => ({ ...current, content: html }))}
+                  />
+                </div>
+              )}
+              {modoAtual === 'manual' && (
+                <ManualEditor
+                  value={draft.content}
+                  onChange={(html) => setDraft((current) => ({ ...current, content: html }))}
+                />
+              )}
+              {modoAtual === 'codigo' && campoHtml}
               {editError && <span className="lesson-editor-error">{editError}</span>}
               <div className="reading-edit-actions">
                 <button type="button" className="ghost-button" onClick={() => setEditing(false)} disabled={saving}>
