@@ -1,4 +1,5 @@
 const accessRepo = require('../db/accessRepo');
+const { query } = require('../db/pool');
 const courseRepo = require('../db/courseRepo');
 const authRepo = require('../db/authRepo');
 const meRepo = require('../db/meRepo');
@@ -25,6 +26,33 @@ function pendingModules(view, entry) {
       return !(lessonsDone && quizDone);
     })
     .map((module) => module.title);
+}
+
+// Visão de quem não é aluno. Professor vê os cursos que ministra; gestão, editor, admin e atendente veem
+// todos os cursos, sem precisar estar matriculado.
+async function visaoEquipe(user) {
+  const todos = ['admin', 'gestao', 'editor', 'atendente'].includes(user.role);
+  const { rows } = await query(
+    `select c.id, c.title, c.slug,
+            (select count(*)::int from turmas t where t.curso_id = c.id and t.ativa) as turmas,
+            (select count(*)::int from course_groups g where g.course_id = c.id) as grupos,
+            (select count(*)::int from enrollments e where e.course_id = c.id and e.role = 'student' and e.status = 'active') as alunos
+       from courses c
+      where $1::boolean
+         or exists (select 1 from enrollments e where e.course_id = c.id and e.user_id = $2 and e.role = 'teacher' and e.status = 'active')
+         or exists (select 1 from turmas t join turma_professores tp on tp.turma_id = t.id where t.curso_id = c.id and tp.user_id = $2)
+      order by c.title`,
+    [todos, user.id]
+  );
+  const cursos = rows.map((r) => ({ id: r.id, title: r.title, slug: r.slug, turmas: r.turmas, grupos: r.grupos, alunos: r.alunos }));
+  const soma = (campo) => cursos.reduce((total, c) => total + c[campo], 0);
+  const professor = user.role === 'teacher';
+  return {
+    papel: professor ? 'professor' : 'equipe',
+    titulo: professor ? 'Cursos que você ministra' : 'Todos os cursos',
+    stats: { cursos: cursos.length, turmas: soma('turmas'), grupos: soma('grupos'), alunos: soma('alunos') },
+    cursos
+  };
 }
 
 exports.getOverview = async (req, res) => {
@@ -67,6 +95,7 @@ exports.getOverview = async (req, res) => {
 
   return res.json({
     profile: sanitizeUser(user || req.user),
+    equipe: req.user.role === 'student' ? null : await visaoEquipe(req.user),
     courses: items,
     completedCourses: items.filter((item) => item.status === 'concluido'),
     inProgressCourses: items.filter((item) => item.status === 'em_andamento'),

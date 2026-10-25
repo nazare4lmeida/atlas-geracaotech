@@ -111,7 +111,50 @@ export default function MyAreaPage() {
   );
 }
 
+function EquipeOverview({ equipe }) {
+  const professor = equipe.papel === 'professor';
+  const rotulos = professor
+    ? ['Cursos que ministro', 'Turmas', 'Grupos', 'Alunos matriculados']
+    : ['Cursos', 'Turmas ativas', 'Grupos', 'Alunos matriculados'];
+  const valores = [equipe.stats.cursos, equipe.stats.turmas, equipe.stats.grupos, equipe.stats.alunos];
+
+  return (
+    <div className="myarea-grid">
+      <section className="myarea-box" style={{ gridColumn: '1 / -1' }}>
+        <div className="myarea-stats">
+          {rotulos.map((rotulo, i) => (
+            <div className="myarea-stat" key={rotulo}>
+              <strong>{valores[i]}</strong>
+              <span>{rotulo}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="myarea-box" style={{ gridColumn: '1 / -1' }}>
+        <h2>{equipe.titulo}</h2>
+        {equipe.cursos.length === 0 && (
+          <p className="myarea-muted">{professor ? 'Você ainda não ministra nenhum curso.' : 'Nenhum curso cadastrado.'}</p>
+        )}
+        {equipe.cursos.map((curso) => (
+          <div className="myarea-course" key={curso.id}>
+            <div className="myarea-course-top">
+              <strong>
+                <Link to={`/cursos/${curso.slug}`}>{curso.title}</Link>
+              </strong>
+              <span className="myarea-pill">
+                {curso.turmas} turma(s) · {curso.grupos} grupo(s) · {curso.alunos} aluno(s)
+              </span>
+            </div>
+          </div>
+        ))}
+      </section>
+    </div>
+  );
+}
+
 function Overview({ overview }) {
+  if (overview.equipe) return <EquipeOverview equipe={overview.equipe} />;
   const completed = overview.completedCourses.length;
   const inProgress = overview.inProgressCourses.length;
   const openReminders = overview.reminderSummary.open;
