@@ -220,3 +220,20 @@
   justify-content: flex-end;
   gap: 0.6rem;
 }
+
+.reading-edit-modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Edição no modo leitura: prévia abaixo do código, para caber na largura do texto. */
+.reading-edit-form .html-editor {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.reading-edit-hint {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-soft);
+}

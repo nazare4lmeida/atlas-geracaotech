@@ -6,8 +6,9 @@ import { courseThemeStyle } from '../../layouts/registry';
 import Icon from '../Icon';
 import { readingMinutes } from '../../utils/lessonHtml';
 import api from '../../services/api';
-import LessonEditor from '../manage/LessonEditor';
+import LessonEditor, { needsHtmlMode } from '../manage/LessonEditor';
 import { errorText } from '../manage/shared';
+import { sanitizeLessonHtml } from '../../utils/lessonHtml';
 
 // Modo leitura: a aula ocupa a tela inteira, sem a trilha e o restante da página.
 // Navegação por Anterior/Próxima (ou setas do teclado); Esc ou "Sair" devolvem à página do curso.
@@ -31,6 +32,7 @@ export default function ReadingMode({ course, entries, index, completedSet, onIn
   const [draft, setDraft] = useState({ title: '', url: '', content: '' });
   const [saving, setSaving] = useState(false);
   const [editError, setEditError] = useState('');
+  const [modoEdicao, setModoEdicao] = useState('visual');
   const editable = canEdit && lesson.type !== 'ao_vivo';
 
   // Ao trocar de aula, volta ao topo e zera a barra.
@@ -43,6 +45,7 @@ export default function ReadingMode({ course, entries, index, completedSet, onIn
 
   function iniciarEdicao() {
     setDraft({ title: lesson.title, url: lesson.url || '', content: lesson.content || '' });
+    setModoEdicao(lesson.type === 'html' ? 'html' : 'visual');
     setEditError('');
     setEditing(true);
   }
@@ -96,6 +99,30 @@ export default function ReadingMode({ course, entries, index, completedSet, onIn
       window.removeEventListener('keydown', onKey);
     };
   }, [index, total, onIndex, onClose, editing]);
+
+  // Conteúdo com blocos (div, estilos, cartões) não cabe no editor visual sem perder a estrutura: edita em HTML.
+  const soHtml = editing && (lesson.type === 'html' || needsHtmlMode(draft.content));
+  const campoHtml = (
+    <div className="html-editor">
+      <label>
+        <span>Código HTML</span>
+        <textarea
+          rows="14"
+          value={draft.content}
+          onChange={(event) => setDraft({ ...draft, content: event.target.value })}
+          spellCheck={false}
+          className="html-editor-code"
+        />
+      </label>
+      <div className="html-preview">
+        <span className="html-preview-label">Prévia (como o aluno vê)</span>
+        <div
+          className="lesson-content lesson-html html-preview-body"
+          dangerouslySetInnerHTML={{ __html: sanitizeLessonHtml(draft.content || '', { name: 'Nome do aluno' }) }}
+        />
+      </div>
+    </div>
+  );
 
   return createPortal(
     // O portal fica fora do .course-layout: aplicamos o tema do curso aqui, senão cores e variáveis somem.
@@ -156,13 +183,46 @@ export default function ReadingMode({ course, entries, index, completedSet, onIn
                   />
                 </label>
               )}
-              <div className="lesson-editor-field">
-                <span className="lesson-editor-label">Conteúdo da aula</span>
-                <LessonEditor
-                  value={draft.content}
-                  onChange={(html) => setDraft((current) => ({ ...current, content: html }))}
-                />
-              </div>
+              {soHtml ? (
+                <>
+                  <p className="reading-edit-hint">
+                    Esta aula tem blocos (cartões, caixas, cores). Eles são editados em HTML, com a prévia ao lado, para não perder a formatação.
+                  </p>
+                  {campoHtml}
+                </>
+              ) : (
+                <>
+                  <div className="reading-edit-modes" role="group" aria-label="Modo de edição do conteúdo">
+                    <button
+                      type="button"
+                      className={modoEdicao === 'visual' ? 'primary-button' : 'ghost-button'}
+                      aria-pressed={modoEdicao === 'visual'}
+                      onClick={() => setModoEdicao('visual')}
+                    >
+                      Editor visual
+                    </button>
+                    <button
+                      type="button"
+                      className={modoEdicao === 'html' ? 'primary-button' : 'ghost-button'}
+                      aria-pressed={modoEdicao === 'html'}
+                      onClick={() => setModoEdicao('html')}
+                    >
+                      HTML com prévia
+                    </button>
+                  </div>
+                  {modoEdicao === 'html' ? (
+                    campoHtml
+                  ) : (
+                    <div className="lesson-editor-field">
+                      <span className="lesson-editor-label">Conteúdo da aula</span>
+                      <LessonEditor
+                        value={draft.content}
+                        onChange={(html) => setDraft((current) => ({ ...current, content: html }))}
+                      />
+                    </div>
+                  )}
+                </>
+              )}
               {editError && <span className="lesson-editor-error">{editError}</span>}
               <div className="reading-edit-actions">
                 <button type="button" className="ghost-button" onClick={() => setEditing(false)} disabled={saving}>
