@@ -11,6 +11,23 @@ import ManualEditor from '../manage/ManualEditor';
 import { errorText } from '../manage/shared';
 import { sanitizeLessonHtml } from '../../utils/lessonHtml';
 
+// Preferência de exibição do aluno ("Como escrito" ou "Organizado"). Fica no navegador de cada pessoa.
+const CHAVE_MODELO = 'atlas-leitura-modelo';
+function lerModelo() {
+  try {
+    return localStorage.getItem(CHAVE_MODELO) === 'organizado' ? 'atlas' : 'original';
+  } catch {
+    return 'original';
+  }
+}
+function guardarModelo(valor) {
+  try {
+    localStorage.setItem(CHAVE_MODELO, valor === 'atlas' ? 'organizado' : 'original');
+  } catch {
+    // Sem armazenamento (navegação privada, por exemplo): a escolha vale só nesta tela.
+  }
+}
+
 // Modo leitura: a aula ocupa a tela inteira, sem a trilha e o restante da página.
 // Navegação por Anterior/Próxima (ou setas do teclado); Esc ou "Sair" devolvem à página do curso.
 // A unidade é concluída no fim dela (última aula), não aula por aula.
@@ -34,6 +51,12 @@ export default function ReadingMode({ course, entries, index, completedSet, onIn
   const [saving, setSaving] = useState(false);
   const [editError, setEditError] = useState('');
   const [modoEdicao, setModoEdicao] = useState('manual');
+  const [modelo, setModelo] = useState(lerModelo);
+
+  function trocarModelo(valor) {
+    setModelo(valor);
+    guardarModelo(valor);
+  }
   const editable = canEdit && lesson.type !== 'ao_vivo';
 
   // Ao trocar de aula, volta ao topo e zera a barra.
@@ -122,7 +145,7 @@ export default function ReadingMode({ course, entries, index, completedSet, onIn
         <span className="html-preview-label">Prévia (como o aluno vê)</span>
         <div
           className="lesson-content lesson-html html-preview-body"
-          dangerouslySetInnerHTML={{ __html: sanitizeLessonHtml(draft.content || '', { name: 'Nome do aluno' }) }}
+          dangerouslySetInnerHTML={{ __html: sanitizeLessonHtml(draft.content || '', { name: 'Nome do aluno', modelo }) }}
         />
       </div>
     </div>
@@ -147,6 +170,26 @@ export default function ReadingMode({ course, entries, index, completedSet, onIn
           {unit && <span>{unit}</span>}
         </div>
         <span className="reading-count">Aula {index + 1} de {total}</span>
+        {!editing && (
+          <div className="reading-modelo" role="group" aria-label="Forma de exibição da aula">
+            <button
+              type="button"
+              className={modelo === 'original' ? 'primary-button' : 'ghost-button'}
+              aria-pressed={modelo === 'original'}
+              onClick={() => trocarModelo('original')}
+            >
+              Como escrito
+            </button>
+            <button
+              type="button"
+              className={modelo === 'atlas' ? 'primary-button' : 'ghost-button'}
+              aria-pressed={modelo === 'atlas'}
+              onClick={() => trocarModelo('atlas')}
+            >
+              Organizado
+            </button>
+          </div>
+        )}
         {editable && !editing && (
           <button type="button" className="ghost-button reading-edit" onClick={iniciarEdicao}>
             Editar conteúdo
@@ -267,7 +310,7 @@ export default function ReadingMode({ course, entries, index, completedSet, onIn
             </p>
           )}
 
-          {lesson.type === 'ao_vivo' ? <AulaAoVivoCard lesson={lesson} /> : <LessonBody content={lesson.content} />}
+          {lesson.type === 'ao_vivo' ? <AulaAoVivoCard lesson={lesson} /> : <LessonBody content={lesson.content} modelo={modelo} />}
             </>
           )}
 

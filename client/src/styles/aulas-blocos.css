@@ -200,6 +200,17 @@
 
 
 /* ---------- Edição do conteúdo no modo leitura (admin e docente do curso) ---------- */
+.reading-modelo {
+  display: inline-flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.reading-modelo button {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
 .reading-edit {
   white-space: nowrap;
 }
