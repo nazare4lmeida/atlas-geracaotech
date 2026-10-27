@@ -20,7 +20,7 @@ export default function LessonBody({ content, modelo }) {
     };
     return (
       <div
-        className="lesson-content lesson-html"
+        className={`lesson-content lesson-html${exibicao === 'original' ? ' modelo-original' : ''}`}
         onClick={onClick}
         dangerouslySetInnerHTML={{ __html: sanitizeLessonHtml(content, { name, modelo: exibicao }) }}
       />

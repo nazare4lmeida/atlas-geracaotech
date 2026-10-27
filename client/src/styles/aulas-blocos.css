@@ -199,6 +199,18 @@
 }
 
 
+/* ---------- "Como escrito" no tema escuro ----------
+   O conteúdo do Moodle traz cores claras fixas (fundo branco, texto escuro). Invertemos o bloco e
+   revertemos as mídias para que mantenham as cores originais. As cores ficam aproximadas. */
+[data-theme="dark"] .lesson-html.modelo-original {
+  color: #000;
+  filter: invert(1) hue-rotate(180deg);
+}
+
+[data-theme="dark"] .lesson-html.modelo-original :is(img, video, iframe, svg, picture) {
+  filter: invert(1) hue-rotate(180deg);
+}
+
 /* ---------- Edição do conteúdo no modo leitura (admin e docente do curso) ---------- */
 .reading-modelo {
   display: inline-flex;
