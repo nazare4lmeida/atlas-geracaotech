@@ -10,23 +10,7 @@ import LessonEditor, { needsHtmlMode } from '../manage/LessonEditor';
 import ManualEditor from '../manage/ManualEditor';
 import { errorText } from '../manage/shared';
 import { sanitizeLessonHtml } from '../../utils/lessonHtml';
-
-// Preferência de exibição do aluno ("Como escrito" ou "Organizado"). Fica no navegador de cada pessoa.
-const CHAVE_MODELO = 'atlas-leitura-modelo';
-function lerModelo() {
-  try {
-    return localStorage.getItem(CHAVE_MODELO) === 'organizado' ? 'atlas' : 'original';
-  } catch {
-    return 'original';
-  }
-}
-function guardarModelo(valor) {
-  try {
-    localStorage.setItem(CHAVE_MODELO, valor === 'atlas' ? 'organizado' : 'original');
-  } catch {
-    // Sem armazenamento (navegação privada, por exemplo): a escolha vale só nesta tela.
-  }
-}
+import { guardarModelo, lerModelo } from '../../utils/modeloLeitura';
 
 // Modo leitura: a aula ocupa a tela inteira, sem a trilha e o restante da página.
 // Navegação por Anterior/Próxima (ou setas do teclado); Esc ou "Sair" devolvem à página do curso.
