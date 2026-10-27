@@ -168,17 +168,20 @@ export function answerInlineQuiz(button) {
   });
 }
 
+// Exibição padrão: a aula aparece como foi escrita (igual ao editor), com os estilos do próprio conteúdo.
+// modelo: 'atlas' reorganiza em seções e cartões (desenho antigo, só para conferência).
 export function sanitizeLessonHtml(html = '', options = {}) {
   installHooks();
-  const prepared = replaceMissingFiles(
-    markInlineQuizzes(
-      buildLessonDocument(enhanceLessonHtml(interpretStyledContent(personalizeText(html, { ...options, html: true })))),
-    )
-  );
+  const { modelo = 'original', ...dados } = options;
+  const personalizado = personalizeText(html, { ...dados, html: true });
+  const estruturado = modelo === 'atlas'
+    ? buildLessonDocument(enhanceLessonHtml(interpretStyledContent(personalizado)))
+    : personalizado;
+  const prepared = replaceMissingFiles(markInlineQuizzes(estruturado));
   return DOMPurify.sanitize(prepared, {
     ADD_TAGS: ['iframe'],
     ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling'],
     FORBID_TAGS: ['style', 'script'],
-    FORBID_ATTR: ['style', 'onclick']
+    FORBID_ATTR: ['onclick']
   });
 }
