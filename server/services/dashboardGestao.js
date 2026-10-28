@@ -9,6 +9,7 @@ async function resumoGestao() {
        (select count(*) from matriculas where situacao = 'desistente')::int as desistentes,
        (select count(*) from matriculas where situacao = 'concluido')::int as concluidos,
        (select count(*) from certificates)::int as certificados,
+       (select count(distinct user_id) from enrollments where role = 'student' and status = 'active')::int as alunos_no_atlas,
        (select count(*) from attendance_justifications where status = 'pendente')::int as justificativas_pendentes,
        (select count(*) from turmas where ativa = true)::int as turmas_ativas,
        (select count(*) from atendimento_sessoes where status = 'aberto')::int as chamados_abertos`
@@ -60,6 +61,17 @@ async function resumoGestao() {
       limit 10`
   );
 
+  // Acessos ao Atlas (tabela enrollments): alunos com matrícula ativa em cada curso da plataforma.
+  const porCursoAtlas = await query(
+    `select c.title as label, count(e.user_id) filter (where e.role = 'student' and e.status = 'active')::int as value
+       from courses c
+       left join enrollments e on e.course_id = c.id
+      group by c.id, c.title
+     having count(e.user_id) filter (where e.role = 'student' and e.status = 'active') > 0
+      order by value desc, c.title
+      limit 8`
+  );
+
   const justificativas = await query(
     `select status as label, count(*)::int as value from attendance_justifications group by status order by status`
   );
@@ -75,6 +87,7 @@ async function resumoGestao() {
       matriculasPorMes: porMes.rows,
       situacao: situacao.rows,
       porCurso: porCurso.rows,
+      porCursoAtlas: porCursoAtlas.rows,
       presencaAulas: presencaAulas.rows.reverse().map((row) => ({
         label: row.label,
         value: row.registros ? Math.round((row.presentes / row.registros) * 100) : 0

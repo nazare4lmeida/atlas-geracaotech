@@ -126,6 +126,7 @@ export default function AdminHome() {
               <p className="admin-grupo-titulo">Pessoas</p>
               <div className="admin-kpis">
                 <Indicador valor={k.alunos_ativos} rotulo="Alunos ativos" dica={`${k.matriculados} matriculados no total`} />
+                <Indicador valor={k.alunos_no_atlas} rotulo="Alunos no Atlas" dica="Com matrícula ativa em algum curso" />
                 <Indicador valor={k.concluidos} rotulo="Concluídos" dica={`${k.certificados} certificados emitidos`} />
                 <Indicador valor={k.desistentes} rotulo="Desistentes" dica="Situação atual" />
                 <Indicador valor={k.turmas_ativas} rotulo="Turmas ativas" dica="Sincronizadas do site do GT" />
@@ -169,6 +170,14 @@ export default function AdminHome() {
                   <span className="admin-muted">Presentes e justificadas</span>
                 </div>
                 <ColumnChart data={g.presencaAulas} max={100} suffix="%" ariaLabel="Presença nas últimas aulas" />
+              </article>
+
+              <article className="admin-bloco">
+                <div className="admin-bloco-cabecalho">
+                  <h2>Alunos no Atlas por curso</h2>
+                  <span className="admin-muted">Matrículas ativas na plataforma</span>
+                </div>
+                <BarList data={g.porCursoAtlas} />
               </article>
 
               <article className="admin-bloco admin-bloco-largo">
