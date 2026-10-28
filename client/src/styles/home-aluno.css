@@ -4,74 +4,7 @@
 .aluno-home {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-}
-
-/* Cartões: mesma base visual das prévias, com as cores do projeto */
-.aluno-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0.9rem;
-  padding: 1.25rem 1.35rem;
-  border-radius: 16px;
-  border: 1px solid var(--border);
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
-  box-shadow: 0 10px 26px -22px rgba(0, 0, 0, 0.4);
-  min-width: 0;
-}
-
-.aluno-card-cabecalho {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
-
-.aluno-card-cabecalho h2 {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 1.1rem;
-  margin: 0;
-}
-
-.aluno-card-cabecalho h2 .icon,
-.aluno-card-cabecalho h2 svg {
-  color: var(--primary);
-  flex: none;
-}
-
-.aluno-link {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--primary);
-  text-decoration: none;
-}
-
-.aluno-link:hover {
-  text-decoration: underline;
-}
-
-.aluno-muted {
-  color: var(--text-muted);
-  margin: 0;
-}
-
-.aluno-vazio {
-  color: var(--text-muted);
-  margin: 0;
-}
-
-/* Saudação */
-.aluno-saudacao {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.aluno-saudacao h1 {
-  margin: 0;
+  gap: 1.25rem;
 }
 
 .aluno-etiqueta {
@@ -86,35 +19,66 @@
   color: var(--primary);
 }
 
-/* Próxima aula */
-.aluno-proxima {
-  display: grid;
-  gap: 1.25rem;
-  align-items: center;
-  padding: 1.5rem 1.6rem;
-  border-radius: 18px;
+.aluno-muted {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.aluno-vazio {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+/* Superfície comum: cartões com o mesmo acabamento */
+.aluno-continuar,
+.aluno-card,
+.aluno-bloco,
+.aluno-curso,
+.aluno-metrica {
   border: 1px solid var(--border);
-  border-left: 4px solid var(--primary);
+  border-radius: 16px;
   background: color-mix(in srgb, var(--surface) 92%, transparent);
   box-shadow: 0 10px 26px -22px rgba(0, 0, 0, 0.4);
-}
-
-@media (min-width: 760px) {
-  .aluno-proxima {
-    grid-template-columns: 1fr auto;
-  }
-}
-
-.aluno-proxima-texto {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
   min-width: 0;
 }
 
-.aluno-proxima-texto h2 {
-  font-size: 1.35rem;
+/* Saudação */
+.aluno-saudacao {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.aluno-saudacao h1 {
   margin: 0;
+}
+
+/* Continue de onde parou */
+.aluno-continuar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: center;
+  padding: 1.5rem 1.6rem;
+  border-left: 4px solid var(--primary);
+}
+
+@media (min-width: 760px) {
+  .aluno-continuar {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
+
+.aluno-continuar-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.aluno-continuar-texto h2 {
+  margin: 0;
+  font-size: 1.35rem;
 }
 
 .aluno-acoes {
@@ -122,6 +86,31 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 0.6rem;
+  margin-top: 0.25rem;
+}
+
+.aluno-anel {
+  --p: 0;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: conic-gradient(var(--primary) calc(var(--p) * 1%), var(--surface-2) 0);
+  justify-self: center;
+}
+
+.aluno-anel > span {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--surface);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--text);
 }
 
 .aluno-botao {
@@ -156,53 +145,173 @@
   border-color: var(--primary);
   color: var(--primary);
   background: var(--surface);
+  transform: none;
 }
 
-/* Indicadores */
-.aluno-indicadores {
+/* Métricas */
+.aluno-metricas {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.9rem;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
 }
 
-@media (min-width: 900px) {
-  .aluno-indicadores {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+@media (min-width: 760px) {
+  .aluno-metricas {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
-.aluno-indicadores a {
+.aluno-metrica {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
-  padding: 0.95rem 1.05rem;
-  border-radius: 16px;
-  border: 1px solid var(--border);
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  gap: 0.2rem;
+  padding: 1rem 1.15rem;
+}
+
+.aluno-metrica strong {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+/* Blocos com título */
+.aluno-bloco {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 1.25rem 1.35rem;
+}
+
+.aluno-bloco-cabecalho,
+.aluno-card-cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.aluno-bloco-cabecalho h2,
+.aluno-card-cabecalho h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.aluno-card-cabecalho h2 svg,
+.aluno-card-cabecalho h2 .icon {
+  color: var(--primary);
+  flex: none;
+}
+
+.aluno-link {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.aluno-link:hover {
+  text-decoration: underline;
+}
+
+/* Cursos */
+.aluno-cursos {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+}
+
+@media (min-width: 760px) {
+  .aluno-cursos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.aluno-curso {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 1.15rem 1.2rem;
   color: inherit;
   text-decoration: none;
 }
 
-.aluno-indicadores a:hover {
+.aluno-curso:hover {
   border-color: var(--primary);
 }
 
-.aluno-indicadores strong {
-  font-family: var(--font-display);
-  font-size: 1.6rem;
-  line-height: 1.1;
-  color: var(--primary);
+.aluno-curso-topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
-.aluno-indicadores span {
+.aluno-curso-topo h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.aluno-curso-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
   font-size: 0.85rem;
   color: var(--text-muted);
 }
 
-/* Duas colunas */
+.aluno-curso p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.aluno-barra {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.aluno-barra > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--primary);
+}
+
+.aluno-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.18rem 0.6rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.aluno-pill.is-live {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.aluno-pill.is-ok {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+/* Cartões em duas colunas */
 .aluno-colunas {
   display: grid;
-  gap: 1.25rem;
+  gap: 1rem;
   grid-template-columns: minmax(0, 1fr);
 }
 
@@ -213,9 +322,19 @@
   }
 }
 
+.aluno-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 1.25rem 1.35rem;
+}
+
+.aluno-card-cabecalho h2 {
+  font-size: 1.1rem;
+}
+
 /* Listas */
-.aluno-lista,
-.aluno-texto-lista {
+.aluno-lista {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -272,28 +391,6 @@
   color: var(--text-muted);
 }
 
-.aluno-texto-lista li {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  padding: 0.7rem 0;
-  border-top: 1px solid var(--border);
-}
-
-.aluno-texto-lista li:first-child {
-  border-top: 0;
-  padding-top: 0;
-}
-
-.aluno-texto-lista strong {
-  font-size: 0.95rem;
-}
-
-.aluno-texto-lista span {
-  font-size: 0.9rem;
-  color: var(--text-muted);
-}
-
 /* Acesso rápido */
 .aluno-atalhos {
   display: grid;
@@ -328,7 +425,7 @@
   font-size: 0.98rem;
 }
 
-.aluno-atalho span:not(.aluno-atalho-icone) {
+.aluno-atalho > span:not(.aluno-atalho-icone) {
   font-size: 0.84rem;
   color: var(--text-muted);
 }

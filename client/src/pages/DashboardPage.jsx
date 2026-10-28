@@ -9,6 +9,7 @@ import { useAuth } from '../context/AuthContext';
 import '../styles/dashboard.css';
 import '../styles/home.css';
 import '../styles/home-aluno.css';
+import { getCourseProgress } from '../utils/courseProgress';
 
 // Página inicial: boas-vindas, próximas aulas com o link ao vivo, lembretes, acesso rápido,
 // dicas e instruções de uso. Cada papel vê os atalhos e as dicas do seu trabalho.
@@ -87,6 +88,21 @@ function dataExtensa(data) {
   return new Intl.DateTimeFormat('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'America/Sao_Paulo' }).format(data);
 }
 
+function plural(n, um, varios) {
+  return n === 1 ? `${n} ${um}` : `${n} ${varios}`;
+}
+
+// Primeira aula ainda não concluída, na ordem do curso (com o módulo a que ela pertence).
+function proximaAulaDoCurso(curso, prog) {
+  const concluidas = new Set(prog.completedLessons || []);
+  for (const modulo of curso.modules || []) {
+    for (const aula of modulo.lessons || []) {
+      if (!concluidas.has(aula.id)) return { aula, modulo };
+    }
+  }
+  return null;
+}
+
 export default function DashboardPage() {
   const { user, isTeacher, isAdmin, isAtendente, isGestao, isEditor } = useAuth();
   if (isAtendente) return <Navigate to="/gestao/atendimento" replace />;
@@ -116,6 +132,8 @@ export default function DashboardPage() {
   const [novoLembrete, setNovoLembrete] = useState('');
   const [erro, setErro] = useState('');
   const [indicadores, setIndicadores] = useState(null);
+  const [cursosAluno, setCursosAluno] = useState(null);
+  const [progressoAluno, setProgressoAluno] = useState({});
   const [agora] = useState(() => new Date());
 
   useEffect(() => {
@@ -127,6 +145,8 @@ export default function DashboardPage() {
       Promise.all([api.get('/users/dashboard'), api.get('/courses'), api.get('/presenca/aluno/historico')])
         .then(([dash, cursos, hist]) => {
           const progresso = Object.values(dash.data.progress || {});
+          setCursosAluno(cursos.data.courses || []);
+          setProgressoAluno(dash.data.progress || {});
           setIndicadores({
             cursos: (cursos.data.courses || []).length,
             emAndamento: progresso.filter((item) => (item.completedLessons || []).length > 0).length,
@@ -134,7 +154,10 @@ export default function DashboardPage() {
             certificados: dash.data.certificates?.length || 0
           });
         })
-        .catch(() => setIndicadores({ cursos: 0, emAndamento: 0, presenca: null, certificados: 0 }));
+        .catch(() => {
+          setCursosAluno([]);
+          setIndicadores({ cursos: 0, emAndamento: 0, presenca: null, certificados: 0 });
+        });
     }
     if (papel !== 'admin') {
       api
@@ -172,7 +195,17 @@ export default function DashboardPage() {
   }
 
   if (papel === 'aluno') {
+    const cursosDoAluno = (cursosAluno || []).map((curso) => {
+      const prog = progressoAluno[curso.slug] || {};
+      return { curso, prog, resumo: getCourseProgress(curso, prog) };
+    });
+    const emAndamento = cursosDoAluno.filter(({ resumo }) => resumo.completedLessons > 0 && resumo.percentage < 100);
+    const destaque = emAndamento[0] || cursosDoAluno.find(({ resumo }) => resumo.totalLessons > 0);
+    const aulaAtual = destaque ? proximaAulaDoCurso(destaque.curso, destaque.prog) : null;
+    const totalAulas = cursosDoAluno.reduce((total, { resumo }) => total + resumo.totalLessons, 0);
+    const concluidas = cursosDoAluno.reduce((total, { resumo }) => total + resumo.completedLessons, 0);
     const aulasVisiveis = aulas.slice(0, 4);
+
     return (
       <div className="dashboard-layout">
         <Sidebar />
@@ -182,36 +215,88 @@ export default function DashboardPage() {
             <h1>{SAUDACAO(agora)}{primeiroNome ? `, ${primeiroNome}` : ''}</h1>
           </header>
 
-          <section className="aluno-proxima" aria-labelledby="aluno-proxima-titulo">
-            <div className="aluno-proxima-texto">
-              <span className="aluno-etiqueta is-destaque">Próxima aula</span>
-              <h2 id="aluno-proxima-titulo">{proxima ? proxima.titulo || 'Aula' : 'Nenhuma aula agendada'}</h2>
-              {proxima && (
-                <p className="aluno-muted">
-                  {proxima.curso} · {proxima.turma} · {dataCurta(proxima.date)}{proxima.horario ? ` · ${proxima.horario}` : ''}
-                </p>
-              )}
+          <section className="aluno-continuar" aria-labelledby="aluno-continuar-titulo">
+            <div className="aluno-continuar-texto">
+              <span className="aluno-etiqueta is-destaque">{aulaAtual ? 'Continue de onde parou' : 'Próxima aula'}</span>
+              <h2 id="aluno-continuar-titulo">
+                {aulaAtual ? aulaAtual.aula.title || 'Aula' : proxima ? proxima.titulo || 'Aula' : 'Nenhuma aula em andamento'}
+              </h2>
+              <p className="aluno-muted">
+                {aulaAtual
+                  ? `${destaque.curso.title} · ${aulaAtual.modulo.title}`
+                  : proxima
+                    ? `${proxima.curso} · ${proxima.turma} · ${dataCurta(proxima.date)}${proxima.horario ? ` · ${proxima.horario}` : ''}`
+                    : 'Escolha um curso para começar.'}
+              </p>
+              <div className="aluno-acoes">
+                <Link className="aluno-botao" to={destaque ? `/cursos/${destaque.curso.slug}` : '/cursos'}>
+                  {aulaAtual ? 'Continuar aula' : 'Ver cursos'}
+                </Link>
+                {destaque && (
+                  <Link className="aluno-botao is-ghost" to={`/cursos/${destaque.curso.slug}`}>Ver o curso</Link>
+                )}
+              </div>
             </div>
-            <div className="aluno-acoes">
-              {proxima?.linkAoVivo ? (
-                <a className="aluno-botao" href={proxima.linkAoVivo} target="_blank" rel="noopener noreferrer">
-                  <Icon name="video" size={18} /> Entrar na aula ao vivo
-                </a>
-              ) : (
-                proxima && <span className="home-sem-link">Link da aula ao vivo ainda não cadastrado.</span>
-              )}
-              <Link className="aluno-botao is-ghost" to="/cursos">Ver cursos</Link>
+            {destaque && (
+              <div className="aluno-anel" style={{ '--p': destaque.resumo.percentage }} role="img" aria-label={`Curso ${destaque.resumo.percentage}% concluído`}>
+                <span className="num">{destaque.resumo.percentage}%</span>
+              </div>
+            )}
+          </section>
+
+          <section className="aluno-metricas" aria-label="Seu resumo">
+            <div className="aluno-metrica">
+              <span className="aluno-etiqueta">Aulas concluídas</span>
+              <strong className="num">{concluidas} de {totalAulas}</strong>
+            </div>
+            <div className="aluno-metrica">
+              <span className="aluno-etiqueta">Presença</span>
+              <strong className="num">{indicadores?.presenca != null ? `${indicadores.presenca}%` : '—'}</strong>
+            </div>
+            <div className="aluno-metrica">
+              <span className="aluno-etiqueta">Certificados</span>
+              <strong className="num">{indicadores?.certificados ?? 0}</strong>
             </div>
           </section>
 
-          {indicadores && (
-            <section className="aluno-indicadores" aria-label="Seu resumo">
-              <Link to="/cursos"><strong>{indicadores.cursos}</strong><span>cursos</span></Link>
-              <Link to="/cursos"><strong>{indicadores.emAndamento}</strong><span>em andamento</span></Link>
-              <Link to="/presenca"><strong>{indicadores.presenca !== null ? `${indicadores.presenca}%` : '—'}</strong><span>presença</span></Link>
-              <Link to="/documentos"><strong>{indicadores.certificados}</strong><span>certificados</span></Link>
-            </section>
-          )}
+          <section className="aluno-bloco" aria-labelledby="aluno-cursos-titulo">
+            <div className="aluno-bloco-cabecalho">
+              <h2 id="aluno-cursos-titulo">Seus cursos</h2>
+              <Link className="aluno-link" to="/cursos">Ver todos</Link>
+            </div>
+            {cursosAluno === null && <p className="aluno-vazio">Carregando…</p>}
+            {cursosAluno && cursosDoAluno.length === 0 && <p className="aluno-vazio">Nenhum curso disponível ainda.</p>}
+            <div className="aluno-cursos">
+              {cursosDoAluno.slice(0, 4).map(({ curso, prog, resumo }) => {
+                const modulos = curso.modules || [];
+                const atual = proximaAulaDoCurso(curso, prog);
+                const posicao = atual ? modulos.findIndex((modulo) => modulo.id === atual.modulo.id) + 1 : modulos.length;
+                const restantesAulas = resumo.totalLessons - resumo.completedLessons;
+                const restantesTestes = resumo.totalQuizzes - resumo.passedQuizzes;
+                const situacao = resumo.percentage >= 100 ? 'Concluído' : resumo.completedLessons > 0 ? 'Em andamento' : 'Não iniciado';
+                const classeSituacao = situacao === 'Em andamento' ? 'is-live' : situacao === 'Concluído' ? 'is-ok' : '';
+                return (
+                  <Link key={curso.slug} to={`/cursos/${curso.slug}`} className="aluno-curso">
+                    <div className="aluno-curso-topo">
+                      <h3>{curso.title}</h3>
+                      <span className={`aluno-pill ${classeSituacao}`}>{situacao}</span>
+                    </div>
+                    <div className="aluno-barra">
+                      <span style={{ width: `${resumo.percentage}%` }} />
+                    </div>
+                    <div className="aluno-curso-meta">
+                      <span className="num">{resumo.percentage}% concluído</span>
+                      <span className="num">Módulo {posicao} de {modulos.length}</span>
+                    </div>
+                    <p className="aluno-muted">
+                      {restantesAulas > 0 ? `Faltam ${plural(restantesAulas, 'aula', 'aulas')}` : 'Todas as aulas concluídas'}
+                      {restantesTestes > 0 ? ` e ${plural(restantesTestes, 'avaliação', 'avaliações')}` : ''}.
+                    </p>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
 
           <div className="aluno-colunas">
             <section className="aluno-card" aria-labelledby="aluno-aulas-titulo">
@@ -273,10 +358,10 @@ export default function DashboardPage() {
             </section>
           </div>
 
-          <section className="aluno-card" aria-labelledby="aluno-acessos-titulo">
-            <header className="aluno-card-cabecalho">
+          <section className="aluno-bloco" aria-labelledby="aluno-acessos-titulo">
+            <div className="aluno-bloco-cabecalho">
               <h2 id="aluno-acessos-titulo"><Icon name="star" size={18} /> Acesso rápido</h2>
-            </header>
+            </div>
             <div className="aluno-atalhos">
               {acessos.map((item) => (
                 <Link key={item.to + item.titulo} to={item.to} className="aluno-atalho">
@@ -287,36 +372,6 @@ export default function DashboardPage() {
               ))}
             </div>
           </section>
-
-          <div className="aluno-colunas">
-            <section className="aluno-card" aria-labelledby="aluno-dicas-titulo">
-              <header className="aluno-card-cabecalho">
-                <h2 id="aluno-dicas-titulo"><Icon name="bulb" size={18} /> Dicas de estudo</h2>
-              </header>
-              <ul className="aluno-texto-lista">
-                {dicas.map((dica) => (
-                  <li key={dica.titulo}>
-                    <strong>{dica.titulo}</strong>
-                    <span>{dica.texto}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-
-            <section className="aluno-card" aria-labelledby="aluno-uso-titulo">
-              <header className="aluno-card-cabecalho">
-                <h2 id="aluno-uso-titulo"><Icon name="arrow" size={18} /> Como usar o Atlas</h2>
-              </header>
-              <ol className="aluno-texto-lista">
-                {passos.map((passo) => (
-                  <li key={passo.titulo}>
-                    <strong>{passo.titulo}</strong>
-                    <span>{passo.texto}</span>
-                  </li>
-                ))}
-              </ol>
-            </section>
-          </div>
 
           <TurmaCard />
         </div>
