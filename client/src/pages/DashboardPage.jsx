@@ -8,6 +8,7 @@ import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import '../styles/dashboard.css';
 import '../styles/home.css';
+import '../styles/home-aluno.css';
 
 // Página inicial: boas-vindas, próximas aulas com o link ao vivo, lembretes, acesso rápido,
 // dicas e instruções de uso. Cada papel vê os atalhos e as dicas do seu trabalho.
@@ -80,6 +81,10 @@ const SAUDACAO = (agora) => {
 
 function dataCurta(iso) {
   return `${iso.slice(8)}/${iso.slice(5, 7)}`;
+}
+
+function dataExtensa(data) {
+  return new Intl.DateTimeFormat('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'America/Sao_Paulo' }).format(data);
 }
 
 export default function DashboardPage() {
@@ -164,6 +169,159 @@ export default function DashboardPage() {
     } catch (error) {
       setErro(error.response?.data?.message || 'Não foi possível criar o lembrete.');
     }
+  }
+
+  if (papel === 'aluno') {
+    const aulasVisiveis = aulas.slice(0, 4);
+    return (
+      <div className="dashboard-layout">
+        <Sidebar />
+        <div className="dashboard-content home-page aluno-home">
+          <header className="aluno-saudacao">
+            <span className="aluno-etiqueta">{dataExtensa(agora)}</span>
+            <h1>{SAUDACAO(agora)}{primeiroNome ? `, ${primeiroNome}` : ''}</h1>
+          </header>
+
+          <section className="aluno-proxima" aria-labelledby="aluno-proxima-titulo">
+            <div className="aluno-proxima-texto">
+              <span className="aluno-etiqueta is-destaque">Próxima aula</span>
+              <h2 id="aluno-proxima-titulo">{proxima ? proxima.titulo || 'Aula' : 'Nenhuma aula agendada'}</h2>
+              {proxima && (
+                <p className="aluno-muted">
+                  {proxima.curso} · {proxima.turma} · {dataCurta(proxima.date)}{proxima.horario ? ` · ${proxima.horario}` : ''}
+                </p>
+              )}
+            </div>
+            <div className="aluno-acoes">
+              {proxima?.linkAoVivo ? (
+                <a className="aluno-botao" href={proxima.linkAoVivo} target="_blank" rel="noopener noreferrer">
+                  <Icon name="video" size={18} /> Entrar na aula ao vivo
+                </a>
+              ) : (
+                proxima && <span className="home-sem-link">Link da aula ao vivo ainda não cadastrado.</span>
+              )}
+              <Link className="aluno-botao is-ghost" to="/cursos">Ver cursos</Link>
+            </div>
+          </section>
+
+          {indicadores && (
+            <section className="aluno-indicadores" aria-label="Seu resumo">
+              <Link to="/cursos"><strong>{indicadores.cursos}</strong><span>cursos</span></Link>
+              <Link to="/cursos"><strong>{indicadores.emAndamento}</strong><span>em andamento</span></Link>
+              <Link to="/presenca"><strong>{indicadores.presenca !== null ? `${indicadores.presenca}%` : '—'}</strong><span>presença</span></Link>
+              <Link to="/documentos"><strong>{indicadores.certificados}</strong><span>certificados</span></Link>
+            </section>
+          )}
+
+          <div className="aluno-colunas">
+            <section className="aluno-card" aria-labelledby="aluno-aulas-titulo">
+              <header className="aluno-card-cabecalho">
+                <h2 id="aluno-aulas-titulo"><Icon name="calendar" size={18} /> Próximas aulas</h2>
+                <Link to="/cronogramas" className="aluno-link">Ver cronograma</Link>
+              </header>
+              {!home && <p className="aluno-vazio">Carregando…</p>}
+              {home && aulas.length === 0 && <p className="aluno-vazio">Nenhuma aula agendada nas suas turmas.</p>}
+              <ul className="aluno-lista">
+                {aulasVisiveis.map((aula) => (
+                  <li key={aula.sessionId}>
+                    <div className="aluno-data">
+                      <strong>{dataCurta(aula.date)}</strong>
+                      <span>{aula.horario || 'dia todo'}</span>
+                    </div>
+                    <div className="aluno-item-texto">
+                      <strong>{aula.titulo || 'Aula'}</strong>
+                      <span>{aula.curso} · {aula.turma}</span>
+                    </div>
+                    {aula.linkAoVivo && (
+                      <a className="home-link-pequeno" href={aula.linkAoVivo} target="_blank" rel="noopener noreferrer">Ao vivo</a>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </section>
+
+            <section className="aluno-card" aria-labelledby="aluno-lembretes-titulo">
+              <header className="aluno-card-cabecalho">
+                <h2 id="aluno-lembretes-titulo"><Icon name="bell" size={18} /> Lembretes</h2>
+                <span className="home-contador">{lembretesAbertos.length} aberto(s)</span>
+              </header>
+              <form className="home-form-lembrete" onSubmit={criarLembrete}>
+                <input
+                  value={novoLembrete}
+                  onChange={(e) => setNovoLembrete(e.target.value)}
+                  placeholder="Ex.: enviar projeto do módulo 3"
+                  maxLength={200}
+                  aria-label="Novo lembrete"
+                />
+                <button type="submit" className="home-botao-pequeno" disabled={novoLembrete.trim().length < 2}>
+                  <Icon name="plus" size={16} /> Adicionar
+                </button>
+              </form>
+              {erro && <p className="home-erro" role="alert">{erro}</p>}
+              {!lembretes && <p className="aluno-vazio">Carregando…</p>}
+              {lembretes && lembretes.length === 0 && <p className="aluno-vazio">Nenhum lembrete. Anote o que não pode esquecer.</p>}
+              <ul className="home-lembretes">
+                {(lembretes || []).slice(0, 8).map((lembrete) => (
+                  <li key={lembrete.id} className={lembrete.done ? 'is-feito' : ''}>
+                    <label>
+                      <input type="checkbox" checked={Boolean(lembrete.done)} onChange={() => alternarLembrete(lembrete)} />
+                      <span>{lembrete.title}</span>
+                    </label>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          </div>
+
+          <section className="aluno-card" aria-labelledby="aluno-acessos-titulo">
+            <header className="aluno-card-cabecalho">
+              <h2 id="aluno-acessos-titulo"><Icon name="star" size={18} /> Acesso rápido</h2>
+            </header>
+            <div className="aluno-atalhos">
+              {acessos.map((item) => (
+                <Link key={item.to + item.titulo} to={item.to} className="aluno-atalho">
+                  <span className="aluno-atalho-icone"><Icon name={item.icon} size={18} /></span>
+                  <strong>{item.titulo}</strong>
+                  <span>{item.texto}</span>
+                </Link>
+              ))}
+            </div>
+          </section>
+
+          <div className="aluno-colunas">
+            <section className="aluno-card" aria-labelledby="aluno-dicas-titulo">
+              <header className="aluno-card-cabecalho">
+                <h2 id="aluno-dicas-titulo"><Icon name="bulb" size={18} /> Dicas de estudo</h2>
+              </header>
+              <ul className="aluno-texto-lista">
+                {dicas.map((dica) => (
+                  <li key={dica.titulo}>
+                    <strong>{dica.titulo}</strong>
+                    <span>{dica.texto}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+
+            <section className="aluno-card" aria-labelledby="aluno-uso-titulo">
+              <header className="aluno-card-cabecalho">
+                <h2 id="aluno-uso-titulo"><Icon name="arrow" size={18} /> Como usar o Atlas</h2>
+              </header>
+              <ol className="aluno-texto-lista">
+                {passos.map((passo) => (
+                  <li key={passo.titulo}>
+                    <strong>{passo.titulo}</strong>
+                    <span>{passo.texto}</span>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          </div>
+
+          <TurmaCard />
+        </div>
+      </div>
+    );
   }
 
   return (

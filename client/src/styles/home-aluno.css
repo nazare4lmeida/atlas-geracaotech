@@ -1,0 +1,367 @@
+/* Painel do aluno (Dashboard). Usa os tokens do global.css, então acompanha o tema claro e escuro.
+   O fundo da marca vem de .home-page em home.css; o cabeçalho e o rodapé continuam os do projeto. */
+
+.aluno-home {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Cartões: mesma base visual das prévias, com as cores do projeto */
+.aluno-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 1.25rem 1.35rem;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  box-shadow: 0 10px 26px -22px rgba(0, 0, 0, 0.4);
+  min-width: 0;
+}
+
+.aluno-card-cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.aluno-card-cabecalho h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.aluno-card-cabecalho h2 .icon,
+.aluno-card-cabecalho h2 svg {
+  color: var(--primary);
+  flex: none;
+}
+
+.aluno-link {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.aluno-link:hover {
+  text-decoration: underline;
+}
+
+.aluno-muted {
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.aluno-vazio {
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Saudação */
+.aluno-saudacao {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.aluno-saudacao h1 {
+  margin: 0;
+}
+
+.aluno-etiqueta {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.aluno-etiqueta.is-destaque {
+  color: var(--primary);
+}
+
+/* Próxima aula */
+.aluno-proxima {
+  display: grid;
+  gap: 1.25rem;
+  align-items: center;
+  padding: 1.5rem 1.6rem;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--primary);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  box-shadow: 0 10px 26px -22px rgba(0, 0, 0, 0.4);
+}
+
+@media (min-width: 760px) {
+  .aluno-proxima {
+    grid-template-columns: 1fr auto;
+  }
+}
+
+.aluno-proxima-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.aluno-proxima-texto h2 {
+  font-size: 1.35rem;
+  margin: 0;
+}
+
+.aluno-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.aluno-botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.6rem 1.05rem;
+  border-radius: 12px;
+  border: 1px solid var(--primary);
+  background: var(--primary);
+  color: var(--primary-ink);
+  font-weight: 600;
+  font-size: 0.92rem;
+  text-decoration: none;
+  box-shadow: 3px 3px 0 var(--highlight);
+}
+
+.aluno-botao:hover {
+  background: var(--primary-hover);
+  transform: translate(-1px, -1px);
+}
+
+.aluno-botao.is-ghost {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border-strong);
+  box-shadow: none;
+}
+
+.aluno-botao.is-ghost:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--surface);
+}
+
+/* Indicadores */
+.aluno-indicadores {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+@media (min-width: 900px) {
+  .aluno-indicadores {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.aluno-indicadores a {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.95rem 1.05rem;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  color: inherit;
+  text-decoration: none;
+}
+
+.aluno-indicadores a:hover {
+  border-color: var(--primary);
+}
+
+.aluno-indicadores strong {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  line-height: 1.1;
+  color: var(--primary);
+}
+
+.aluno-indicadores span {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* Duas colunas */
+.aluno-colunas {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 900px) {
+  .aluno-colunas {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+/* Listas */
+.aluno-lista,
+.aluno-texto-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.aluno-lista li {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) auto;
+  gap: 0.9rem;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.aluno-lista li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.aluno-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.35rem 0;
+  border-radius: 10px;
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.aluno-data strong {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  line-height: 1.1;
+}
+
+.aluno-data span {
+  font-size: 0.72rem;
+}
+
+.aluno-item-texto {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.aluno-item-texto strong {
+  font-size: 0.95rem;
+}
+
+.aluno-item-texto span {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+}
+
+.aluno-texto-lista li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.7rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.aluno-texto-lista li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.aluno-texto-lista strong {
+  font-size: 0.95rem;
+}
+
+.aluno-texto-lista span {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+/* Acesso rápido */
+.aluno-atalhos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+@media (min-width: 900px) {
+  .aluno-atalhos {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.aluno-atalho {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.95rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: inherit;
+  text-decoration: none;
+}
+
+.aluno-atalho:hover {
+  border-color: var(--primary);
+}
+
+.aluno-atalho strong {
+  font-family: var(--font-display);
+  font-size: 0.98rem;
+}
+
+.aluno-atalho span:not(.aluno-atalho-icone) {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+}
+
+.aluno-atalho-icone {
+  width: 34px;
+  height: 34px;
+  margin-bottom: 0.2rem;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+/* Telas estreitas */
+@media (max-width: 520px) {
+  .aluno-lista li {
+    grid-template-columns: 52px minmax(0, 1fr);
+  }
+
+  .aluno-lista li .home-link-pequeno {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .aluno-acoes .aluno-botao {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aluno-botao:hover {
+    transform: none;
+  }
+}
