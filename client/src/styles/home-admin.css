@@ -1,0 +1,275 @@
+/* Painel do administrador. Tokens do global.css (acompanha o tema claro e escuro).
+   O fundo da marca vem de .home-page em home.css; cabeçalho e rodapé são os do projeto. */
+
+.admin-home {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.admin-etiqueta {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.admin-saudacao {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.admin-saudacao h1 {
+  margin: 0;
+}
+
+.admin-muted {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* Blocos com título: mesma superfície usada no painel do aluno */
+.admin-bloco {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 1.25rem 1.35rem;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  box-shadow: 0 10px 26px -22px rgba(0, 0, 0, 0.4);
+  min-width: 0;
+}
+
+.admin-bloco-cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.admin-bloco-cabecalho h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.admin-bloco-cabecalho h2 svg {
+  color: var(--primary);
+  flex: none;
+}
+
+/* Precisa de atenção */
+.admin-atencao-itens {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 760px) {
+  .admin-atencao-itens {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.admin-alerta {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1rem 1.1rem;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: inherit;
+  text-decoration: none;
+  min-width: 0;
+}
+
+.admin-alerta:hover {
+  border-color: var(--primary);
+}
+
+.admin-alerta > strong {
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  line-height: 1;
+  color: var(--warning);
+}
+
+.admin-alerta.is-ok > strong {
+  color: var(--success);
+}
+
+.admin-alerta-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.admin-alerta-texto small {
+  font-size: 0.86rem;
+  color: var(--text-muted);
+}
+
+/* Números */
+.admin-numeros {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.admin-numeros > h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.admin-grupo-titulo {
+  margin: 0.5rem 0 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.admin-kpis {
+  display: grid;
+  gap: 0.9rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 900px) {
+  .admin-kpis {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.admin-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.95rem 1.05rem;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  color: inherit;
+  text-decoration: none;
+  min-width: 0;
+}
+
+a.admin-kpi:hover {
+  border-color: var(--primary);
+}
+
+.admin-kpi strong {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  line-height: 1.1;
+  color: var(--primary);
+}
+
+.admin-kpi span {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.admin-kpi small {
+  font-size: 0.76rem;
+  color: var(--text-soft);
+}
+
+/* Gráficos em pares */
+.admin-graficos {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 900px) {
+  .admin-graficos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  .admin-bloco-largo {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Atalhos por área */
+.admin-atalhos-grupos {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 900px) {
+  .admin-atalhos-grupos {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.admin-atalho-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.admin-atalho-grupo h3 {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.admin-atalho {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: inherit;
+  text-decoration: none;
+  min-width: 0;
+}
+
+.admin-atalho:hover {
+  border-color: var(--primary);
+}
+
+.admin-atalho-icone {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.admin-atalho-texto {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.admin-atalho-texto strong {
+  font-size: 0.95rem;
+}
+
+.admin-atalho-texto small {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+}
+

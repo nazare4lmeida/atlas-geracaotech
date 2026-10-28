@@ -4,6 +4,7 @@ import Sidebar from '../components/Sidebar';
 import Icon from '../components/Icon';
 import GestaoDashboard from '../components/dashboard/GestaoDashboard';
 import TurmaCard from '../components/portal/TurmaCard';
+import AdminHome from '../components/dashboard/AdminHome';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import '../styles/dashboard.css';
@@ -378,6 +379,8 @@ export default function DashboardPage() {
       </div>
     );
   }
+
+  if (papel === 'admin') return <AdminHome />;
 
   return (
     <div className="dashboard-layout">
