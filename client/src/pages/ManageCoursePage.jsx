@@ -7,6 +7,8 @@ import ContentEditor from '../components/manage/ContentEditor';
 import ParticipantsPanel from '../components/manage/ParticipantsPanel';
 import GroupsPanel from '../components/manage/GroupsPanel';
 import BackupPanel from '../components/manage/BackupPanel';
+import BlocksPanel from '../components/manage/BlocksPanel';
+import { useAuth } from '../context/AuthContext';
 import { Feedback, errorText } from '../components/manage/shared';
 
 const TABS = [
@@ -14,6 +16,7 @@ const TABS = [
   { id: 'configuracoes', label: 'Configurações' },
   { id: 'participantes', label: 'Participantes' },
   { id: 'grupos', label: 'Grupos' },
+  { id: 'blocos', label: 'Blocos', soEditores: true },
   { id: 'backup', label: 'Backup' }
 ];
 
@@ -25,6 +28,8 @@ export default function ManageCoursePage() {
   const [status, setStatus] = useState('loading');
   const [tab, setTab] = useState('conteudo');
   const [feedback, setFeedback] = useState(null);
+  const { isAdmin, isEditor } = useAuth();
+  const podeEditarBlocos = isAdmin || isEditor;
 
   useEffect(() => {
     let active = true;
@@ -100,7 +105,7 @@ export default function ManageCoursePage() {
         </section>
 
         <nav className="module-tabs" aria-label="Seções de gestão">
-          {TABS.filter((item) => !['participantes', 'grupos', 'backup'].includes(item.id) || course?.permissions?.canManageParticipants).map((item) => (
+          {TABS.filter((item) => (!item.soEditores || podeEditarBlocos) && (!['participantes', 'grupos', 'backup'].includes(item.id) || course?.permissions?.canManageParticipants)).map((item) => (
             <button
               key={item.id}
               type="button"
@@ -128,6 +133,10 @@ export default function ManageCoursePage() {
         {tab === 'participantes' && <ParticipantsPanel slug={course.slug} onFeedback={setFeedback} />}
 
         {tab === 'grupos' && <GroupsPanel slug={course.slug} onFeedback={setFeedback} />}
+
+        {tab === 'blocos' && podeEditarBlocos && (
+          <BlocksPanel course={course} onCourseChange={setCourse} onFeedback={setFeedback} />
+        )}
 
         {tab === 'backup' && (
           <BackupPanel course={course} onCourseChange={setCourse} onFeedback={setFeedback} />

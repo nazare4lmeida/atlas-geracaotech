@@ -13,7 +13,18 @@ const { normalizeLayout, normalizeTheme } = require('./layouts');
 const BACKUP_FORMAT = 'atlas-backup';
 const BACKUP_VERSION = 1;
 const LESSON_TYPES = ['video', 'page', 'link', 'html', 'ao_vivo', 'codice', 'codey'];
-const LIMITS = { modules: 200, lessons: 300, questions: 100, options: 10 };
+const LIMITS = { modules: 200, lessons: 300, questions: 100, options: 10, blocks: 50 };
+const UNLOCK_MODES = ['sequential', 'open'];
+
+// Data no formato AAAA-MM-DD, ou vazia (sem data).
+function readDate(value, label) {
+  const text = String(value ?? '').trim();
+  if (!text) return '';
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) {
+    throw httpError(400, `${label} precisa estar no formato AAAA-MM-DD.`);
+  }
+  return text;
+}
 
 function readText(value, max, label) {
   const text = String(value ?? '').trim();
@@ -43,9 +54,23 @@ function buildBackup(course) {
         title: course.finalProject?.title || '',
         description: course.finalProject?.description || ''
       },
+      blocks: (course.blocks || []).map((block) => ({
+        title: block.title,
+        description: block.description || '',
+        workloadHours: block.workloadHours || 0,
+        level: block.level || '',
+        accent: block.accent || '#6366f1',
+        unlockMode: block.unlockMode || 'sequential',
+        startsOn: block.startsOn || '',
+        endsOn: block.endsOn || ''
+      })),
       modules: course.modules.map((module) => ({
         title: module.title,
         description: module.description || '',
+        // Bloco do módulo, pelo índice na lista "blocks" do arquivo (null = sem bloco).
+        blockIndex: ((course.blocks || []).findIndex((block) => block.id === module.blockId) >= 0)
+          ? (course.blocks || []).findIndex((block) => block.id === module.blockId)
+          : null,
         visible: module.visible !== false,
         lessons: module.lessons.map((lesson) => ({
           title: lesson.title,
@@ -90,6 +115,38 @@ function parseBackup(payload) {
   if (!Array.isArray(source.modules)) {
     throw httpError(400, 'O backup não contém a lista de seções.');
   }
+
+  // Blocos (fases) são opcionais: backups antigos não têm essa lista.
+  const blocksInput = Array.isArray(source.blocks) ? source.blocks : [];
+  if (blocksInput.length > LIMITS.blocks) {
+    throw httpError(400, `O curso pode ter no máximo ${LIMITS.blocks} blocos.`);
+  }
+  const blocks = blocksInput.map((block) => {
+    const blockTitle = readText(block?.title, 160, 'O título do bloco');
+    if (!blockTitle) {
+      throw httpError(400, 'Há um bloco sem título no backup.');
+    }
+    const accent = String(block?.accent ?? '#6366f1');
+    const unlockMode = String(block?.unlockMode ?? 'sequential');
+    if (!UNLOCK_MODES.includes(unlockMode)) {
+      throw httpError(400, `O bloco "${blockTitle}" tem um modo de liberação inválido.`);
+    }
+    const startsOn = readDate(block?.startsOn, `A data de início do bloco "${blockTitle}"`);
+    const endsOn = readDate(block?.endsOn, `A data de fim do bloco "${blockTitle}"`);
+    if (startsOn && endsOn && startsOn > endsOn) {
+      throw httpError(400, `O bloco "${blockTitle}" tem a data de início depois da data de fim.`);
+    }
+    return {
+      title: blockTitle,
+      description: readText(block?.description, 2000, 'A descrição do bloco'),
+      workloadHours: Math.max(0, Math.floor(Number(block?.workloadHours) || 0)),
+      level: readText(block?.level, 60, 'O nível do bloco'),
+      accent: /^#[0-9a-f]{6}$/i.test(accent) ? accent : '#6366f1',
+      unlockMode,
+      startsOn,
+      endsOn
+    };
+  });
   if (source.modules.length > LIMITS.modules) {
     throw httpError(400, `O curso pode ter no máximo ${LIMITS.modules} seções.`);
   }
@@ -163,11 +220,16 @@ function parseBackup(payload) {
       return { id: newId('q'), question: questionText, options, answer, explanation, optionFeedback };
     });
 
+    const blockIndex = Number.isInteger(module.blockIndex) && module.blockIndex >= 0 && module.blockIndex < blocks.length
+      ? module.blockIndex
+      : null;
+
     return {
       id: newId('mod'),
       title: moduleTitle,
       description: readText(module.description, 2000, 'A descrição da seção'),
       visible: module.visible !== false,
+      blockIndex,
       lessons,
       quiz
     };
@@ -188,6 +250,7 @@ function parseBackup(payload) {
       title: readText(source.finalProject?.title, 160, 'O título do projeto final'),
       description: readText(source.finalProject?.description, 4000, 'A descrição do projeto final')
     },
+    blocks,
     modules
   };
 }
@@ -217,14 +280,14 @@ async function restoreIntoCourse(course, payload) {
   const doc = parseBackup(payload);
 
   await withTransaction(async (client) => {
-    await courseRepo.replaceModules(client, course.id, doc.modules);
+    await courseRepo.replaceModules(client, course.id, doc.modules, doc.blocks);
     await client.query(
       `update courses set final_project_title = $2, final_project_description = $3, updated_at = now()
        where id = $1`,
       [course.id, doc.finalProject.title, doc.finalProject.description]
     );
-    // Formação com plano próprio volta para a organização de blocos do plano.
-    const plan = planForCourse(course);
+    // Sem blocos no arquivo, a formação com plano próprio volta para a organização do plano.
+    const plan = doc.blocks.length ? null : planForCourse(course);
     if (plan) {
       await applyBlockPlan(client, course.id, plan);
     }

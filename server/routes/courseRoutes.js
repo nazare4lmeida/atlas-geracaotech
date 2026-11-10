@@ -11,7 +11,8 @@ const {
   completeUnit,
   rateUnit,
   completeProject,
-  getCertificate
+  getCertificate,
+  updateBlock
 } = require('../controllers/courseController');
 const { getQuizAttempt, answerQuiz, resetQuiz } = require('../controllers/quizController');
 const { updateCourseSettings, getEligibility, generateCertificates, requestCertificate } = require('../controllers/certificateIssueController');
@@ -102,6 +103,8 @@ router.delete('/:slug/modules/:moduleId/questions/:questionId', asyncHandler(del
 // ---------- Projeto final ----------
 router.put('/:slug/final-project', asyncHandler(updateFinalProject));
 router.put('/:slug/progress-bar', requireRole('admin', 'teacher', 'editor'), asyncHandler(updateProgressBar));
+// Blocos: cor, modo de liberação e datas. Só administração e editores.
+router.put('/:slug/blocks/:blockId', requireRole('admin', 'editor'), asyncHandler(updateBlock));
 
 // ---------- Participantes ----------
 router.get('/:slug/participants', asyncHandler(listParticipants));
