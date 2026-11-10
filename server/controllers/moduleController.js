@@ -7,7 +7,7 @@ const { serializeCourse, normalizeProgressBar } = require('../services/courseVie
 // Seções (módulos), recursos (aulas), questões do teste e projeto final.
 // Todas as rotas exigem permissão de gestão no curso (admin ou docente do curso).
 
-const LESSON_TYPES = ['video', 'page', 'link', 'html', 'ao_vivo'];
+const LESSON_TYPES = ['video', 'page', 'link', 'html', 'ao_vivo', 'codice', 'codey'];
 
 // Aceita vazio (encontro sem dados ainda) ou um objeto JSON simples.
 function isPlainJsonObject(text) {
@@ -83,7 +83,8 @@ function normalizeLessonFields(body, current = {}) {
   const url = body.url !== undefined ? String(body.url).trim() : current.url || '';
   const content = body.content !== undefined ? String(body.content).trim() : current.content || '';
 
-  if ((type === 'video' || type === 'link') && !isHttpUrl(url)) {
+  // Vídeo, link e espaços de código (Codice e Codey) precisam de um endereço http(s).
+  if (['video', 'link', 'codice', 'codey'].includes(type) && !isHttpUrl(url)) {
     throw httpError(400, 'Informe uma URL válida (começando com http:// ou https://).');
   }
 

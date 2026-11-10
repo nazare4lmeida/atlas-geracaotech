@@ -17,8 +17,18 @@ const TIPOS_NOVOS = [
   { id: 'ao_vivo', titulo: 'Encontro ao vivo', ajuda: 'Cartão com dia, horário e link.' },
   { id: 'video', titulo: 'Vídeo', ajuda: 'Vídeo incorporado (YouTube ou similar).' },
   { id: 'link', titulo: 'Link externo', ajuda: 'Botão que abre outro site.' },
-  { id: 'html', titulo: 'Bloco HTML', ajuda: 'Código livre, com prévia ao lado.' }
+  { id: 'html', titulo: 'Bloco HTML', ajuda: 'Código livre, com prévia ao lado.' },
+  { id: 'codice', titulo: 'Sala de código (Codice)', ajuda: 'A turma escreve junta, no mesmo projeto.' },
+  { id: 'codey', titulo: 'Jogo de programação (Codey)', ajuda: 'Treino de código com desafios.' }
 ];
+
+// Rótulo do campo de endereço de cada espaço de código.
+const ROTULO_DO_LINK = {
+  video: 'URL do vídeo (começando com https://)',
+  link: 'URL do recurso (começando com https://)',
+  codice: 'Endereço da sala no Codice (começando com https://)',
+  codey: 'Endereço do jogo Codey (começando com https://)'
+};
 
 // Executa uma ação para cada item, em sequência, parando no primeiro erro. Devolve quantos deram certo.
 async function emSequencia(lista, fazer) {
@@ -163,7 +173,8 @@ function LessonForm({
   const isLive = values.type === 'ao_vivo';
   const isHtml = values.type === 'html';
   const isPage = values.type === 'page';
-  const needsUrl = values.type === 'video' || values.type === 'link' || isLive;
+  const isEspaco = values.type === 'codice' || values.type === 'codey';
+  const needsUrl = values.type === 'video' || values.type === 'link' || isEspaco || isLive;
 
   return (
     <form
@@ -196,12 +207,12 @@ function LessonForm({
 
       {needsUrl && (
         <label>
-          <span>{isLive ? 'Link do encontro (Google Meet, Zoom...)' : 'URL (começando com https://)'}</span>
+          <span>{isLive ? 'Link do encontro (Google Meet, Zoom...)' : isEspaco ? ROTULO_DO_LINK[values.type] : 'URL (começando com https://)'}</span>
           <input
             name="url"
             value={values.url}
             onChange={handleChange}
-            placeholder={isLive ? 'https://meet.google.com/...' : 'https://www.youtube.com/embed/...'}
+            placeholder={isLive ? 'https://meet.google.com/...' : isEspaco ? 'https://...' : 'https://www.youtube.com/embed/...'}
           />
         </label>
       )}
@@ -253,7 +264,7 @@ function LessonForm({
         </div>
       )}
 
-      {(isPage || values.type === 'video' || values.type === 'link') && (
+      {(isPage || values.type === 'video' || values.type === 'link' || isEspaco) && (
         <div className="lesson-editor-field">
           <span className="lesson-editor-label">{isPage ? 'Conteúdo da página' : 'Texto de apoio'}</span>
           <LessonEditor value={values.content} onChange={(html) => setFieldValue('content', html)} />

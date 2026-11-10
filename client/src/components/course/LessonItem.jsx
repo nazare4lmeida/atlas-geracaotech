@@ -1,7 +1,8 @@
 import LessonBody from '../LessonBody';
 import AulaAoVivoCard from './AulaAoVivoCard';
+import EspacoIncorporado from './EspacoIncorporado';
 
-const RUAS_DO_TIPO = { video: 'Vídeo', link: 'Link', ao_vivo: 'Ao vivo', html: 'Texto', page: 'Texto' };
+const RUAS_DO_TIPO = { video: 'Vídeo', link: 'Link', ao_vivo: 'Ao vivo', html: 'Texto', page: 'Texto', codice: 'Código', codey: 'Jogo' };
 
 // Uma aula recolhível. O conteúdo só é montado quando a aula está aberta (vídeos não carregam antes disso).
 // Não há botão de concluir aula: a conclusão é da unidade inteira (ao final dela). O ✓ mostra o que já foi concluído.
@@ -38,6 +39,8 @@ export default function LessonItem({ lesson, open, completed, onToggle, onRead }
               </a>
             </p>
           )}
+
+          {(lesson.type === 'codice' || lesson.type === 'codey') && <EspacoIncorporado lesson={lesson} />}
 
           {lesson.type === 'ao_vivo' ? <AulaAoVivoCard lesson={lesson} /> : <LessonBody content={lesson.content} />}
 

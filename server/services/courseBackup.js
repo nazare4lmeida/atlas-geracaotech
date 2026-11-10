@@ -12,7 +12,7 @@ const { normalizeLayout, normalizeTheme } = require('./layouts');
 
 const BACKUP_FORMAT = 'atlas-backup';
 const BACKUP_VERSION = 1;
-const LESSON_TYPES = ['video', 'page', 'link'];
+const LESSON_TYPES = ['video', 'page', 'link', 'html', 'ao_vivo', 'codice', 'codey'];
 const LIMITS = { modules: 200, lessons: 300, questions: 100, options: 10 };
 
 function readText(value, max, label) {
@@ -118,7 +118,9 @@ function parseBackup(payload) {
       const url = readText(lesson.url, 2000, 'A URL');
       const content = readText(lesson.content, 50000, 'O conteúdo');
 
-      if (lesson.type !== 'page' && !/^https?:\/\//i.test(url)) {
+      // Vídeo, link e espaços de código precisam de URL http(s). Página, bloco HTML e encontro ao vivo não exigem.
+      const exigeUrl = ['video', 'link', 'codice', 'codey'].includes(lesson.type);
+      if (exigeUrl && !/^https?:\/\//i.test(url)) {
         throw httpError(400, `O recurso "${lessonTitle}" precisa de uma URL começando com http:// ou https://.`);
       }
       if (lesson.type === 'page' && !content) {
@@ -130,7 +132,7 @@ function parseBackup(payload) {
         title: lessonTitle,
         unit: readText(lesson.unit, 160, 'O nome da unidade'),
         type: lesson.type,
-        url: lesson.type === 'page' ? '' : url,
+        url: ['page', 'html'].includes(lesson.type) ? '' : url,
         content,
         visible: lesson.visible !== false
       };
