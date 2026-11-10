@@ -9,6 +9,7 @@ const items = [
   { to: '/mural', label: 'Mural', icon: 'bell' },
   { to: '/anotacoes', label: 'Anotações', icon: 'note' },
   { to: '/editor', label: 'Editor', icon: 'code' },
+  { to: '/jogo', label: 'Codey', icon: 'star' },
   { to: '/documentos', label: 'Documentos', icon: 'award' },
   { to: '/perfil', label: 'Perfil', icon: 'user' }
 ];
@@ -60,7 +61,7 @@ export default function Sidebar() {
   const [collapsed, setCollapsed] = useSidebarCollapsed();
 
   // Anotações e editor de código são exclusivos do aluno.
-  const studentOnly = new Set(['/anotacoes', '/editor']);
+  const studentOnly = new Set(['/anotacoes', '/editor', '/jogo']);
   // Atendente: menu enxuto, só o atendimento e o perfil.
   const visibleItems = isEditor
     ? editorItems

@@ -288,9 +288,16 @@
   }
 }
 
-/* Aba Editor com o Codice ocupando a área de conteúdo inteira. */
-.editor-codice-frame {
-  height: calc(100vh - 6rem);
-  min-height: 520px;
+/* Aba Editor com o Codice ocupando a tela inteira abaixo do cabeçalho (sem precisar rolar a página). */
+.editor-page .editor-codice-frame {
+  height: calc(100dvh - 200px);
+  min-height: 560px;
   width: 100%;
+}
+
+@media (max-width: 640px) {
+  .editor-page .editor-codice-frame {
+    height: calc(100dvh - 150px);
+    min-height: 480px;
+  }
 }
