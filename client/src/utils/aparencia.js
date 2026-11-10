@@ -42,6 +42,25 @@ function atualizarLinkFonte(google) {
   link.href = `https://fonts.googleapis.com/css2?family=${google}&display=swap`;
 }
 
+// Só aplica o fundo depois que a imagem carregou. Antes, o véu escuro (gradiente) pintava sozinho
+// enquanto a imagem ainda baixava, e aparecia um fundo escuro antes da imagem.
+let versaoFundo = 0;
+
+function aplicarFundo(corpo, url, opacidade) {
+  const versao = ++versaoFundo;
+  const opaco = `color-mix(in srgb, var(--bg) ${Math.round(opacidade)}%, transparent)`;
+  const imagem = new Image();
+  imagem.onload = () => {
+    if (versao === versaoFundo) {
+      corpo.style.background = `linear-gradient(${opaco}, ${opaco}), url("${url}") center / cover fixed no-repeat`;
+    }
+  };
+  imagem.onerror = () => {
+    if (versao === versaoFundo) corpo.style.background = '';
+  };
+  imagem.src = url;
+}
+
 // Aplica a aparência no documento. Falha silenciosa: sem ela o site segue com o padrão.
 export function aplicarAparencia(valor) {
   const config = { ...APARENCIA_PADRAO, ...(valor || {}) };
@@ -57,9 +76,9 @@ export function aplicarAparencia(valor) {
     atualizarLinkFonte(fonte.google);
 
     if (config.imagemFundo) {
-      const opaco = `color-mix(in srgb, var(--bg) ${Math.round(config.opacidadeFundo)}%, transparent)`;
-      corpo.style.background = `linear-gradient(${opaco}, ${opaco}), url("${config.imagemFundo}") center / cover fixed no-repeat`;
+      aplicarFundo(corpo, config.imagemFundo, config.opacidadeFundo);
     } else {
+      versaoFundo += 1;
       corpo.style.background = '';
     }
   } catch {
