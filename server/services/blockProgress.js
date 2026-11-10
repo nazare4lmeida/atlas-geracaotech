@@ -11,7 +11,12 @@ const httpError = require('../utils/httpError');
 // `view` é a visão do aluno do curso (serializeCourse com canManage: false).
 // `entry` é o progresso do aluno: { completedLessons, quizResults }.
 
-function computeBlocks(view, entry = {}) {
+// Data de hoje no fuso de Brasília, no formato AAAA-MM-DD (comparável com as datas dos blocos).
+function hojeEmBrasilia() {
+  return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
+}
+
+function computeBlocks(view, entry = {}, hoje = hojeEmBrasilia()) {
   const completed = new Set(entry.completedLessons || []);
   const quizResults = entry.quizResults || {};
   const modules = (view.modules || []).filter((module) => module.kind !== 'recuperacao');
@@ -29,7 +34,9 @@ function computeBlocks(view, entry = {}) {
       quizModuleIds.filter((id) => quizResults[id]?.passed).length;
     const isDone = totalSteps === 0 || doneSteps === totalSteps;
 
-    const unlocked = block.unlockMode === 'open' || previousDone;
+    // Bloco com data de início futura fica bloqueado até essa data (e bloqueia os seguintes, se for sequencial).
+    const aindaNaoComecou = Boolean(block.startsOn) && hoje < block.startsOn;
+    const unlocked = (block.unlockMode === 'open' || previousDone) && !aindaNaoComecou;
     if (block.unlockMode !== 'open') {
       previousDone = previousDone && isDone;
     }
@@ -42,6 +49,10 @@ function computeBlocks(view, entry = {}) {
       unlockMode: block.unlockMode,
       workloadHours: block.workloadHours || 0,
       unlocked,
+      scheduledFrom: aindaNaoComecou ? block.startsOn : '',
+      startsOn: block.startsOn || '',
+      endsOn: block.endsOn || '',
+      ended: Boolean(block.endsOn) && hoje > block.endsOn,
       completed: isDone,
       totalSteps,
       doneSteps,
@@ -73,4 +84,44 @@ function assertModuleUnlocked(view, blocks, moduleId, { alreadyCompleted = false
   }
 }
 
-module.exports = { computeBlocks, overallPercentage, assertModuleUnlocked };
+// Esconde o conteúdo de módulos de blocos bloqueados: título e estrutura continuam (o painel mostra o cadeado),
+// mas texto, links de aulas e enunciados/alternativas das questões não saem da API até o bloco ser liberado.
+function redactLockedBlocks(view, blocks) {
+  const lockedIds = new Set(blocks.filter((block) => !block.unlocked).map((block) => block.id));
+  if (lockedIds.size === 0) return view;
+
+  return {
+    ...view,
+    modules: (view.modules || []).map((module) => {
+      if (!module.blockId || !lockedIds.has(module.blockId)) return module;
+      return {
+        ...module,
+        lessons: (module.lessons || []).map((lesson) => ({ ...lesson, content: '', url: '' })),
+        quiz: (module.quiz || []).map((question) => ({ id: question.id, question: '', options: [] }))
+      };
+    })
+  };
+}
+
+// Remove do aluno os blocos destinados a outra modalidade (e seus módulos).
+// modalidade: 'Online', 'Presencial' ou null (aluno sem turma nem matrícula com modalidade: só vê blocos para todos).
+function filterBlocksByAudience(view, modalidade) {
+  const minha = modalidade === 'Presencial' ? 'presencial' : modalidade === 'Online' ? 'online' : null;
+  const visivel = (block) => block.audience === 'todas' || block.audience === undefined || block.audience === minha;
+  const ocultos = new Set((view.blocks || []).filter((block) => !visivel(block)).map((block) => block.id));
+  if (ocultos.size === 0) return view;
+
+  return {
+    ...view,
+    blocks: (view.blocks || []).filter((block) => !ocultos.has(block.id)),
+    modules: (view.modules || []).filter((module) => !ocultos.has(module.blockId))
+  };
+}
+
+module.exports = {
+  computeBlocks,
+  overallPercentage,
+  assertModuleUnlocked,
+  redactLockedBlocks,
+  filterBlocksByAudience
+};

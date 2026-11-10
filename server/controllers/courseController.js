@@ -20,6 +20,8 @@ const {
 const {
   computeBlocks,
   assertModuleUnlocked,
+  redactLockedBlocks,
+  filterBlocksByAudience,
 } = require("../services/blockProgress");
 const { normalizeLayout, normalizeTheme } = require("../services/layouts");
 const certificateRepo = require("../db/certificateRepo");
@@ -86,25 +88,81 @@ exports.listCourses = async (req, res) => {
     }
   }
 
-  return res.json({
-    courses: courses.map((course) =>
-      serializeCourse(
-        course,
-        buildAccess(user, course, enrolmentByCourse.get(course.id)),
-      ),
-    ),
-  });
+  // Alunos: blocos de outra modalidade saem da resposta, e o conteúdo bloqueado não é enviado.
+  const progressMap =
+    user.role === "student" ? await progressRepo.progressMapForUser(user.id) : null;
+
+  const views = await Promise.all(
+    courses.map(async (course) => {
+      const access = buildAccess(user, course, enrolmentByCourse.get(course.id));
+      const view = serializeCourse(course, access);
+      if (!progressMap || access.canManage) return view;
+      const modalidade = await accessRepo.modalidadeDoAluno(user.id, course.id);
+      const visibleView = filterBlocksByAudience(view, modalidade);
+      const entry = progressMap[course.slug] || {};
+      return redactLockedBlocks(visibleView, computeBlocks(visibleView, entry));
+    }),
+  );
+
+  return res.json({ courses: views });
 };
+
+// Edição de um bloco (cor, modo de liberação e datas). Só admin e editor chegam aqui (ver rota).
+exports.updateBlock = async (req, res) => {
+  const course = await findCourseBySlugOr404(req.params.slug);
+  const block = (course.blocks || []).find((item) => String(item.id) === String(req.params.blockId));
+  if (!block) {
+    throw httpError(404, "Bloco não encontrado.");
+  }
+
+  const body = req.body || {};
+  const accent = body.accent !== undefined ? String(body.accent).trim() : block.accent;
+  if (!/^#[0-9a-f]{6}$/i.test(accent)) {
+    throw httpError(400, "Escolha uma cor válida.");
+  }
+  const unlockMode = body.unlockMode !== undefined ? String(body.unlockMode) : block.unlockMode;
+  if (!["sequential", "open"].includes(unlockMode)) {
+    throw httpError(400, "Modo de liberação inválido.");
+  }
+  const audience = body.audience !== undefined ? String(body.audience) : block.audience || "todas";
+  if (!["todas", "online", "presencial"].includes(audience)) {
+    throw httpError(400, "Escolha para quem o bloco aparece.");
+  }
+  const startsOn = body.startsOn !== undefined ? normalizeDay(body.startsOn, "A data de início") : block.startsOn;
+  const endsOn = body.endsOn !== undefined ? normalizeDay(body.endsOn, "A data de fim") : block.endsOn;
+  if (startsOn && endsOn && startsOn > endsOn) {
+    throw httpError(400, "A data de início deve ser anterior à data de fim.");
+  }
+
+  await courseRepo.updateBlockSettings(course.id, block.id, { accent, unlockMode, startsOn, endsOn, audience });
+  return respondWithCourse(res, req.user, course.id);
+};
+
+function normalizeDay(value, label) {
+  const text = String(value ?? "").trim();
+  if (!text) return "";
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) {
+    throw httpError(400, `${label} precisa ser uma data válida.`);
+  }
+  return text;
+}
 
 exports.getCourse = async (req, res) => {
   const course = await findCourseBySlugOr404(req.params.slug);
   const access = await requireViewAccess(course, req.user);
-  return res.json({
-    course: serializeCourse(course, {
-      ...access,
-      canDelete: canDeleteCourse(req.user, course),
-    }),
+  const view = serializeCourse(course, {
+    ...access,
+    canDelete: canDeleteCourse(req.user, course),
   });
+
+  // Aluno: vê só os blocos da sua modalidade, e o conteúdo bloqueado só é liberado quando o bloco anterior estiver concluído.
+  if (!access.canManage && req.user) {
+    const modalidade = await accessRepo.modalidadeDoAluno(req.user.id, course.id);
+    const visibleView = filterBlocksByAudience(view, modalidade);
+    const entry = await progressRepo.progressEntryForUser(req.user.id, course.id);
+    return res.json({ course: redactLockedBlocks(visibleView, computeBlocks(visibleView, entry)) });
+  }
+  return res.json({ course: view });
 };
 
 // ---------- Gestão do curso (metadados) ----------

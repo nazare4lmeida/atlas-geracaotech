@@ -80,7 +80,10 @@ function serializeCourse(course, access = {}) {
       unlockMode: block.unlockMode,
       workloadHours: block.workloadHours || 0,
       level: block.level || '',
-      accent: block.accent || '#6366f1'
+      accent: block.accent || '#6366f1',
+      startsOn: block.startsOn || '',
+      endsOn: block.endsOn || '',
+      audience: block.audience || 'todas'
     })),
     modules,
     permissions: {

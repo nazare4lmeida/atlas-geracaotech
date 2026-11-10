@@ -23,7 +23,14 @@ export function trailModules(course, blockStates = []) {
   return ordered.map((item, index) => ({ ...item, number: index + 1 }));
 }
 
+// Data AAAA-MM-DD em formato curto (dd/mm), para o aluno saber quando o bloco abre.
+export function dataCurta(iso = '') {
+  const [, mes, dia] = String(iso).split('-');
+  return mes && dia ? `${dia}/${mes}` : '';
+}
+
 export function moduleStatusLabel(state, getBadgeLabel) {
+  if (!state.unlocked && state.scheduledFrom) return `Abre em ${dataCurta(state.scheduledFrom)}`;
   if (!state.unlocked) return 'Bloqueado';
   if (state.completed) return 'Concluído';
   return getBadgeLabel(state.percentage);

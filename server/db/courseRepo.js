@@ -96,7 +96,11 @@ async function fetchCourses(whereSql = '', params = []) {
         order by q.section_id, q.position`,
       [ids]
     ),
-    query('select * from course_blocks where course_id = any($1::uuid[]) order by course_id, position', [ids])
+    query(
+      `select *, to_char(starts_at, 'YYYY-MM-DD') as starts_on, to_char(ends_at, 'YYYY-MM-DD') as ends_on
+         from course_blocks where course_id = any($1::uuid[]) order by course_id, position`,
+      [ids]
+    )
   ]);
 
   blocksResult.rows.forEach((row) => {
@@ -108,7 +112,10 @@ async function fetchCourses(whereSql = '', params = []) {
       unlockMode: row.unlock_mode,
       workloadHours: row.workload_hours,
       level: row.level || '',
-      accent: row.accent || '#6366f1'
+      accent: row.accent || '#6366f1',
+      startsOn: row.starts_on || '',
+      endsOn: row.ends_on || '',
+      audience: row.audience || 'todas'
     });
   });
 
@@ -249,15 +256,55 @@ async function insertCourseTree(client, doc, createdBy = null) {
   );
 
   await insertModules(client, course.id, doc.modules || []);
-  await createDefaultBlocks(client, course.id);
 
-  // Formações com plano próprio (ex.: Fullstack) são organizadas pelo plano logo na importação.
-  const plan = planForCourse(doc);
-  if (plan) {
-    await applyBlockPlan(client, course.id, plan);
+  // Backup com blocos: usa os blocos do arquivo (cor, modo e datas). Caso contrário, segue o plano ou o padrão.
+  if (doc.blocks && doc.blocks.length) {
+    await insertBackupBlocks(client, course.id, doc.blocks, doc.modules || []);
+    await createDefaultBlocks(client, course.id);
+  } else {
+    await createDefaultBlocks(client, course.id);
+    // Formações com plano próprio (ex.: Fullstack) são organizadas pelo plano logo na importação.
+    const plan = planForCourse(doc);
+    if (plan) {
+      await applyBlockPlan(client, course.id, plan);
+    }
   }
 
   return course.id;
+}
+
+// Atualiza a apresentação e a liberação de um bloco. Os demais campos do bloco não mudam aqui.
+async function updateBlockSettings(courseId, blockId, { accent, unlockMode, startsOn, endsOn, audience }) {
+  await query(
+    `update course_blocks
+        set accent = $3, unlock_mode = $4, starts_at = $5::date, ends_at = $6::date, audience = $7, updated_at = now()
+      where id = $1 and course_id = $2`,
+    [blockId, courseId, accent, unlockMode, startsOn || null, endsOn || null, audience]
+  );
+}
+
+// Cria os blocos de um backup e liga cada módulo ao seu bloco (pelo índice no arquivo).
+// Módulos sem bloco no arquivo continuam sem bloco e recebem o bloco padrão depois.
+async function insertBackupBlocks(client, courseId, blocks, modules) {
+  const ids = [];
+  for (const [index, block] of blocks.entries()) {
+    const { rows } = await client.query(
+      `insert into course_blocks
+         (course_id, position, title, description, workload_hours, level, accent, unlock_mode, starts_at, ends_at, audience)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9::date, $10::date, $11)
+       returning id`,
+      [
+        courseId, index, block.title, block.description || '', block.workloadHours || 0, block.level || '',
+        block.accent || '#6366f1', block.unlockMode || 'sequential', block.startsOn || null, block.endsOn || null,
+        block.audience || 'todas'
+      ]
+    );
+    ids.push(rows[0].id);
+  }
+  for (const module of modules) {
+    if (module.blockIndex === null || module.blockIndex === undefined) continue;
+    await client.query('update sections set block_id = $2 where id = $1', [module.id, ids[module.blockIndex]]);
+  }
 }
 
 // Cada módulo sem bloco vira um bloco próprio, na mesma ordem (padrão para todo curso sem plano).
@@ -327,10 +374,13 @@ async function insertModules(client, courseId, modules) {
 }
 
 // Substitui todo o conteúdo (seções, recursos, questões) de um curso. Progresso dos alunos nesse conteúdo é removido em cascata.
-async function replaceModules(client, courseId, modules) {
+async function replaceModules(client, courseId, modules, blocks = []) {
   await client.query('delete from sections where course_id = $1', [courseId]);
   await client.query('delete from course_blocks where course_id = $1', [courseId]);
   await insertModules(client, courseId, modules);
+  if (blocks.length) {
+    await insertBackupBlocks(client, courseId, blocks, modules);
+  }
   await createDefaultBlocks(client, courseId);
   await client.query('update courses set updated_at = now() where id = $1', [courseId]);
 }
@@ -475,6 +525,7 @@ module.exports = {
   insertModules,
   replaceModules,
   createDefaultBlocks,
+  updateBlockSettings,
   createCourse,
   updateCourse,
   deleteCourse,
