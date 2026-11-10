@@ -6,7 +6,9 @@ export const LESSON_TYPE_LABELS = {
   page: 'Página de texto',
   link: 'Link externo',
   html: 'Bloco HTML',
-  ao_vivo: 'Encontro ao vivo'
+  ao_vivo: 'Encontro ao vivo',
+  codice: 'Sala de código (Codice)',
+  codey: 'Jogo de programação (Codey)'
 };
 
 export const DIAS_DA_SEMANA = [

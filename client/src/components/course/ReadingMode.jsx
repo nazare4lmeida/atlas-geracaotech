@@ -11,6 +11,7 @@ import ManualEditor from '../manage/ManualEditor';
 import { errorText } from '../manage/shared';
 import { sanitizeLessonHtml } from '../../utils/lessonHtml';
 import { guardarModelo, lerModelo } from '../../utils/modeloLeitura';
+import EspacoIncorporado from './EspacoIncorporado';
 
 // Modo leitura: a aula ocupa a tela inteira, sem a trilha e o restante da página.
 // Navegação por Anterior/Próxima (ou setas do teclado); Esc ou "Sair" devolvem à página do curso.
@@ -63,7 +64,7 @@ export default function ReadingMode({ course, entries, index, completedSet, onIn
     setSaving(true);
     setEditError('');
     const body = { title: draft.title, content: draft.content };
-    if (lesson.type === 'video' || lesson.type === 'link') body.url = draft.url;
+    if (['video', 'link', 'codice', 'codey'].includes(lesson.type)) body.url = draft.url;
     try {
       const { data } = await api.put(`/courses/${course.slug}/modules/${entry.moduleId}/lessons/${lesson.id}`, body);
       onLessonSaved?.(data.course);
@@ -203,9 +204,9 @@ export default function ReadingMode({ course, entries, index, completedSet, onIn
                 <span>Título da aula</span>
                 <input value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} required />
               </label>
-              {(lesson.type === 'video' || lesson.type === 'link') && (
+              {['video', 'link', 'codice', 'codey'].includes(lesson.type) && (
                 <label>
-                  <span>{lesson.type === 'video' ? 'Link do vídeo' : 'Link do recurso'}</span>
+                  <span>{ROTULO_DO_LINK[lesson.type]}</span>
                   <input
                     type="url"
                     value={draft.url}
@@ -293,6 +294,8 @@ export default function ReadingMode({ course, entries, index, completedSet, onIn
               </a>
             </p>
           )}
+
+          {(lesson.type === 'codice' || lesson.type === 'codey') && <EspacoIncorporado lesson={lesson} />}
 
           {lesson.type === 'ao_vivo' ? <AulaAoVivoCard lesson={lesson} /> : <LessonBody content={lesson.content} modelo={modelo} />}
             </>

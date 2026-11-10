@@ -287,3 +287,10 @@
     height: 460px;
   }
 }
+
+/* Aba Editor com o Codice ocupando a área de conteúdo inteira. */
+.editor-codice-frame {
+  height: calc(100vh - 6rem);
+  min-height: 520px;
+  width: 100%;
+}
