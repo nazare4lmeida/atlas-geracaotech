@@ -212,7 +212,17 @@ function LessonForm({
             name="url"
             value={values.url}
             onChange={handleChange}
-            placeholder={isLive ? 'https://meet.google.com/...' : isEspaco ? 'https://...' : 'https://www.youtube.com/embed/...'}
+            placeholder={
+              isLive
+                ? 'https://meet.google.com/...'
+                : values.type === 'codice'
+                  ? 'https://codice-navy.vercel.app'
+                  : values.type === 'codey'
+                    ? 'https://codey-gamma.vercel.app'
+                    : isEspaco
+                      ? 'https://...'
+                      : 'https://www.youtube.com/embed/...'
+            }
           />
         </label>
       )}
