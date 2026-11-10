@@ -16,6 +16,7 @@ import CoursesPage from './pages/CoursesPage';
 import CourseDetailPage from './pages/CourseDetailPage';
 import NotesPage from './pages/NotesPage';
 import EditorPage from './pages/EditorPage';
+import CodeyPage from './pages/CodeyPage';
 import DocumentosPage from './pages/DocumentosPage';
 import MuralPage from './pages/MuralPage';
 import MyAreaPage from './pages/MyAreaPage';
@@ -120,6 +121,14 @@ export default function App() {
           element={
             <ProtectedRoute roles={['student']}>
               <EditorPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/jogo"
+          element={
+            <ProtectedRoute roles={['student']}>
+              <CodeyPage />
             </ProtectedRoute>
           }
         />

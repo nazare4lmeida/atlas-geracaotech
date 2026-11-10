@@ -27,6 +27,7 @@ export default function Navbar() {
         {isAuthenticated && !isAtendente && (!isTeacher || isAdmin) && <NavLink to="/documentos">Documentos</NavLink>}
         {isAuthenticated && !isTeacher && !isAtendente && <NavLink to="/anotacoes">Anotações</NavLink>}
         {isAuthenticated && !isTeacher && !isAtendente && <NavLink to="/editor">Editor</NavLink>}
+        {isAuthenticated && !isTeacher && !isAtendente && <NavLink to="/jogo">Codey</NavLink>}
         {isAuthenticated && isTeacher && !isAtendente && <NavLink to="/gestao">Gestão</NavLink>}
       </nav>
 
