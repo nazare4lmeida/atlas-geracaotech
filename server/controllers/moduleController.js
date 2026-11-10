@@ -159,6 +159,16 @@ function normalizeQuestionFields(body, current = {}) {
 
 // ---------- Seções ----------
 
+// Histórico: toda mudança dentro de um bloco fica registrada com o nome do bloco.
+async function registrarMudanca(course, req, bloco, acao) {
+  await courseRepo.recordHistory(course.id, req.user.id, 'conteudo', `${bloco || 'Sem bloco'} — ${acao}`);
+}
+
+function blocoDaSecao(course, section) {
+  const bloco = (course.blocks || []).find((item) => String(item.id) === String(section?.blockId));
+  return bloco ? bloco.title : '';
+}
+
 exports.addModule = async (req, res) => {
   const course = await loadManagedCourse(req);
   const title = String(req.body.title || '').trim();
@@ -171,6 +181,7 @@ exports.addModule = async (req, res) => {
     description: String(req.body.description || '').trim(),
     visible: req.body.visible !== undefined ? Boolean(req.body.visible) : true
   });
+  await registrarMudanca(course, req, title, 'seção criada, com bloco próprio');
 
   return respond(res, req.user, course.id, 201);
 };
@@ -188,6 +199,10 @@ exports.updateModule = async (req, res) => {
   if (req.body.visible !== undefined) fields.visible = Boolean(req.body.visible);
 
   await courseRepo.updateSection(section.id, fields);
+  const mudancas = Object.keys(fields).map((campo) => ({ title: 'título', description: 'descrição', visible: 'visibilidade' })[campo]);
+  if (mudancas.length) {
+    await registrarMudanca(course, req, blocoDaSecao(course, section), `seção "${section.title}" editada: ${mudancas.join(', ')}`);
+  }
   return respond(res, req.user, course.id);
 };
 
@@ -196,6 +211,7 @@ exports.deleteModule = async (req, res) => {
   const section = findModuleOr404(course, req.params.moduleId);
 
   await courseRepo.deleteSection(section.id);
+  await registrarMudanca(course, req, blocoDaSecao(course, section), `seção "${section.title}" removida`);
   return respond(res, req.user, course.id);
 };
 
@@ -203,6 +219,8 @@ exports.moveModule = async (req, res) => {
   const course = await loadManagedCourse(req);
   const moved = await courseRepo.moveSection(course.id, req.params.moduleId, req.body.direction);
   if (!moved) throw httpError(404, 'Seção não encontrada.');
+  const secaoMovida = findModuleOr404(course, req.params.moduleId);
+  await registrarMudanca(course, req, blocoDaSecao(course, secaoMovida), `seção "${secaoMovida.title}" movida`);
 
   return respond(res, req.user, course.id);
 };
@@ -213,7 +231,9 @@ exports.addLesson = async (req, res) => {
   const course = await loadManagedCourse(req);
   const section = findModuleOr404(course, req.params.moduleId);
 
-  await courseRepo.createLesson(section.id, normalizeLessonFields(req.body));
+  const dados = normalizeLessonFields(req.body);
+  await courseRepo.createLesson(section.id, dados);
+  await registrarMudanca(course, req, blocoDaSecao(course, section), `aula "${dados.title}" adicionada em "${section.title}"`);
   return respond(res, req.user, course.id, 201);
 };
 
@@ -222,7 +242,9 @@ exports.updateLesson = async (req, res) => {
   const section = findModuleOr404(course, req.params.moduleId);
   const lesson = findLessonOr404(section, req.params.lessonId);
 
-  await courseRepo.updateLesson(lesson.id, normalizeLessonFields(req.body, lesson));
+  const dados = normalizeLessonFields(req.body, lesson);
+  await courseRepo.updateLesson(lesson.id, dados);
+  await registrarMudanca(course, req, blocoDaSecao(course, section), `aula "${dados.title}" editada em "${section.title}"`);
   return respond(res, req.user, course.id);
 };
 
@@ -232,6 +254,7 @@ exports.deleteLesson = async (req, res) => {
   const lesson = findLessonOr404(section, req.params.lessonId);
 
   await courseRepo.deleteLesson(lesson.id);
+  await registrarMudanca(course, req, blocoDaSecao(course, section), `aula "${lesson.title}" removida de "${section.title}"`);
   return respond(res, req.user, course.id);
 };
 
@@ -241,6 +264,8 @@ exports.moveLesson = async (req, res) => {
 
   const moved = await courseRepo.moveLesson(section.id, req.params.lessonId, req.body.direction);
   if (!moved) throw httpError(404, 'Recurso não encontrado.');
+  const aulaMovida = findLessonOr404(findModuleOr404(course, req.params.moduleId), req.params.lessonId);
+  await registrarMudanca(course, req, blocoDaSecao(course, section), `aula "${aulaMovida.title}" movida em "${section.title}"`);
 
   return respond(res, req.user, course.id);
 };
@@ -251,7 +276,9 @@ exports.addQuestion = async (req, res) => {
   const course = await loadManagedCourse(req);
   const section = findModuleOr404(course, req.params.moduleId);
 
-  await courseRepo.createQuestion(section.id, normalizeQuestionFields(req.body));
+  const dados = normalizeQuestionFields(req.body);
+  await courseRepo.createQuestion(section.id, dados);
+  await registrarMudanca(course, req, blocoDaSecao(course, section), `questão do teste adicionada em "${section.title}"`);
   return respond(res, req.user, course.id, 201);
 };
 
@@ -261,6 +288,7 @@ exports.updateQuestion = async (req, res) => {
   const question = findQuestionOr404(section, req.params.questionId);
 
   await courseRepo.updateQuestion(question.id, normalizeQuestionFields(req.body, question));
+  await registrarMudanca(course, req, blocoDaSecao(course, section), `questão do teste editada em "${section.title}"`);
   return respond(res, req.user, course.id);
 };
 
@@ -270,6 +298,7 @@ exports.deleteQuestion = async (req, res) => {
   const question = findQuestionOr404(section, req.params.questionId);
 
   await courseRepo.deleteQuestion(question.id);
+  await registrarMudanca(course, req, blocoDaSecao(course, section), `questão do teste removida de "${section.title}"`);
   return respond(res, req.user, course.id);
 };
 
