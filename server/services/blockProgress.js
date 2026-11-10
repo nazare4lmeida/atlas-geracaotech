@@ -119,6 +119,7 @@ function filterBlocksByAudience(view, modalidade) {
 }
 
 module.exports = {
+  hojeEmBrasilia,
   computeBlocks,
   overallPercentage,
   assertModuleUnlocked,

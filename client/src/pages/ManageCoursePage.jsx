@@ -8,6 +8,7 @@ import ParticipantsPanel from '../components/manage/ParticipantsPanel';
 import GroupsPanel from '../components/manage/GroupsPanel';
 import BackupPanel from '../components/manage/BackupPanel';
 import BlocksPanel from '../components/manage/BlocksPanel';
+import AcompanhamentoPanel from '../components/manage/AcompanhamentoPanel';
 import { useAuth } from '../context/AuthContext';
 import { Feedback, errorText } from '../components/manage/shared';
 
@@ -17,6 +18,7 @@ const TABS = [
   { id: 'participantes', label: 'Participantes' },
   { id: 'grupos', label: 'Grupos' },
   { id: 'blocos', label: 'Blocos', soEditores: true },
+  { id: 'acompanhamento', label: 'Acompanhamento' },
   { id: 'backup', label: 'Backup' }
 ];
 
@@ -136,6 +138,10 @@ export default function ManageCoursePage() {
 
         {tab === 'blocos' && podeEditarBlocos && (
           <BlocksPanel course={course} onCourseChange={setCourse} onFeedback={setFeedback} />
+        )}
+
+        {tab === 'acompanhamento' && (
+          <AcompanhamentoPanel slug={course.slug} onFeedback={setFeedback} />
         )}
 
         {tab === 'backup' && (

@@ -12,7 +12,9 @@ const {
   rateUnit,
   completeProject,
   getCertificate,
-  updateBlock
+  updateBlock,
+  listAtrasados,
+  listHistorico
 } = require('../controllers/courseController');
 const { getQuizAttempt, answerQuiz, resetQuiz } = require('../controllers/quizController');
 const { updateCourseSettings, getEligibility, generateCertificates, requestCertificate } = require('../controllers/certificateIssueController');
@@ -105,6 +107,9 @@ router.put('/:slug/final-project', asyncHandler(updateFinalProject));
 router.put('/:slug/progress-bar', requireRole('admin', 'teacher', 'editor'), asyncHandler(updateProgressBar));
 // Blocos: cor, modo de liberação e datas. Só administração e editores.
 router.put('/:slug/blocks/:blockId', requireRole('admin', 'editor'), asyncHandler(updateBlock));
+// Acompanhamento da gestão: atrasados e histórico (o controlador confere se a pessoa gerencia o curso).
+router.get('/:slug/atrasados', requireRole('admin', 'teacher', 'editor'), asyncHandler(listAtrasados));
+router.get('/:slug/historico', requireRole('admin', 'teacher', 'editor'), asyncHandler(listHistorico));
 
 // ---------- Participantes ----------
 router.get('/:slug/participants', asyncHandler(listParticipants));
