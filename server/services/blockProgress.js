@@ -73,4 +73,23 @@ function assertModuleUnlocked(view, blocks, moduleId, { alreadyCompleted = false
   }
 }
 
-module.exports = { computeBlocks, overallPercentage, assertModuleUnlocked };
+// Esconde o conteúdo de módulos de blocos bloqueados: título e estrutura continuam (o painel mostra o cadeado),
+// mas texto, links de aulas e enunciados/alternativas das questões não saem da API até o bloco ser liberado.
+function redactLockedBlocks(view, blocks) {
+  const lockedIds = new Set(blocks.filter((block) => !block.unlocked).map((block) => block.id));
+  if (lockedIds.size === 0) return view;
+
+  return {
+    ...view,
+    modules: (view.modules || []).map((module) => {
+      if (!module.blockId || !lockedIds.has(module.blockId)) return module;
+      return {
+        ...module,
+        lessons: (module.lessons || []).map((lesson) => ({ ...lesson, content: '', url: '' })),
+        quiz: (module.quiz || []).map((question) => ({ id: question.id, question: '', options: [] }))
+      };
+    })
+  };
+}
+
+module.exports = { computeBlocks, overallPercentage, assertModuleUnlocked, redactLockedBlocks };

@@ -20,6 +20,7 @@ const {
 const {
   computeBlocks,
   assertModuleUnlocked,
+  redactLockedBlocks,
 } = require("../services/blockProgress");
 const { normalizeLayout, normalizeTheme } = require("../services/layouts");
 const certificateRepo = require("../db/certificateRepo");
@@ -86,25 +87,35 @@ exports.listCourses = async (req, res) => {
     }
   }
 
+  // Alunos: conteúdo de blocos bloqueados não sai da API.
+  const progressMap =
+    user.role === "student" ? await progressRepo.progressMapForUser(user.id) : null;
+
   return res.json({
-    courses: courses.map((course) =>
-      serializeCourse(
-        course,
-        buildAccess(user, course, enrolmentByCourse.get(course.id)),
-      ),
-    ),
+    courses: courses.map((course) => {
+      const access = buildAccess(user, course, enrolmentByCourse.get(course.id));
+      const view = serializeCourse(course, access);
+      if (!progressMap || access.canManage) return view;
+      const entry = progressMap[course.slug] || {};
+      return redactLockedBlocks(view, computeBlocks(view, entry));
+    }),
   });
 };
 
 exports.getCourse = async (req, res) => {
   const course = await findCourseBySlugOr404(req.params.slug);
   const access = await requireViewAccess(course, req.user);
-  return res.json({
-    course: serializeCourse(course, {
-      ...access,
-      canDelete: canDeleteCourse(req.user, course),
-    }),
+  const view = serializeCourse(course, {
+    ...access,
+    canDelete: canDeleteCourse(req.user, course),
   });
+
+  // Aluno: o conteúdo de blocos bloqueados só é liberado quando o bloco anterior estiver concluído.
+  if (!access.canManage && req.user) {
+    const entry = await progressRepo.progressEntryForUser(req.user.id, course.id);
+    return res.json({ course: redactLockedBlocks(view, computeBlocks(view, entry)) });
+  }
+  return res.json({ course: view });
 };
 
 // ---------- Gestão do curso (metadados) ----------
