@@ -273,6 +273,37 @@ async function insertCourseTree(client, doc, createdBy = null) {
   return course.id;
 }
 
+// Histórico de alterações do curso.
+async function recordHistory(courseId, userId, acao, detalhe) {
+  await query(
+    'insert into course_history (course_id, user_id, acao, detalhe) values ($1, $2, $3, $4)',
+    [courseId, userId, acao, detalhe || '']
+  );
+}
+
+async function listHistory(courseId, limit = 100) {
+  const { rows } = await query(
+    `select h.created_at, h.acao, h.detalhe, u.name as autor
+       from course_history h left join users u on u.id = h.user_id
+      where h.course_id = $1
+      order by h.created_at desc
+      limit $2`,
+    [courseId, limit]
+  );
+  return rows;
+}
+
+// Alunos matriculados (ativos) no curso.
+async function studentsOfCourse(courseId) {
+  const { rows } = await query(
+    `select u.id, u.name from enrollments e join users u on u.id = e.user_id
+      where e.course_id = $1 and e.role = 'student' and e.status = 'active'
+      order by u.name`,
+    [courseId]
+  );
+  return rows;
+}
+
 // Atualiza a apresentação e a liberação de um bloco. Os demais campos do bloco não mudam aqui.
 async function updateBlockSettings(courseId, blockId, { accent, unlockMode, startsOn, endsOn, audience }) {
   await query(
@@ -526,6 +557,9 @@ module.exports = {
   replaceModules,
   createDefaultBlocks,
   updateBlockSettings,
+  recordHistory,
+  listHistory,
+  studentsOfCourse,
   createCourse,
   updateCourse,
   deleteCourse,

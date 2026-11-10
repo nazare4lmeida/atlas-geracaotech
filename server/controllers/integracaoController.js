@@ -3,6 +3,12 @@ const { upsertMatricula } = require('../services/matriculaIngest');
 const { digitsOf } = require('../services/cpf');
 
 // Teste de conexão: o site usa para confirmar que a chave funciona.
+// Agendador externo chama esta rota todo dia: cria avisos de prazo no mural das turmas.
+exports.lembretesPrazo = async (req, res) => {
+  const { enviarLembretesPrazo } = require('../services/lembretesPrazo');
+  return res.json(await enviarLembretesPrazo({ dias: 3 }));
+};
+
 exports.ping = async (req, res) => {
   res.json({ ok: true, integracao: req.integration.nome, versao: 1 });
 };

@@ -22,6 +22,7 @@ const {
   assertModuleUnlocked,
   redactLockedBlocks,
   filterBlocksByAudience,
+  hojeEmBrasilia,
 } = require("../services/blockProgress");
 const { normalizeLayout, normalizeTheme } = require("../services/layouts");
 const certificateRepo = require("../db/certificateRepo");
@@ -135,6 +136,17 @@ exports.updateBlock = async (req, res) => {
   }
 
   await courseRepo.updateBlockSettings(course.id, block.id, { accent, unlockMode, startsOn, endsOn, audience });
+
+  // Histórico: registra só o que mudou.
+  const mudancas = [];
+  if (accent !== block.accent) mudancas.push(`cor ${accent}`);
+  if (unlockMode !== block.unlockMode) mudancas.push(`liberação ${unlockMode === "open" ? "sempre liberado" : "em sequência"}`);
+  if (audience !== (block.audience || "todas")) mudancas.push(`quem vê: ${audience}`);
+  if (startsOn !== block.startsOn) mudancas.push(`abre em ${startsOn || "sem data"}`);
+  if (endsOn !== block.endsOn) mudancas.push(`prazo ${endsOn || "sem prazo"}`);
+  if (mudancas.length) {
+    await courseRepo.recordHistory(course.id, req.user.id, "bloco", `${block.title}: ${mudancas.join("; ")}`);
+  }
   return respondWithCourse(res, req.user, course.id);
 };
 
@@ -146,6 +158,46 @@ function normalizeDay(value, label) {
   }
   return text;
 }
+
+// Gestão: alunos com bloco vencido e não concluído.
+exports.listAtrasados = async (req, res) => {
+  const course = await findCourseBySlugOr404(req.params.slug);
+  const access = await requireViewAccess(course, req.user);
+  if (!access.canManage) throw httpError(403, "Você não tem permissão para ver os atrasados deste curso.");
+
+  const view = serializeCourse(course, { canManage: false });
+  const hoje = hojeEmBrasilia();
+  const alunos = await courseRepo.studentsOfCourse(course.id);
+  const entries = await progressRepo.progressEntriesForCourse(course.id);
+
+  const atrasados = alunos
+    .map((aluno) => {
+      const blocos = computeBlocks(view, entries.get(aluno.id) || {}, hoje)
+        .filter((bloco) => bloco.ended && !bloco.completed)
+        .map((bloco) => ({ titulo: bloco.title, prazo: bloco.endsOn, percentual: bloco.percentage }));
+      return { userId: aluno.id, nome: aluno.name, blocos };
+    })
+    .filter((aluno) => aluno.blocos.length > 0);
+
+  return res.json({ hoje, alunos: atrasados });
+};
+
+// Gestão: histórico de alterações do curso.
+exports.listHistorico = async (req, res) => {
+  const course = await findCourseBySlugOr404(req.params.slug);
+  const access = await requireViewAccess(course, req.user);
+  if (!access.canManage) throw httpError(403, "Você não tem permissão para ver o histórico deste curso.");
+
+  const rows = await courseRepo.listHistory(course.id, 100);
+  return res.json({
+    historico: rows.map((row) => ({
+      quando: row.created_at,
+      autor: row.autor || "Sistema",
+      acao: row.acao,
+      detalhe: row.detalhe,
+    })),
+  });
+};
 
 exports.getCourse = async (req, res) => {
   const course = await findCourseBySlugOr404(req.params.slug);

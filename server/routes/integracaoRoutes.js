@@ -14,5 +14,6 @@ router.get('/ping', asyncHandler(integracao.ping));
 router.post('/matriculas', asyncHandler(integracao.receberMatricula));
 router.post('/turmas', asyncHandler(integracao.receberTurma));
 router.post('/aulas', asyncHandler(integracao.receberAulas));
+router.post('/lembretes-prazo', asyncHandler(integracao.lembretesPrazo));
 
 module.exports = router;
