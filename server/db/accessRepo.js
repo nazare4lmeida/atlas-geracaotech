@@ -290,7 +290,23 @@ async function deleteUser(userId) {
   await query('delete from users where id = $1', [userId]);
 }
 
+// Modalidade do aluno no curso (Online ou Presencial): a da turma dele e, se não houver turma, a da matrícula.
+async function modalidadeDoAluno(userId, courseId) {
+  const { rows } = await query(
+    `select t.modalidade as turma_modalidade, m.modalidade as matricula_modalidade
+       from matriculas m
+       left join turma_alunos ta on ta.matricula_id = m.id and ta.situacao = 'ativo'
+       left join turmas t on t.id = ta.turma_id
+      where m.user_id = $1 and m.curso_id = $2 and m.situacao = 'ativo'
+      limit 1`,
+    [userId, courseId]
+  );
+  const row = rows[0];
+  return row ? row.turma_modalidade || row.matricula_modalidade || null : null;
+}
+
 module.exports = {
+  modalidadeDoAluno,
   findEnrollment,
   listEnrollmentsForUser,
   hasActiveMatriculaInCourse,

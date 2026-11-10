@@ -21,6 +21,7 @@ const {
   computeBlocks,
   assertModuleUnlocked,
   redactLockedBlocks,
+  filterBlocksByAudience,
 } = require("../services/blockProgress");
 const { normalizeLayout, normalizeTheme } = require("../services/layouts");
 const certificateRepo = require("../db/certificateRepo");
@@ -87,19 +88,23 @@ exports.listCourses = async (req, res) => {
     }
   }
 
-  // Alunos: conteúdo de blocos bloqueados não sai da API.
+  // Alunos: blocos de outra modalidade saem da resposta, e o conteúdo bloqueado não é enviado.
   const progressMap =
     user.role === "student" ? await progressRepo.progressMapForUser(user.id) : null;
 
-  return res.json({
-    courses: courses.map((course) => {
+  const views = await Promise.all(
+    courses.map(async (course) => {
       const access = buildAccess(user, course, enrolmentByCourse.get(course.id));
       const view = serializeCourse(course, access);
       if (!progressMap || access.canManage) return view;
+      const modalidade = await accessRepo.modalidadeDoAluno(user.id, course.id);
+      const visibleView = filterBlocksByAudience(view, modalidade);
       const entry = progressMap[course.slug] || {};
-      return redactLockedBlocks(view, computeBlocks(view, entry));
+      return redactLockedBlocks(visibleView, computeBlocks(visibleView, entry));
     }),
-  });
+  );
+
+  return res.json({ courses: views });
 };
 
 // Edição de um bloco (cor, modo de liberação e datas). Só admin e editor chegam aqui (ver rota).
@@ -119,13 +124,17 @@ exports.updateBlock = async (req, res) => {
   if (!["sequential", "open"].includes(unlockMode)) {
     throw httpError(400, "Modo de liberação inválido.");
   }
+  const audience = body.audience !== undefined ? String(body.audience) : block.audience || "todas";
+  if (!["todas", "online", "presencial"].includes(audience)) {
+    throw httpError(400, "Escolha para quem o bloco aparece.");
+  }
   const startsOn = body.startsOn !== undefined ? normalizeDay(body.startsOn, "A data de início") : block.startsOn;
   const endsOn = body.endsOn !== undefined ? normalizeDay(body.endsOn, "A data de fim") : block.endsOn;
   if (startsOn && endsOn && startsOn > endsOn) {
     throw httpError(400, "A data de início deve ser anterior à data de fim.");
   }
 
-  await courseRepo.updateBlockSettings(course.id, block.id, { accent, unlockMode, startsOn, endsOn });
+  await courseRepo.updateBlockSettings(course.id, block.id, { accent, unlockMode, startsOn, endsOn, audience });
   return respondWithCourse(res, req.user, course.id);
 };
 
@@ -146,10 +155,12 @@ exports.getCourse = async (req, res) => {
     canDelete: canDeleteCourse(req.user, course),
   });
 
-  // Aluno: o conteúdo de blocos bloqueados só é liberado quando o bloco anterior estiver concluído.
+  // Aluno: vê só os blocos da sua modalidade, e o conteúdo bloqueado só é liberado quando o bloco anterior estiver concluído.
   if (!access.canManage && req.user) {
+    const modalidade = await accessRepo.modalidadeDoAluno(req.user.id, course.id);
+    const visibleView = filterBlocksByAudience(view, modalidade);
     const entry = await progressRepo.progressEntryForUser(req.user.id, course.id);
-    return res.json({ course: redactLockedBlocks(view, computeBlocks(view, entry)) });
+    return res.json({ course: redactLockedBlocks(visibleView, computeBlocks(visibleView, entry)) });
   }
   return res.json({ course: view });
 };

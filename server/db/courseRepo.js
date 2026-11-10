@@ -114,7 +114,8 @@ async function fetchCourses(whereSql = '', params = []) {
       level: row.level || '',
       accent: row.accent || '#6366f1',
       startsOn: row.starts_on || '',
-      endsOn: row.ends_on || ''
+      endsOn: row.ends_on || '',
+      audience: row.audience || 'todas'
     });
   });
 
@@ -273,12 +274,12 @@ async function insertCourseTree(client, doc, createdBy = null) {
 }
 
 // Atualiza a apresentação e a liberação de um bloco. Os demais campos do bloco não mudam aqui.
-async function updateBlockSettings(courseId, blockId, { accent, unlockMode, startsOn, endsOn }) {
+async function updateBlockSettings(courseId, blockId, { accent, unlockMode, startsOn, endsOn, audience }) {
   await query(
     `update course_blocks
-        set accent = $3, unlock_mode = $4, starts_at = $5::date, ends_at = $6::date, updated_at = now()
+        set accent = $3, unlock_mode = $4, starts_at = $5::date, ends_at = $6::date, audience = $7, updated_at = now()
       where id = $1 and course_id = $2`,
-    [blockId, courseId, accent, unlockMode, startsOn || null, endsOn || null]
+    [blockId, courseId, accent, unlockMode, startsOn || null, endsOn || null, audience]
   );
 }
 
@@ -289,12 +290,13 @@ async function insertBackupBlocks(client, courseId, blocks, modules) {
   for (const [index, block] of blocks.entries()) {
     const { rows } = await client.query(
       `insert into course_blocks
-         (course_id, position, title, description, workload_hours, level, accent, unlock_mode, starts_at, ends_at)
-       values ($1, $2, $3, $4, $5, $6, $7, $8, $9::date, $10::date)
+         (course_id, position, title, description, workload_hours, level, accent, unlock_mode, starts_at, ends_at, audience)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9::date, $10::date, $11)
        returning id`,
       [
         courseId, index, block.title, block.description || '', block.workloadHours || 0, block.level || '',
-        block.accent || '#6366f1', block.unlockMode || 'sequential', block.startsOn || null, block.endsOn || null
+        block.accent || '#6366f1', block.unlockMode || 'sequential', block.startsOn || null, block.endsOn || null,
+        block.audience || 'todas'
       ]
     );
     ids.push(rows[0].id);

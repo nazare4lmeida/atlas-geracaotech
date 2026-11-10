@@ -4,6 +4,12 @@ import { errorText } from './shared';
 
 // Blocos da formação: cor, modo de liberação e datas.
 // Só administração e editores veem esta tela (a API também recusa os demais).
+const PUBLICO = [
+  { id: 'todas', label: 'Todos os alunos' },
+  { id: 'online', label: 'Só turmas Online' },
+  { id: 'presencial', label: 'Só turmas Presenciais' }
+];
+
 const MODOS = [
   { id: 'sequential', label: 'Em sequência (libera ao concluir o bloco anterior)' },
   { id: 'open', label: 'Sempre liberado' }
@@ -13,6 +19,7 @@ function BlockRow({ block, slug, onSaved, onFeedback }) {
   const [values, setValues] = useState({
     accent: block.accent || '#6366f1',
     unlockMode: block.unlockMode || 'sequential',
+    audience: block.audience || 'todas',
     startsOn: block.startsOn || '',
     endsOn: block.endsOn || ''
   });
@@ -41,6 +48,16 @@ function BlockRow({ block, slug, onSaved, onFeedback }) {
         <label>
           <span>Cor da faixa</span>
           <input type="color" value={values.accent} onChange={change('accent')} />
+        </label>
+        <label>
+          <span>Quem vê</span>
+          <select value={values.audience} onChange={change('audience')}>
+            {PUBLICO.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.label}
+              </option>
+            ))}
+          </select>
         </label>
         <label>
           <span>Liberação</span>
@@ -81,7 +98,7 @@ export default function BlocksPanel({ course, onCourseChange, onFeedback }) {
       {blocos.length === 0 && <p className="muted">Este curso ainda não tem blocos.</p>}
       {blocos.map((block) => (
         <BlockRow
-          key={`${block.id}-${block.accent}-${block.unlockMode}-${block.startsOn}-${block.endsOn}`}
+          key={`${block.id}-${block.accent}-${block.unlockMode}-${block.audience}-${block.startsOn}-${block.endsOn}`}
           block={block}
           slug={course.slug}
           onSaved={onCourseChange}

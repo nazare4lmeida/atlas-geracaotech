@@ -103,4 +103,25 @@ function redactLockedBlocks(view, blocks) {
   };
 }
 
-module.exports = { computeBlocks, overallPercentage, assertModuleUnlocked, redactLockedBlocks };
+// Remove do aluno os blocos destinados a outra modalidade (e seus módulos).
+// modalidade: 'Online', 'Presencial' ou null (aluno sem turma nem matrícula com modalidade: só vê blocos para todos).
+function filterBlocksByAudience(view, modalidade) {
+  const minha = modalidade === 'Presencial' ? 'presencial' : modalidade === 'Online' ? 'online' : null;
+  const visivel = (block) => block.audience === 'todas' || block.audience === undefined || block.audience === minha;
+  const ocultos = new Set((view.blocks || []).filter((block) => !visivel(block)).map((block) => block.id));
+  if (ocultos.size === 0) return view;
+
+  return {
+    ...view,
+    blocks: (view.blocks || []).filter((block) => !ocultos.has(block.id)),
+    modules: (view.modules || []).filter((module) => !ocultos.has(module.blockId))
+  };
+}
+
+module.exports = {
+  computeBlocks,
+  overallPercentage,
+  assertModuleUnlocked,
+  redactLockedBlocks,
+  filterBlocksByAudience
+};

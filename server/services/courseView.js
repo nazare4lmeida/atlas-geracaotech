@@ -82,7 +82,8 @@ function serializeCourse(course, access = {}) {
       level: block.level || '',
       accent: block.accent || '#6366f1',
       startsOn: block.startsOn || '',
-      endsOn: block.endsOn || ''
+      endsOn: block.endsOn || '',
+      audience: block.audience || 'todas'
     })),
     modules,
     permissions: {

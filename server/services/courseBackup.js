@@ -62,7 +62,8 @@ function buildBackup(course) {
         accent: block.accent || '#6366f1',
         unlockMode: block.unlockMode || 'sequential',
         startsOn: block.startsOn || '',
-        endsOn: block.endsOn || ''
+        endsOn: block.endsOn || '',
+        audience: block.audience || 'todas'
       })),
       modules: course.modules.map((module) => ({
         title: module.title,
@@ -144,7 +145,8 @@ function parseBackup(payload) {
       accent: /^#[0-9a-f]{6}$/i.test(accent) ? accent : '#6366f1',
       unlockMode,
       startsOn,
-      endsOn
+      endsOn,
+      audience: ['todas', 'online', 'presencial'].includes(block?.audience) ? block.audience : 'todas'
     };
   });
   if (source.modules.length > LIMITS.modules) {
