@@ -53,7 +53,8 @@ const adminItems = [
   { to: '/gestao/justificativas', label: 'Justificativas', icon: 'bulb' },
   { to: '/gestao/ponto', label: 'Ponto dos professores', icon: 'clock' },
   { to: '/gestao/acessos', label: 'Acessos', icon: 'key' },
-  { to: '/gestao/usuarios', label: 'Usuários', icon: 'shield' }
+  { to: '/gestao/usuarios', label: 'Usuários', icon: 'shield' },
+  { to: '/gestao/ia', label: 'Inteligência artificial', icon: 'bulb' }
 ];
 
 export default function Sidebar() {

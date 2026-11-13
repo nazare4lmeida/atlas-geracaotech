@@ -1,5 +1,11 @@
 const { query } = require('./pool');
 
+// Conteudo da aula, lido no servidor (o cliente so envia o ID).
+async function lerAula(aulaId) {
+  const { rows } = await query('select id, title, content from lessons where id = $1', [aulaId]);
+  return rows[0] || null;
+}
+
 // Grava so o registro de uso (sem conteudo da conversa).
 async function registrarUso({ usuarioId, modulo, provedor, modelo, status, tokensEntrada, tokensSaida, codigoErro }) {
   await query(
@@ -34,4 +40,5 @@ async function salvarLigada(ligada, usuarioId) {
   );
 }
 
-module.exports = { registrarUso, lerLigada, salvarLigada };
+module.exports = {
+  lerAula, registrarUso, lerLigada, salvarLigada };

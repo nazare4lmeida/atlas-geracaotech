@@ -12,8 +12,8 @@ export async function definirEstadoIa(ligada) {
   return data;
 }
 
-// Pergunta ao tutor. O material da aula é enviado como referência.
-export async function perguntarTutor({ pergunta, contexto = '' }) {
-  const { data } = await api.post('/ia/tutor', { pergunta, contexto });
+// Pergunta ao tutor. O servidor lê o material da aula pelo ID.
+export async function perguntarTutor({ pergunta, aulaId }) {
+  const { data } = await api.post('/ia/tutor', { pergunta, aulaId });
   return data.resposta;
 }

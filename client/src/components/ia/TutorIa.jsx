@@ -2,13 +2,6 @@ import { useEffect, useState } from 'react';
 import { buscarEstadoIa, perguntarTutor } from '../../services/ia';
 import { errorText } from '../manage/shared';
 
-// Texto puro da aula, sem tags, para servir de material ao tutor.
-function textoDaAula(html = '') {
-  const div = document.createElement('div');
-  div.innerHTML = html;
-  return (div.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 20000);
-}
-
 // Só aparece quando a IA está ligada e configurada, e o módulo tutor está ativo.
 export default function TutorIa({ lesson }) {
   const [disponivel, setDisponivel] = useState(false);
@@ -36,7 +29,7 @@ export default function TutorIa({ lesson }) {
     setEnviando(true);
     setErro('');
     try {
-      setResposta(await perguntarTutor({ pergunta: pergunta.trim(), contexto: textoDaAula(lesson?.content) }));
+      setResposta(await perguntarTutor({ pergunta: pergunta.trim(), aulaId: lesson.id }));
     } catch (error) {
       setResposta('');
       setErro(errorText(error, 'O assistente não respondeu agora. Tente de novo.'));

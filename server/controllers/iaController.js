@@ -1,10 +1,9 @@
 const { gerarResposta, IaErro } = require('../services/ia');
-const { montarSistemaTutor } = require('../services/ia/tutor');
+const { montarSistemaTutor, textoDeHtml } = require('../services/ia/tutor');
 const { calcularEstado } = require('../services/ia/estado');
-const { registrarUso, lerLigada, salvarLigada } = require('../db/iaRepo');
+const { registrarUso, lerLigada, salvarLigada, lerAula } = require('../db/iaRepo');
 
 const MAX_PERGUNTA = 2000;
-const MAX_CONTEXTO = 20000;
 
 // Se o banco falhar, a IA aparece como desligada (o site continua funcionando).
 async function ligadaNoPainel() {
@@ -30,14 +29,15 @@ exports.definirEstado = async (req, res) => {
   res.json(calcularEstado({ ligadaNoPainel: ligada }));
 };
 
-// POST /api/ia/tutor  { pergunta, contexto? }  -> { resposta }
+// POST /api/ia/tutor  { pergunta, aulaId }  -> { resposta }
+// O material da aula e lido no servidor pelo ID; o cliente nao envia texto.
 exports.tutor = async (req, res) => {
   const estado = calcularEstado({ ligadaNoPainel: await ligadaNoPainel() });
   if (!estado.modulos.tutor) {
     throw new IaErro('desativado', 'O assistente de IA não está disponível agora.', 503);
   }
 
-  const { pergunta, contexto = '' } = req.body || {};
+  const { pergunta, aulaId } = req.body || {};
 
   if (typeof pergunta !== 'string' || !pergunta.trim()) {
     throw new IaErro('entrada', 'Escreva a sua pergunta.', 400);
@@ -45,15 +45,21 @@ exports.tutor = async (req, res) => {
   if (pergunta.length > MAX_PERGUNTA) {
     throw new IaErro('entrada', `A pergunta pode ter até ${MAX_PERGUNTA} caracteres.`, 400);
   }
-  if (typeof contexto !== 'string' || contexto.length > MAX_CONTEXTO) {
-    throw new IaErro('entrada', 'O material enviado é grande demais.', 400);
+  const id = Number(aulaId);
+  if (!Number.isInteger(id) || id <= 0) {
+    throw new IaErro('entrada', 'Informe a aula.', 400);
   }
+  const aula = await lerAula(id);
+  if (!aula) {
+    throw new IaErro('entrada', 'Aula não encontrada.', 404);
+  }
+  const material = `${aula.title || ''}\n${textoDeHtml(aula.content)}`;
 
   const usuarioId = req.user && req.user.id;
   try {
     const r = await gerarResposta({
       modulo: 'tutor',
-      sistema: montarSistemaTutor(contexto),
+      sistema: montarSistemaTutor(material),
       mensagens: [{ role: 'user', content: pergunta }],
     });
     await registrarUso({

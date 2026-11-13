@@ -2,7 +2,7 @@ const { test, describe } = require('node:test');
 const assert = require('node:assert/strict');
 const { gerarResposta, normalizarMensagens, IaErro } = require('../services/ia');
 const { lerConfig, moduloAtivo } = require('../services/ia/config');
-const { montarSistemaTutor } = require('../services/ia/tutor');
+const { montarSistemaTutor, textoDeHtml } = require('../services/ia/tutor');
 
 // Ambiente simulado: nenhuma chamada sai da maquina.
 const envBase = {
@@ -169,4 +169,11 @@ describe('entrada e prompt', () => {
     assert.match(s, /<<<\nconteudo da aula\n>>>/);
     assert.equal(montarSistemaTutor(''), montarSistemaTutor(undefined).replace(/\n\n.*$/s, ''));
   });
+});
+
+test('textoDeHtml remove tags, scripts e decodifica entidades', () => {
+  const t = textoDeHtml('<p>Olá &amp; <b>mundo</b></p><script>alert(1)</script><p>x&nbsp;y</p>');
+  assert.ok(!t.includes('<'));
+  assert.ok(!t.includes('alert'));
+  assert.ok(t.includes('Olá & mundo'));
 });

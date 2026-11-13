@@ -29,8 +29,7 @@ export default function IaAdminSwitch() {
   }
 
   return (
-    <section className="aparencia-campo ia-admin">
-      <h2>Inteligência artificial</h2>
+    <section className="ia-admin-card">
       {!estado ? (
         <p>Carregando…</p>
       ) : (
