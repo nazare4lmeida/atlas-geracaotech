@@ -24,6 +24,7 @@ const presencaRoutes = require('./routes/presencaRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const atendimentoRoutes = require('./routes/atendimentoRoutes');
 const docenteRoutes = require('./routes/docenteRoutes');
+const iaRoutes = require('./routes/iaRoutes');
 const muralRoutes = require('./routes/muralRoutes');
 const portalRoutes = require('./routes/portalRoutes');
 const securityHeaders = require('./middleware/securityHeaders');
@@ -60,6 +61,8 @@ app.use('/api/atendimento', authMiddleware, atendimentoRoutes);
 app.use('/api/mural', authMiddleware, muralRoutes);
 app.use('/api/portal', authMiddleware, portalRoutes);
 app.use('/api/docente', authMiddleware, docenteRoutes);
+// IA: so funciona com IA_PROVEDOR definido e o modulo em IA_MODULOS_ATIVOS (ver .env.example).
+app.use('/api/ia', authMiddleware, iaRoutes);
 app.use('/api/reports', authMiddleware, reportRoutes);
 app.use('/api/accounts', authMiddleware, accountRoutes);
 app.use('/api/integracoes', integracaoRoutes);
