@@ -1,5 +1,11 @@
 const { query } = require('./pool');
 
+// Conteudo da aula, lido no servidor (o cliente so envia o ID).
+async function lerAula(aulaId) {
+  const { rows } = await query('select id, title, content from lessons where id = $1', [aulaId]);
+  return rows[0] || null;
+}
+
 // Grava so o registro de uso (sem conteudo da conversa).
 async function registrarUso({ usuarioId, modulo, provedor, modelo, status, tokensEntrada, tokensSaida, codigoErro }) {
   await query(
@@ -18,4 +24,21 @@ async function registrarUso({ usuarioId, modulo, provedor, modelo, status, token
   );
 }
 
-module.exports = { registrarUso };
+// Liga/desliga pelo painel. Sem linha no banco, a IA fica desligada.
+async function lerLigada() {
+  const { rows } = await query("select valor from ia_configuracao where chave = 'ligada'");
+  return rows[0]?.valor === 'true';
+}
+
+async function salvarLigada(ligada, usuarioId) {
+  await query(
+    `insert into ia_configuracao (chave, valor, atualizado_em, atualizado_por)
+     values ('ligada', $1, now(), $2)
+     on conflict (chave) do update
+       set valor = excluded.valor, atualizado_em = now(), atualizado_por = excluded.atualizado_por`,
+    [ligada ? 'true' : 'false', usuarioId ? String(usuarioId) : null]
+  );
+}
+
+module.exports = {
+  lerAula, registrarUso, lerLigada, salvarLigada };

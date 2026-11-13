@@ -8,6 +8,7 @@ import { useAuth } from './context/AuthContext';
 import ReportsPage from './pages/ReportsPage';
 import AttendancePage from './pages/AttendancePage';
 import { AccessLogPage } from './pages/ManagementExtrasPage';
+import IaAdminPage from './pages/IaAdminPage';
 import VerifyCertificatePage from './pages/VerifyCertificatePage';
 import LoginPage from './pages/LoginPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
@@ -263,6 +264,14 @@ export default function App() {
           element={
             <ProtectedRoute roles={['admin']}>
               <AccessLogPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/gestao/ia"
+          element={
+            <ProtectedRoute roles={['admin']}>
+              <IaAdminPage />
             </ProtectedRoute>
           }
         />

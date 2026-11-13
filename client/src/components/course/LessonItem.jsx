@@ -1,6 +1,7 @@
 import LessonBody from '../LessonBody';
 import AulaAoVivoCard from './AulaAoVivoCard';
 import EspacoIncorporado from './EspacoIncorporado';
+import TutorIa from '../ia/TutorIa';
 
 const RUAS_DO_TIPO = { video: 'Vídeo', link: 'Link', ao_vivo: 'Ao vivo', html: 'Texto', page: 'Texto', codice: 'Código', codey: 'Jogo' };
 
@@ -43,6 +44,7 @@ export default function LessonItem({ lesson, open, completed, onToggle, onRead }
           {(lesson.type === 'codice' || lesson.type === 'codey') && <EspacoIncorporado lesson={lesson} />}
 
           {lesson.type === 'ao_vivo' ? <AulaAoVivoCard lesson={lesson} /> : <LessonBody content={lesson.content} />}
+          {lesson.type !== 'ao_vivo' && <TutorIa lesson={lesson} />}
 
           <div className="lesson-item-foot">
             <button type="button" className="ghost-button small" onClick={onRead}>
