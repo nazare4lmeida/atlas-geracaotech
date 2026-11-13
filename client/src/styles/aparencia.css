@@ -56,3 +56,10 @@
   align-items: center;
   gap: 0.35rem;
 }
+
+/* Assistente de IA (tutor na aula e interruptor no painel) */
+.tutor-ia { margin-top: 1rem; }
+.tutor-ia textarea { width: 100%; margin: 0.25rem 0 0.5rem; }
+.tutor-ia-acoes { display: flex; gap: 0.5rem; }
+.tutor-ia-resposta { margin-top: 0.75rem; white-space: pre-wrap; }
+.ia-admin { margin-top: 1.5rem; }

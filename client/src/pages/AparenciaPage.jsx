@@ -2,12 +2,15 @@ import { useEffect, useRef, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import api from '../services/api';
 import { Feedback, errorText } from '../components/manage/shared';
+import IaAdminSwitch from '../components/ia/IaAdminSwitch';
+import { useAuth } from '../context/AuthContext';
 import { APARENCIA_PADRAO, FONTES, LARGURAS, aplicarAparencia } from '../utils/aparencia';
 
 const CAMPOS = ['corPrimaria', 'corDestaque', 'fonte', 'imagemFundoCaminho', 'opacidadeFundo', 'larguraConteudo'];
 
 // Aparência do site: o editor vê a mudança na hora e só publica ao clicar em Salvar.
 export default function AparenciaPage() {
+  const { isAdmin } = useAuth();
   const [salvo, setSalvo] = useState(null);
   const [rascunho, setRascunho] = useState(null);
   const [feedback, setFeedback] = useState(null);
@@ -176,6 +179,7 @@ export default function AparenciaPage() {
           </>
         )}
         {!rascunho && !feedback && <div className="page-state">Carregando aparência…</div>}
+        {isAdmin && <IaAdminSwitch />}
       </div>
     </div>
   );
